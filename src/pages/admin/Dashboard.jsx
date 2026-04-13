@@ -162,6 +162,9 @@ export default function Dashboard() {
       <header className={styles.header}>
         <h1 className={styles.heading}>Works</h1>
         <div className={styles.headerActions}>
+          <button onClick={() => navigate("/admin/blog")} className={styles.btnBlog}>
+            Blog
+          </button>
           <button onClick={() => navigate("/admin/new")} className={styles.btnNew}>
             + New
           </button>

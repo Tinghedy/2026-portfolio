@@ -16,6 +16,8 @@ import Portfolio from "./pages/Portfolio/Portfolio";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import ProjectForm from "./pages/admin/ProjectForm";
+import BlogDashboard from "./pages/admin/BlogDashboard";
+import BlogPostForm from "./pages/admin/BlogPostForm";
 
 export default function App() {
   return (
@@ -44,6 +46,30 @@ export default function App() {
           element={
             <AuthGuard>
               <ProjectForm />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/blog"
+          element={
+            <AuthGuard>
+              <BlogDashboard />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/blog/new"
+          element={
+            <AuthGuard>
+              <BlogPostForm />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/blog/edit/:id"
+          element={
+            <AuthGuard>
+              <BlogPostForm />
             </AuthGuard>
           }
         />

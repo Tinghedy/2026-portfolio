@@ -1,8 +1,25 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { posts } from "../../data/blog";
+import { supabase } from "../../lib/supabase";
 import styles from "./Blog.module.css";
 
 export default function Blog() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("posts")
+      .select("slug, title, date, summary")
+      .order("date", { ascending: false })
+      .then(({ data }) => {
+        setPosts(data ?? []);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <main className={styles.page}><div className={styles.inner} /></main>;
+
   return (
     <main className={styles.page}>
       <div className={styles.inner}>

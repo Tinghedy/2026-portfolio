@@ -36,6 +36,39 @@ CREATE POLICY "Auth delete"
   TO authenticated
   USING (true);
 
+-- ─── 2b. Posts table ─────────────────────────────────────────────────────────
+CREATE TABLE posts (
+  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug       TEXT        NOT NULL UNIQUE,
+  title      TEXT        NOT NULL,
+  date       DATE        NOT NULL DEFAULT CURRENT_DATE,
+  summary    TEXT,
+  content    TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read posts"
+  ON posts FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "Auth insert posts"
+  ON posts FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Auth update posts"
+  ON posts FOR UPDATE
+  TO authenticated
+  USING (true) WITH CHECK (true);
+
+CREATE POLICY "Auth delete posts"
+  ON posts FOR DELETE
+  TO authenticated
+  USING (true);
+
 -- ─── 3. Storage bucket ───────────────────────────────────────────────────────
 -- Run this in the SQL editor (or create the bucket manually in the Storage UI)
 INSERT INTO storage.buckets (id, name, public)

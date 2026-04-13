@@ -30,7 +30,48 @@
   margin: 0 0 1.5rem;
 }
 
+.date {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.45;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
 .placeholder {
   opacity: 0.5;
   font-size: 1rem;
 }
+
+/* ── Rendered HTML content ── */
+.content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: inherit;
+}
+
+.content p { margin: 0 0 1em; }
+.content p:last-child { margin-bottom: 0; }
+.content h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2em 0 0.6em;
+}
+.content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1.75em 0 0.5em;
+}
+.content a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: inherit;
+}
+.content ul {
+  padding-left: 1.5em;
+  margin: 0 0 1em;
+}
+.content li { margin-bottom: 0.35em; }
+.content strong { font-weight: 700; }
+.content em { font-style: italic; }
