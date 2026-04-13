@@ -24,6 +24,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         {/* ── Admin routes (no public Navbar) ── */}
+        <Route path="/admin" element={<Login />} />
         <Route path="/admin/login" element={<Login />} />
         <Route
           path="/admin/dashboard"

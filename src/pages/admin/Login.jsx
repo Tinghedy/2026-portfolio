@@ -26,7 +26,7 @@ export default function Login() {
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.box}>
         <h1 className={styles.title}>Admin</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -54,6 +54,6 @@ export default function Login() {
           </button>
         </form>
       </div>
-    </main>
+    </div>
   );
 }
