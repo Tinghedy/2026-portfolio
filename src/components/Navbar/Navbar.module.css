@@ -66,6 +66,25 @@
   transform: scaleX(1);
 }
 
+.loginBtn {
+  text-decoration: none;
+  color: #fff;
+  background: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.loginBtn:hover {
+  background: #000;
+}
+
+.loginBtn.active {
+  background: #000;
+}
+
 /* Hamburger */
 .hamburger {
   display: none;

@@ -7,6 +7,7 @@ const navLinks = [
   { to: "/works", label: "作品集" },
   { to: "/blog", label: "Blog" },
   { to: "/portfolio", label: "Portfolio" },
+  { to: "/admin", label: "Admin", isBtn: true },
 ];
 
 export default function Navbar() {
@@ -41,14 +42,15 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <ul className={styles.links}>
-          {navLinks.map(({ to, label, end }) => (
+          {navLinks.map(({ to, label, end, isBtn }) => (
             <li key={to}>
               <NavLink
                 to={to}
                 end={end}
-                className={({ isActive }) =>
-                  isActive ? `${styles.link} ${styles.active}` : styles.link
-                }
+                className={({ isActive }) => {
+                  const baseClass = isBtn ? styles.loginBtn : styles.link;
+                  return isActive ? `${baseClass} ${styles.active}` : baseClass;
+                }}
               >
                 {label}
               </NavLink>
