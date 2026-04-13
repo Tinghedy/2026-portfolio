@@ -1,0 +1,53 @@
+.hero {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+
+.heroInner {
+  padding: 0 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.heading {
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.subheading {
+  font-size: clamp(1rem, 3vw, 1.75rem);
+  font-weight: 400;
+  margin: 0 0 1.5rem;
+}
+
+.bio {
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  max-width: 540px;
+  line-height: 1.7;
+  margin: 0 0 2.5rem;
+}
+
+.cta {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease;
+}
+
+.cta:hover {
+  opacity: 0.6;
+}
+
+.placeholder {
+  min-height: 60vh;
+}

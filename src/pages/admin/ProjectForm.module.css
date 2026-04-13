@@ -1,0 +1,300 @@
+.page {
+  min-height: 100vh;
+  padding: 2rem 1.5rem 5rem;
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.topBar {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.btnBack {
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 0;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.btnBack:hover { opacity: 1; }
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Form ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.input {
+  font-size: 1rem; /* prevent iOS zoom */
+  font-family: inherit;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  width: 100%;
+}
+.input:focus { border-color: #111; }
+
+/* ── Tags ── */
+.tagsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  min-height: 48px;
+  background: #fff;
+}
+
+.tagPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+.tagPill button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  color: #888;
+}
+
+.tagInput {
+  font-size: 1rem;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 140px;
+  padding: 0.25rem 0;
+  background: transparent;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+/* ── Cover preview ── */
+.coverPreview {
+  position: relative;
+  display: inline-block;
+  max-width: 320px;
+}
+
+.coverPreview img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.removeCover {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* ── Gallery grid ── */
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+}
+
+.imgThumb {
+  position: relative;
+}
+
+.imgThumb img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.imgRemove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  width: 22px;
+  height: 22px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── File input ── */
+.fileInput {
+  font-size: 0.9rem;
+  font-family: inherit;
+  padding: 0.5rem 0;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+/* ── Tiptap editor ── */
+.editor {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0.4rem 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.toolbar button {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  min-height: 36px;
+  transition: background 0.15s;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.toolbar button:hover { background: #f0f0f0; }
+
+.toolbarActive {
+  background: #111 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+}
+
+.editorContent {
+  padding: 0.875rem 1rem;
+  min-height: 180px;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Tiptap resets */
+.editorContent :global(.ProseMirror) {
+  outline: none;
+  min-height: 160px;
+}
+
+.editorContent :global(.ProseMirror p) { margin: 0 0 0.75em; }
+.editorContent :global(.ProseMirror p:last-child) { margin-bottom: 0; }
+.editorContent :global(.ProseMirror a) { text-decoration: underline; }
+.editorContent :global(.ProseMirror .is-editor-empty:first-child::before) {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* ── Error ── */
+.error {
+  font-size: 0.85rem;
+  color: #c00;
+  margin: 0;
+}
+
+/* ── Footer ── */
+.formFooter {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+.btnCancel {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.btnSave {
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 48px;
+  transition: opacity 0.2s;
+}
+.btnSave:disabled { opacity: 0.5; }

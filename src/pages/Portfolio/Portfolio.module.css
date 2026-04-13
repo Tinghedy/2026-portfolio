@@ -1,0 +1,169 @@
+.page {
+  padding-top: 8rem;
+  padding-bottom: 8rem;
+}
+
+.inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+/* Bio */
+.name {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.5rem;
+}
+
+.bio {
+  font-size: 1rem;
+  line-height: 1.8;
+  opacity: 0.8;
+  margin: 0 0 1rem;
+  max-width: 60ch;
+}
+
+/* Section */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timelineItem {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1.5rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid currentColor;
+}
+
+.timelineItem:last-child {
+  border-bottom: 1px solid currentColor;
+}
+
+.period {
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  opacity: 0.5;
+  padding-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.timelineBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+}
+
+.org {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.role {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.note {
+  font-size: 0.85rem;
+  opacity: 0.55;
+  margin-top: 0.15rem;
+}
+
+/* Awards */
+.awardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.awardItem {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid currentColor;
+}
+
+.awardItem:last-child {
+  border-bottom: 1px solid currentColor;
+}
+
+.awardYear {
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+
+.awardTitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.awardIssuer {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  text-align: right;
+}
+
+/* PDF download */
+.downloadSection {
+  align-items: flex-start;
+}
+
+.downloadBtn {
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease;
+}
+
+.downloadBtn:hover {
+  opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+  .timelineItem {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .awardItem {
+    grid-template-columns: 48px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .awardIssuer {
+    grid-column: 2;
+    text-align: left;
+  }
+}

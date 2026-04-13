@@ -1,0 +1,106 @@
+.page {
+  padding-top: 8rem;
+  padding-bottom: 6rem;
+}
+
+.inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.back {
+  display: inline-block;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+.back:hover { opacity: 1; }
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.year {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+}
+
+.tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 0.75rem;
+  border: 1px solid currentColor;
+  padding: 0.2rem 0.65rem;
+  opacity: 0.6;
+}
+
+.title {
+  font-size: clamp(1.75rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.coverWrap {
+  width: 100%;
+}
+
+.cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.description {
+  font-size: 1rem;
+  line-height: 1.8;
+  max-width: 65ch;
+}
+
+.description p { margin: 0 0 1em; }
+.description p:last-child { margin-bottom: 0; }
+.description a { text-decoration: underline; }
+.description strong { font-weight: 600; }
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.galleryImg {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.placeholder {
+  opacity: 0.5;
+  font-size: 1rem;
+}
