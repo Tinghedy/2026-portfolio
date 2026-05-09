@@ -1,16 +1,28 @@
-# React + Vite
+# 2026 Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+個人作品集網站，以極簡設計語言呈現作品、部落格與履歷，並附有後台管理系統。
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 設計理念
 
-## React Compiler
+以「少即是多」為核心，捨棄視覺噪音，讓作品本身說話。  
+頁面入場動畫以 GSAP 驅動，節奏克制而流暢；自訂游標在滑過互動元素時給予細微的觸覺回饋，在不干擾閱讀的前提下提升空間感。  
+後台採用受保護的路由與 Supabase Auth，讓內容管理與公開展示完全解耦，發佈新文章或作品不需要重新部署。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 特色功能
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **動態入場動畫** — GSAP Timeline 驅動的 Hero 區塊，元素依序淡入滑入
+- **自訂游標** — GSAP 跟隨滑鼠位置並帶有延遲，懸停連結 / 卡片時自動放大
+- **作品集管理** — 後台可新增、編輯、排序作品項目，支援圖片壓縮上傳（browser-image-compression）
+- **部落格系統** — 使用 Tiptap 富文字編輯器撰寫文章，支援連結嵌入，以 slug 產生永久連結
+- **拖曳排序** — 以 dnd-kit 在後台對作品與文章進行拖曳重新排序
+- **受保護的後台** — Supabase Auth 登入驗證，搭配 AuthGuard 元件確保未授權者無法存取 `/admin/*` 路由
+- **SPA 路由支援** — vercel.json 設定 rewrite，確保重新整理或直接輸入 URL 時不出現 404
+
+---
+
+
+

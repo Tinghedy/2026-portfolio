@@ -1,94 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
-import styles from "./ProjectForm.module.css";
+import { uploadImage } from "../../lib/uploadImage";
+import styles from "./BlogPostForm.module.css";
 
-// ── Tiptap rich editor (reused from ProjectForm) ─────────────────────────────
-
-function RichEditor({ content, onChange }) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({ bold: {}, italic: {}, heading: { levels: [2, 3] } }),
-      Link.configure({ openOnClick: false }),
-    ],
-    content,
-    onUpdate: ({ editor }) => onChange(editor.getHTML()),
-  });
-
-  if (!editor) return null;
-
-  const setLink = () => {
-    const prev = editor.getAttributes("link").href;
-    const url = window.prompt("URL:", prev ?? "https://");
-    if (url === null) return;
-    if (url === "") {
-      editor.chain().focus().unsetLink().run();
-    } else {
-      editor.chain().focus().setLink({ href: url }).run();
-    }
-  };
-
-  return (
-    <div className={styles.editor}>
-      <div className={styles.toolbar}>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive("bold") ? styles.toolbarActive : ""}
-          aria-label="Bold"
-        >
-          <strong>B</strong>
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive("italic") ? styles.toolbarActive : ""}
-          aria-label="Italic"
-        >
-          <em>I</em>
-        </button>
-        <button
-          type="button"
-          onClick={setLink}
-          className={editor.isActive("link") ? styles.toolbarActive : ""}
-          aria-label="Link"
-        >
-          Link
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive("heading", { level: 2 }) ? styles.toolbarActive : ""}
-          aria-label="Heading 2"
-        >
-          H2
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive("heading", { level: 3 }) ? styles.toolbarActive : ""}
-          aria-label="Heading 3"
-        >
-          H3
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive("bulletList") ? styles.toolbarActive : ""}
-          aria-label="Bullet list"
-        >
-          • List
-        </button>
-      </div>
-      <EditorContent editor={editor} className={styles.editorContent} />
-    </div>
-  );
-}
-
-// ── Slug generator ────────────────────────────────────────────────────────────
+const AUTO_SAVE_MS = 30 * 60 * 1000;
 
 function toSlug(str) {
   return str
@@ -99,199 +20,325 @@ function toSlug(str) {
     .replace(/^-+|-+$/g, "");
 }
 
-// ── BlogPostForm ──────────────────────────────────────────────────────────────
+function formatTime(d) {
+  return d.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
+}
 
 export default function BlogPostForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isEdit = Boolean(id);
   const slugTouched = useRef(false);
-
+  const fileInputRef = useRef(null);
+  const savedIdRef = useRef(id ?? null);
   const today = new Date().toISOString().slice(0, 10);
 
-  const [form, setForm] = useState({
-    title: "",
-    slug: "",
-    date: today,
-    summary: "",
-    content: "",
-  });
+  const [form, setForm] = useState({ title: "", slug: "", date: today, summary: "", content: "" });
+  const formRef = useRef(form);
+  useEffect(() => { formRef.current = form; }, [form]);
 
-  const [editorReady, setEditorReady] = useState(!isEdit);
+  const [editorReady, setEditorReady] = useState(!id);
   const [initialContent, setInitialContent] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null); // null | "saving" | Date
   const [error, setError] = useState("");
+  const [showSettings, setShowSettings] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
+  // Load existing post for edit mode
   useEffect(() => {
-    if (!isEdit) return;
-
+    if (!id) return;
     supabase
       .from("posts")
       .select("*")
       .eq("id", id)
       .single()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          setError("Post not found.");
-          return;
-        }
+      .then(({ data, error: err }) => {
+        if (err || !data) { setError("Post not found."); return; }
         slugTouched.current = true;
-        setForm({
+        const loaded = {
           title: data.title ?? "",
           slug: data.slug ?? "",
           date: data.date ?? today,
           summary: data.summary ?? "",
           content: data.content ?? "",
-        });
+        };
+        setForm(loaded);
+        formRef.current = loaded;
         setInitialContent(data.content ?? "");
         setEditorReady(true);
       });
-  }, [id, isEdit]);
+  }, [id]);
 
-  const handleTitleChange = (e) => {
-    const title = e.target.value;
-    setForm((prev) => ({
-      ...prev,
-      title,
-      slug: slugTouched.current ? prev.slug : toSlug(title),
-    }));
-  };
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ bold: {}, italic: {}, heading: { levels: [2, 3] } }),
+      Link.configure({ openOnClick: false }),
+      Image.configure({ inline: false, allowBase64: false }),
+      Placeholder.configure({ placeholder: "Start writing…" }),
+    ],
+    content: "",
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setForm(prev => ({ ...prev, content: html }));
+      formRef.current = { ...formRef.current, content: html };
+      setSaveStatus(null);
+    },
+  });
 
-  const handleSlugChange = (e) => {
-    slugTouched.current = true;
-    setForm((prev) => ({ ...prev, slug: e.target.value }));
-  };
+  // Populate editor once data loads (edit mode)
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Save (used for both manual and auto-save)
+  const savePost = useCallback(async ({ redirect = false } = {}) => {
+    const f = formRef.current;
+    if (!f.title.trim()) return;
+
     setSaving(true);
+    setSaveStatus("saving");
     setError("");
 
     const payload = {
-      title: form.title,
-      slug: form.slug,
-      date: form.date,
-      summary: form.summary,
-      content: form.content,
+      title: f.title,
+      slug: f.slug || toSlug(f.title),
+      date: f.date,
+      summary: f.summary,
+      content: f.content,
     };
 
     try {
-      if (isEdit) {
-        const { error } = await supabase.from("posts").update(payload).eq("id", id);
-        if (error) throw error;
+      if (savedIdRef.current) {
+        const { error: err } = await supabase.from("posts").update(payload).eq("id", savedIdRef.current);
+        if (err) throw err;
       } else {
-        const { error } = await supabase.from("posts").insert(payload);
-        if (error) throw error;
+        const { data, error: err } = await supabase.from("posts").insert(payload).select("id").single();
+        if (err) throw err;
+        savedIdRef.current = data.id;
       }
-      navigate("/admin/blog");
+      setSaveStatus(new Date());
+      if (redirect) navigate("/admin/blog");
     } catch (err) {
       setError(err.message);
+      setSaveStatus(null);
+    } finally {
       setSaving(false);
+    }
+  }, [navigate]);
+
+  // Auto-save every 30 minutes
+  useEffect(() => {
+    const timer = setInterval(() => savePost(), AUTO_SAVE_MS);
+    return () => clearInterval(timer);
+  }, [savePost]);
+
+  // ⌘S to save
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        savePost();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [savePost]);
+
+  const handleTitleChange = (e) => {
+    const title = e.target.value;
+    const next = {
+      ...formRef.current,
+      title,
+      slug: slugTouched.current ? formRef.current.slug : toSlug(title),
+    };
+    setForm(next);
+    formRef.current = next;
+    setSaveStatus(null);
+  };
+
+  const updateField = (key) => (e) => {
+    const next = { ...formRef.current, [key]: e.target.value };
+    setForm(next);
+    formRef.current = next;
+  };
+
+  const setLink = () => {
+    if (!editor) return;
+    const prev = editor.getAttributes("link").href;
+    const url = window.prompt("URL:", prev ?? "https://");
+    if (url === null) return;
+    if (url === "") editor.chain().focus().unsetLink().run();
+    else editor.chain().focus().setLink({ href: url }).run();
+  };
+
+  const handleImageFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+    e.target.value = "";
+    setUploading(true);
+    try {
+      const url = await uploadImage(file, "blog/");
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (err) {
+      alert("Upload failed: " + err.message);
+    } finally {
+      setUploading(false);
     }
   };
 
-  const field = (key) => ({
-    value: form[key],
-    onChange: (e) => setForm((prev) => ({ ...prev, [key]: e.target.value })),
-  });
+  const statusText =
+    saveStatus === "saving" ? "儲存中..." :
+    saveStatus instanceof Date ? `已自動儲存 ${formatTime(saveStatus)}` : "";
 
   return (
-    <main className={styles.page}>
-      <div className={styles.inner}>
-        <div className={styles.topBar}>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/blog")}
-            className={styles.btnBack}
-          >
-            ← Blog
-          </button>
-          <h1 className={styles.heading}>
-            {isEdit ? "Edit Post" : "New Post"}
-          </h1>
-        </div>
+    <div className={styles.page}>
+      {/* ── Top bar ── */}
+      <header className={styles.topBar}>
+        <button type="button" onClick={() => navigate("/admin/blog")} className={styles.btnBack}>
+          ← Blog
+        </button>
+        <span className={styles.topBarTitle}>
+          {form.title || (id ? "Edit Post" : "New Post")}
+        </span>
+        {statusText && <span className={styles.saveStatus}>{statusText}</span>}
+        <button
+          type="button"
+          onClick={() => setShowSettings(s => !s)}
+          className={`${styles.btnSettings}${showSettings ? ` ${styles.btnSettingsActive}` : ""}`}
+        >
+          ⚙ Settings
+        </button>
+        <button
+          type="button"
+          onClick={() => savePost({ redirect: true })}
+          disabled={saving}
+          className={styles.btnPublish}
+        >
+          {saving ? "Saving…" : "Publish"}
+        </button>
+      </header>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Title */}
-          <label className={styles.label}>
-            Title
-            <input
-              type="text"
-              value={form.title}
-              onChange={handleTitleChange}
-              required
-              className={styles.input}
-              placeholder="Post title"
-            />
-          </label>
-
-          {/* Slug */}
-          <label className={styles.label}>
+      {/* ── Settings drawer ── */}
+      {showSettings && (
+        <div className={styles.settingsPanel}>
+          <label className={styles.settingsLabel}>
             Slug
             <input
               type="text"
               value={form.slug}
-              onChange={handleSlugChange}
-              required
-              className={styles.input}
+              onChange={(e) => { slugTouched.current = true; updateField("slug")(e); }}
+              className={styles.settingsInput}
               placeholder="url-friendly-slug"
             />
           </label>
-
-          {/* Date */}
-          <label className={styles.label}>
+          <label className={styles.settingsLabel}>
             Date
             <input
               type="date"
-              {...field("date")}
-              required
-              className={styles.input}
-              style={{ maxWidth: "180px" }}
+              value={form.date}
+              onChange={updateField("date")}
+              className={styles.settingsInput}
             />
           </label>
-
-          {/* Summary */}
-          <label className={styles.label}>
+          <label className={styles.settingsLabel} style={{ gridColumn: "1 / -1" }}>
             Summary
             <textarea
-              {...field("summary")}
+              value={form.summary}
+              onChange={updateField("summary")}
               rows={2}
-              className={styles.input}
+              className={styles.settingsInput}
               placeholder="One-line description shown in the blog list"
               style={{ resize: "vertical", lineHeight: "1.6" }}
             />
           </label>
+        </div>
+      )}
 
-          {/* Content */}
-          <div className={styles.label}>
-            Content
-            {editorReady && (
-              <RichEditor
-                content={initialContent}
-                onChange={(html) =>
-                  setForm((prev) => ({ ...prev, content: html }))
-                }
-              />
-            )}
-          </div>
+      {/* ── Toolbar ── */}
+      {editor && (
+        <div className={styles.toolbar}>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive("bold") ? styles.toolbarActive : ""}
+            aria-label="Bold"
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive("italic") ? styles.toolbarActive : ""}
+            aria-label="Italic"
+          >
+            <em>I</em>
+          </button>
+          <span className={styles.divider} />
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={editor.isActive("heading", { level: 2 }) ? styles.toolbarActive : ""}
+          >
+            H2
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive("heading", { level: 3 }) ? styles.toolbarActive : ""}
+          >
+            H3
+          </button>
+          <span className={styles.divider} />
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive("bulletList") ? styles.toolbarActive : ""}
+          >
+            • List
+          </button>
+          <span className={styles.divider} />
+          <button
+            type="button"
+            onClick={setLink}
+            className={editor.isActive("link") ? styles.toolbarActive : ""}
+          >
+            Link
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading…" : "Image"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleImageFile}
+          />
+        </div>
+      )}
 
+      {/* ── Document ── */}
+      <div className={styles.document}>
+        <div className={styles.documentInner}>
           {error && <p className={styles.error}>{error}</p>}
-
-          <div className={styles.formFooter}>
-            <button
-              type="button"
-              onClick={() => navigate("/admin/blog")}
-              className={styles.btnCancel}
-              disabled={saving}
-            >
-              Cancel
-            </button>
-            <button type="submit" disabled={saving} className={styles.btnSave}>
-              {saving ? "Saving…" : isEdit ? "Save Changes" : "Publish"}
-            </button>
-          </div>
-        </form>
+          <input
+            type="text"
+            value={form.title}
+            onChange={handleTitleChange}
+            className={styles.titleInput}
+            placeholder="Post title"
+          />
+          {editorReady && editor && (
+            <EditorContent editor={editor} className={styles.editorContent} />
+          )}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -47,7 +47,7 @@ export default function Home() {
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <h1 ref={headingRef} className={styles.heading} style={{ opacity: 0 }}>
-            Your Name Here
+            Hedy
           </h1>
           <h2 ref={subheadingRef} className={styles.subheading} style={{ opacity: 0 }}>
             Designer / Researcher / Something Else
@@ -65,7 +65,6 @@ export default function Home() {
 
       {/* Placeholder sections */}
       <section id="intro" className={styles.placeholder} />
-
       <section id="featured-works" className={styles.placeholder} />
     </main>
   );

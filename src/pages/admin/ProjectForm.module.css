@@ -251,6 +251,16 @@
 .editorContent :global(.ProseMirror p) { margin: 0 0 0.75em; }
 .editorContent :global(.ProseMirror p:last-child) { margin-bottom: 0; }
 .editorContent :global(.ProseMirror a) { text-decoration: underline; }
+.editorContent :global(.ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+  margin: 1em 0;
+}
+.editorContent :global(.ProseMirror img.ProseMirror-selectednode) {
+  outline: 2px solid #111;
+}
 .editorContent :global(.ProseMirror .is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
   color: #aaa;
