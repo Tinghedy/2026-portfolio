@@ -1,18 +1,22 @@
+/* ── Page layout ── */
 .page {
-  min-height: 100vh;
-  padding: 2rem 1.5rem 5rem;
-}
-
-.inner {
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.topBar {
+  height: 100vh;
   display: flex;
-  align-items: baseline;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f0efeb;
+}
+
+/* ── Top bar ── */
+.topBar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1.25rem;
+  height: 52px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .btnBack {
@@ -21,50 +25,111 @@
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.55;
-  padding: 0;
-  transition: opacity 0.2s;
+  opacity: 0.5;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  transition: opacity 0.15s;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 .btnBack:hover { opacity: 1; }
 
-.heading {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.topBarTitle {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 0.25rem;
 }
 
-/* ── Form ── */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
+.saveStatus {
+  font-size: 0.78rem;
+  opacity: 0.45;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.label {
+.btnSettings {
+  font-size: 0.82rem;
+  font-family: inherit;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btnSettings:hover { opacity: 1; background: #f0f0f0; }
+.btnSettingsActive { opacity: 1 !important; background: #f0f0f0 !important; border-color: #ccc !important; }
+
+.btnPublish {
+  padding: 0.45rem 1.1rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  min-height: 36px;
+}
+.btnPublish:disabled { opacity: 0.45; cursor: default; }
+
+/* ── Settings panel ── */
+.settingsPanel {
+  flex-shrink: 0;
+  background: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 1.1rem;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.settingsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.5rem;
+}
+
+.settingsLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.73rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
-.input {
-  font-size: 1rem; /* prevent iOS zoom */
+.settingsInput {
+  font-size: 0.92rem;
   font-family: inherit;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 3px;
   outline: none;
   background: #fff;
-  transition: border-color 0.2s;
-  -webkit-appearance: none;
+  transition: border-color 0.15s;
   width: 100%;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 1;
 }
-.input:focus { border-color: #111; }
+.settingsInput:focus { border-color: #111; }
 
 /* ── Tags ── */
 .tagsWrapper {
@@ -73,10 +138,14 @@
   gap: 0.4rem;
   align-items: center;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 0.5rem 0.75rem;
-  min-height: 48px;
+  border-radius: 3px;
+  padding: 0.4rem 0.6rem;
+  min-height: 36px;
   background: #fff;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 1;
 }
 
 .tagPill {
@@ -84,7 +153,7 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.78rem;
-  padding: 0.2rem 0.6rem;
+  padding: 0.15rem 0.5rem;
   border: 1px solid #ccc;
   border-radius: 2px;
   font-weight: 400;
@@ -104,13 +173,13 @@
 }
 
 .tagInput {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-family: inherit;
   border: none;
   outline: none;
   flex: 1;
-  min-width: 140px;
-  padding: 0.25rem 0;
+  min-width: 120px;
+  padding: 0.1rem 0;
   background: transparent;
   font-weight: 400;
   text-transform: none;
@@ -122,7 +191,7 @@
 .coverPreview {
   position: relative;
   display: inline-block;
-  max-width: 320px;
+  max-width: 220px;
 }
 
 .coverPreview img {
@@ -135,31 +204,34 @@
 
 .removeCover {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 5px;
+  right: 5px;
   background: rgba(0,0,0,0.6);
   color: #fff;
   border: none;
   border-radius: 3px;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.73rem;
   cursor: pointer;
+  font-family: inherit;
 }
 
 /* ── Gallery grid ── */
 .imageGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .imgThumb {
   position: relative;
+  width: 72px;
+  height: 72px;
 }
 
 .imgThumb img {
   width: 100%;
-  aspect-ratio: 1;
+  height: 100%;
   object-fit: cover;
   border-radius: 4px;
   display: block;
@@ -167,144 +239,172 @@
 
 .imgRemove {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 3px;
+  right: 3px;
   background: rgba(0,0,0,0.6);
   color: #fff;
   border: none;
   border-radius: 3px;
-  width: 22px;
-  height: 22px;
-  font-size: 0.9rem;
+  width: 18px;
+  height: 18px;
+  font-size: 0.8rem;
   cursor: pointer;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: inherit;
 }
 
 /* ── File input ── */
 .fileInput {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-family: inherit;
-  padding: 0.5rem 0;
+  padding: 0.3rem 0;
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  opacity: 1;
+  opacity: 0.6;
 }
 
-/* ── Tiptap editor ── */
-.editor {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #fff;
-}
-
+/* ── Toolbar ── */
 .toolbar {
+  flex-shrink: 0;
   display: flex;
-  gap: 0;
-  border-bottom: 1px solid #e5e5e5;
-  padding: 0.4rem 0.5rem;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.35rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
   flex-wrap: wrap;
-  gap: 0.25rem;
 }
 
 .toolbar button {
-  padding: 0.4rem 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.88rem;
   font-family: inherit;
   background: none;
   border: 1px solid transparent;
   border-radius: 3px;
   cursor: pointer;
-  min-height: 36px;
-  transition: background 0.15s;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-  opacity: 1;
+  min-height: 30px;
+  transition: background 0.12s;
+  white-space: nowrap;
+  color: inherit;
 }
-
-.toolbar button:hover { background: #f0f0f0; }
+.toolbar button:hover:not(:disabled) { background: #f0f0f0; }
+.toolbar button:disabled { opacity: 0.35; cursor: default; }
 
 .toolbarActive {
   background: #111 !important;
   color: #fff !important;
-  border-color: #111 !important;
 }
 
+.divider {
+  width: 1px;
+  height: 18px;
+  background: #ddd;
+  margin: 0 0.2rem;
+  flex-shrink: 0;
+}
+
+/* ── Document (scrolls) ── */
+.document {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.5rem 1.5rem 6rem;
+}
+
+.documentInner {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  padding: 4rem 5rem;
+}
+
+@media (max-width: 640px) {
+  .documentInner { padding: 2rem 1.5rem; }
+}
+
+.titleInput {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-family: inherit;
+  color: inherit;
+  padding: 0 0 1.25rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+  background: transparent;
+}
+.titleInput::placeholder { opacity: 0.25; }
+
+/* ── Editor content ── */
 .editorContent {
-  padding: 0.875rem 1rem;
-  min-height: 180px;
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  min-height: 400px;
 }
 
-/* Tiptap resets */
 .editorContent :global(.ProseMirror) {
   outline: none;
-  min-height: 160px;
+  min-height: 400px;
 }
 
-.editorContent :global(.ProseMirror p) { margin: 0 0 0.75em; }
+.editorContent :global(.ProseMirror p) { margin: 0 0 0.85em; }
 .editorContent :global(.ProseMirror p:last-child) { margin-bottom: 0; }
-.editorContent :global(.ProseMirror a) { text-decoration: underline; }
+
+.editorContent :global(.ProseMirror h2) {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2em 0 0.6em;
+}
+.editorContent :global(.ProseMirror h3) {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1.5em 0 0.5em;
+}
+.editorContent :global(.ProseMirror ul) {
+  padding-left: 1.5em;
+  margin: 0 0 1em;
+}
+.editorContent :global(.ProseMirror li) { margin-bottom: 0.35em; }
+
+.editorContent :global(.ProseMirror a) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .editorContent :global(.ProseMirror img) {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
   display: block;
-  margin: 1em 0;
+  margin: 1.75em 0;
 }
 .editorContent :global(.ProseMirror img.ProseMirror-selectednode) {
   outline: 2px solid #111;
+  outline-offset: 2px;
 }
+
 .editorContent :global(.ProseMirror .is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
-  color: #aaa;
+  color: #bbb;
   pointer-events: none;
-  position: absolute;
+  float: left;
+  height: 0;
 }
 
 /* ── Error ── */
 .error {
   font-size: 0.85rem;
   color: #c00;
-  margin: 0;
+  margin: 0 0 1.5rem;
 }
-
-/* ── Footer ── */
-.formFooter {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  padding-top: 0.5rem;
-}
-
-.btnCancel {
-  padding: 0.75rem 1.5rem;
-  font-size: 0.9rem;
-  font-family: inherit;
-  background: none;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  min-height: 48px;
-}
-
-.btnSave {
-  padding: 0.75rem 1.75rem;
-  font-size: 0.9rem;
-  font-family: inherit;
-  font-weight: 600;
-  background: #111;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  min-height: 48px;
-  transition: opacity 0.2s;
-}
-.btnSave:disabled { opacity: 0.5; }

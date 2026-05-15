@@ -22,6 +22,7 @@ import BlogPostForm from "./pages/admin/BlogPostForm";
 export default function App() {
   return (
     <AuthProvider>
+      <Cursor />
       <Routes>
         {/* ── Admin routes (no public Navbar) ── */}
         <Route path="/admin" element={<Login />} />
@@ -80,7 +81,6 @@ export default function App() {
           path="/*"
           element={
             <>
-              <Cursor />
               <Navbar />
               <Routes>
                 <Route path="/" element={<Home />} />
