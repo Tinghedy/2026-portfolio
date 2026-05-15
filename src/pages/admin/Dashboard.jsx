@@ -102,6 +102,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -160,11 +161,40 @@ export default function Dashboard() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.heading}>Works</h1>
-        <div className={styles.headerActions}>
-          <button onClick={() => navigate("/admin/blog")} className={styles.btnBlog}>
-            Blog
+        <div className={styles.dropdownWrapper}>
+          <button
+            className={styles.dropdownTrigger}
+            onClick={() => setShowDropdown(s => !s)}
+            aria-haspopup="listbox"
+            aria-expanded={showDropdown}
+          >
+            Works <span className={styles.dropdownCaret}>▾</span>
           </button>
+          {showDropdown && (
+            <>
+              <div className={styles.dropdownBackdrop} onClick={() => setShowDropdown(false)} />
+              <ul className={styles.dropdownMenu} role="listbox">
+                <li
+                  role="option"
+                  aria-selected="true"
+                  className={`${styles.dropdownItem} ${styles.dropdownItemActive}`}
+                  onClick={() => setShowDropdown(false)}
+                >
+                  Works
+                </li>
+                <li
+                  role="option"
+                  aria-selected="false"
+                  className={styles.dropdownItem}
+                  onClick={() => navigate("/admin/blog")}
+                >
+                  Blog
+                </li>
+              </ul>
+            </>
+          )}
+        </div>
+        <div className={styles.headerActions}>
           <button onClick={() => navigate("/admin/new")} className={styles.btnNew}>
             + New
           </button>

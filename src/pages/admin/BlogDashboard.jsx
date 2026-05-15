@@ -32,6 +32,7 @@ export default function BlogDashboard() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -57,14 +58,38 @@ export default function BlogDashboard() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.headerLeft}>
+        <div className={styles.dropdownWrapper}>
           <button
-            onClick={() => navigate("/admin/dashboard")}
-            className={styles.btnBack}
+            className={styles.dropdownTrigger}
+            onClick={() => setShowDropdown(s => !s)}
+            aria-haspopup="listbox"
+            aria-expanded={showDropdown}
           >
-            ← Works
+            Blog <span className={styles.dropdownCaret}>▾</span>
           </button>
-          <h1 className={styles.heading}>Blog</h1>
+          {showDropdown && (
+            <>
+              <div className={styles.dropdownBackdrop} onClick={() => setShowDropdown(false)} />
+              <ul className={styles.dropdownMenu} role="listbox">
+                <li
+                  role="option"
+                  aria-selected="false"
+                  className={styles.dropdownItem}
+                  onClick={() => navigate("/admin/dashboard")}
+                >
+                  Works
+                </li>
+                <li
+                  role="option"
+                  aria-selected="true"
+                  className={`${styles.dropdownItem} ${styles.dropdownItemActive}`}
+                  onClick={() => setShowDropdown(false)}
+                >
+                  Blog
+                </li>
+              </ul>
+            </>
+          )}
         </div>
         <div className={styles.headerActions}>
           <button
