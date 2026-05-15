@@ -190,6 +190,14 @@ export default function Dashboard() {
                 >
                   Blog
                 </li>
+                <li
+                  role="option"
+                  aria-selected="false"
+                  className={styles.dropdownItem}
+                  onClick={() => navigate("/admin/notes")}
+                >
+                  Learning Notes
+                </li>
               </ul>
             </>
           )}

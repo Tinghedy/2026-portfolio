@@ -1,0 +1,250 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ── Section dropdown ── */
+.dropdownWrapper {
+  position: relative;
+}
+
+.dropdownTrigger {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-family: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: inherit;
+}
+
+.dropdownCaret {
+  font-size: 0.9rem;
+  opacity: 0.45;
+  font-weight: 400;
+}
+
+.dropdownBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem;
+  min-width: 160px;
+}
+
+.dropdownItem {
+  padding: 0.55rem 0.85rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.dropdownItem:hover { background: #f5f5f5; }
+
+.dropdownItemActive {
+  font-weight: 600;
+  background: #f0f0f0;
+}
+
+/* ── Buttons ── */
+.btnNew {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: opacity 0.2s;
+}
+.btnNew:hover { opacity: 0.75; }
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ── Card ── */
+.card {
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardBody {
+  padding: 1.25rem 1.25rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.date {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.45;
+  letter-spacing: 0.05em;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.summary {
+  font-size: 0.85rem;
+  opacity: 0.55;
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tags {
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag {
+  font-size: 0.7rem;
+  border: 1px solid #ccc;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.cardActions {
+  display: flex;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btnEdit,
+.btnDelete {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background 0.15s;
+}
+
+.btnEdit:hover { background: #f8f8f8; }
+.btnDelete { color: #c00; }
+.btnDelete:hover { background: #fff5f5; }
+.btnEdit + .btnDelete { border-left: 1px solid #f0f0f0; }
+
+/* ── Empty ── */
+.empty {
+  opacity: 0.45;
+  margin-top: 4rem;
+  text-align: center;
+}
+
+/* ── Confirm dialog ── */
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1.5rem;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 360px;
+  width: 100%;
+}
+
+.dialogText {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btnCancel {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btnConfirmDelete {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: #c00;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 44px;
+}

@@ -1,0 +1,178 @@
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 1rem;
+}
+
+/* ── Modal ── */
+.modal {
+  background: #f5f5f5;
+  border-radius: 10px;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  width: min(96vw, 900px);
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.sep {
+  width: 1px;
+  height: 22px;
+  background: #e0e0e0;
+  margin: 0 0.3rem;
+  flex-shrink: 0;
+}
+
+.spacer { flex: 1; }
+
+/* ── Tool buttons ── */
+.toolBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+}
+.toolBtn:hover { background: #f0f0f0; }
+.toolActive { background: #e8e8e8 !important; border-color: #ccc !important; }
+
+/* ── Color swatches ── */
+.colorBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+  flex-shrink: 0;
+}
+.colorBtn:hover { transform: scale(1.18); }
+.colorActive { border-color: #111 !important; transform: scale(1.12); }
+
+.colorPicker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+  flex-shrink: 0;
+}
+.colorPicker::-webkit-color-swatch-wrapper { padding: 0; }
+.colorPicker::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+/* ── Size buttons ── */
+.sizeBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+}
+.sizeBtn:hover { background: #f0f0f0; }
+
+.sizeDot {
+  border-radius: 50%;
+  background: #333;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ── Clear button ── */
+.btnClear {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.83rem;
+  font-family: inherit;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btnClear:hover { background: #f0f0f0; }
+
+/* ── Canvas ── */
+.canvas {
+  flex: 1;
+  width: 100%;
+  display: block;
+  touch-action: none;
+  background: #fff;
+  min-height: 0;
+  object-fit: contain;
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  flex-shrink: 0;
+}
+
+.btnCancel {
+  padding: 0.5rem 1.1rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btnCancel:hover { background: #f0f0f0; }
+
+.btnInsert {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btnInsert:hover { opacity: 0.75; }

@@ -6,6 +6,7 @@ const navLinks = [
   { to: "/", label: "主頁", end: true },
   { to: "/works", label: "作品集" },
   { to: "/blog", label: "Blog" },
+  { to: "/notes", label: "Notes" },
   { to: "/portfolio", label: "Portfolio" },
   { to: "/admin", label: "Admin", isBtn: true },
 ];

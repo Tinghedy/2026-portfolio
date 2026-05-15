@@ -10,6 +10,7 @@ import Works from "./pages/Works/Works";
 import WorkDetail from "./pages/Works/WorkDetail";
 import Blog from "./pages/Blog/Blog";
 import BlogPost from "./pages/Blog/BlogPost";
+import Notes from "./pages/Notes/Notes";
 import Portfolio from "./pages/Portfolio/Portfolio";
 
 // Admin pages — no Navbar on these
@@ -18,6 +19,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import ProjectForm from "./pages/admin/ProjectForm";
 import BlogDashboard from "./pages/admin/BlogDashboard";
 import BlogPostForm from "./pages/admin/BlogPostForm";
+import NotesDashboard from "./pages/admin/NotesDashboard";
+import NoteForm from "./pages/admin/NoteForm";
 
 export default function App() {
   return (
@@ -75,6 +78,30 @@ export default function App() {
             </AuthGuard>
           }
         />
+        <Route
+          path="/admin/notes"
+          element={
+            <AuthGuard>
+              <NotesDashboard />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/notes/new"
+          element={
+            <AuthGuard>
+              <NoteForm />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/notes/edit/:id"
+          element={
+            <AuthGuard>
+              <NoteForm />
+            </AuthGuard>
+          }
+        />
 
         {/* ── Public routes ── */}
         <Route
@@ -88,6 +115,7 @@ export default function App() {
                 <Route path="/works/:id" element={<WorkDetail />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/notes" element={<Notes />} />
                 <Route path="/portfolio" element={<Portfolio />} />
               </Routes>
             </>
