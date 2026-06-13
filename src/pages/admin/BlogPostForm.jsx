@@ -4,7 +4,6 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-import { ResizableImage } from "../../lib/ResizableImage";
 import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
 import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
@@ -107,7 +106,7 @@ export default function BlogPostForm() {
     extensions: [
       StarterKit.configure({ bold: {}, italic: {}, heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false }),
-      ResizableImage.configure({ inline: false, allowBase64: false }),
+      Image.configure({ inline: false, allowBase64: false, resize: { enabled: true, minWidth: 80 } }),
       Placeholder.configure({ placeholder: "Start writing…" }),
     ],
     content: "",
