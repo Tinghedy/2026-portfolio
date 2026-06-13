@@ -6,7 +6,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
-import { uploadImage, deleteImageByUrl } from "../../lib/uploadImage";
+import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
 import styles from "./ProjectForm.module.css";
 
 const AUTO_SAVE_MS = 30 * 60 * 1000;
@@ -48,6 +48,7 @@ export default function ProjectForm() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
   const inlineImageRef = useRef(null);
+  const coverInputRef = useRef(null);
   const savedIdRef = useRef(id ?? null);
 
   const [form, setForm] = useState({
@@ -55,6 +56,9 @@ export default function ProjectForm() {
     year: new Date().getFullYear(),
     tags: [],
     description: "",
+    role: "",
+    team: "",
+    link: "",
   });
   const formRef = useRef(form);
   useEffect(() => { formRef.current = form; }, [form]);
@@ -63,6 +67,8 @@ export default function ProjectForm() {
   const [coverPreview, setCoverPreview] = useState("");
   const [imageFiles, setImageFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
+  const [existingCaptions, setExistingCaptions] = useState([]);
+  const [newCaptions, setNewCaptions] = useState([]);
   const [removedImages, setRemovedImages] = useState([]);
   const removedRef = useRef(removedImages);
   useEffect(() => { removedRef.current = removedImages; }, [removedImages]);
@@ -86,11 +92,15 @@ export default function ProjectForm() {
           year: data.year ?? new Date().getFullYear(),
           tags: data.tags ?? [],
           description: data.description ?? "",
+          role: data.role ?? "",
+          team: data.team ?? "",
+          link: data.link ?? "",
         };
         setForm(loaded);
         formRef.current = loaded;
         setCoverPreview(data.cover_image ?? "");
         setExistingImages(data.images ?? []);
+        setExistingCaptions(data.image_captions ?? []);
         setInitialContent(data.description ?? "");
         setEditorReady(true);
       });
@@ -149,16 +159,21 @@ export default function ProjectForm() {
     setError("");
     try {
       let coverUrl = coverPreview;
-      if (coverFile) coverUrl = await uploadImage(coverFile, "covers/");
+      if (coverFile) coverUrl = await uploadMedia(coverFile, "covers/");
       const newUrls = await Promise.all(imageFiles.map((file) => uploadImage(file, "gallery/")));
       await Promise.all(removedRef.current.map(deleteImageByUrl));
+      const allCaptions = [...existingCaptions, ...newCaptions];
       const payload = {
         title: f.title,
         year: Number(f.year),
         tags: f.tags,
         description: f.description,
+        role: f.role,
+        team: f.team,
+        link: f.link,
         cover_image: coverUrl,
         images: [...existingImages, ...newUrls],
+        image_captions: allCaptions,
       };
       if (savedIdRef.current) {
         const { error: err } = await supabase.from("projects").update(payload).eq("id", savedIdRef.current);
@@ -178,7 +193,7 @@ export default function ProjectForm() {
     } finally {
       setSaving(false);
     }
-  }, [coverFile, coverPreview, imageFiles, existingImages, navigate]);
+  }, [coverFile, coverPreview, imageFiles, existingImages, existingCaptions, newCaptions, navigate]);
 
   // Auto-save text every 30 min
   useEffect(() => {
@@ -286,34 +301,86 @@ export default function ProjectForm() {
             </div>
           </div>
           <div className={styles.settingsRow}>
-            <div className={styles.settingsLabel}>
-              Cover Image
-              {coverPreview && (
-                <div className={styles.coverPreview}>
-                  <img src={coverPreview} alt="Cover preview" />
-                  <button type="button" onClick={() => { setCoverFile(null); setCoverPreview(""); }} className={styles.removeCover}>Remove</button>
-                </div>
-              )}
+            <label className={styles.settingsLabel}>
+              My role
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) { setCoverFile(f); setCoverPreview(URL.createObjectURL(f)); } }}
-                className={styles.fileInput}
+                type="text"
+                value={form.role}
+                onChange={(e) => { const next = { ...formRef.current, role: e.target.value }; setForm(next); formRef.current = next; }}
+                placeholder="e.g. UX Designer"
+                className={styles.settingsInput}
               />
-            </div>
+            </label>
+            <label className={styles.settingsLabel}>
+              Team
+              <input
+                type="text"
+                value={form.team}
+                onChange={(e) => { const next = { ...formRef.current, team: e.target.value }; setForm(next); formRef.current = next; }}
+                placeholder="e.g. 3 people"
+                className={styles.settingsInput}
+              />
+            </label>
+          </div>
+          <div className={styles.settingsRow} style={{ gridTemplateColumns: "1fr" }}>
+            <label className={styles.settingsLabel}>
+              Link
+              <input
+                type="url"
+                value={form.link}
+                onChange={(e) => { const next = { ...formRef.current, link: e.target.value }; setForm(next); formRef.current = next; }}
+                placeholder="https://…"
+                className={styles.settingsInput}
+              />
+            </label>
+          </div>
+          <div className={styles.settingsRow} style={{ gridTemplateColumns: "1fr" }}>
             <div className={styles.settingsLabel}>
               Gallery
-              <div className={styles.imageGrid}>
-                {existingImages.map((url) => (
-                  <div key={url} className={styles.imgThumb}>
-                    <img src={url} alt="" />
-                    <button type="button" onClick={() => { setExistingImages(prev => prev.filter(u => u !== url)); setRemovedImages(prev => [...prev, url]); }} className={styles.imgRemove}>×</button>
+              <div className={styles.galleryList}>
+                {existingImages.map((url, i) => (
+                  <div key={url} className={styles.galleryItem}>
+                    <div className={styles.imgThumb}>
+                      <img src={url} alt="" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExistingImages(prev => prev.filter((_, idx) => idx !== i));
+                          setExistingCaptions(prev => prev.filter((_, idx) => idx !== i));
+                          setRemovedImages(prev => [...prev, url]);
+                        }}
+                        className={styles.imgRemove}
+                      >×</button>
+                    </div>
+                    <input
+                      type="text"
+                      value={existingCaptions[i] ?? ""}
+                      onChange={(e) => setExistingCaptions(prev => { const next = [...prev]; next[i] = e.target.value; return next; })}
+                      placeholder="Caption (optional)"
+                      className={styles.captionInput}
+                    />
                   </div>
                 ))}
                 {imageFiles.map((file, i) => (
-                  <div key={i} className={styles.imgThumb}>
-                    <img src={URL.createObjectURL(file)} alt="" />
-                    <button type="button" onClick={() => setImageFiles(prev => prev.filter((_, idx) => idx !== i))} className={styles.imgRemove}>×</button>
+                  <div key={i} className={styles.galleryItem}>
+                    <div className={styles.imgThumb}>
+                      <img src={URL.createObjectURL(file)} alt="" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageFiles(prev => prev.filter((_, idx) => idx !== i));
+                          setNewCaptions(prev => prev.filter((_, idx) => idx !== i));
+                        }}
+                        className={styles.imgRemove}
+                      >×</button>
+                    </div>
+                    <input
+                      type="text"
+                      value={newCaptions[i] ?? ""}
+                      onChange={(e) => setNewCaptions(prev => { const next = [...prev]; next[i] = e.target.value; return next; })}
+                      placeholder="Caption (optional)"
+                      className={styles.captionInput}
+                    />
                   </div>
                 ))}
               </div>
@@ -321,7 +388,11 @@ export default function ProjectForm() {
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => setImageFiles(prev => [...prev, ...Array.from(e.target.files ?? [])])}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  setImageFiles(prev => [...prev, ...files]);
+                  setNewCaptions(prev => [...prev, ...files.map(() => "")]);
+                }}
                 className={styles.fileInput}
               />
             </div>
@@ -356,6 +427,56 @@ export default function ProjectForm() {
       <div className={styles.document}>
         <div className={styles.documentInner}>
           {error && <p className={styles.error}>{error}</p>}
+
+          {/* Cover image / video zone */}
+          <div
+            className={styles.coverZone}
+            onClick={() => coverInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && coverInputRef.current?.click()}
+            aria-label="Upload cover image or video"
+          >
+            {coverPreview ? (
+              <>
+                {coverFile?.type?.startsWith("video/") || /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(coverPreview) ? (
+                  <video
+                    src={coverPreview}
+                    className={styles.coverZoneImg}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                  />
+                ) : (
+                  <img src={coverPreview} alt="Cover" className={styles.coverZoneImg} />
+                )}
+                <div className={styles.coverZoneOverlay}>
+                  <span>點擊更換封面</span>
+                  <button
+                    type="button"
+                    className={styles.coverZoneRemove}
+                    onClick={(e) => { e.stopPropagation(); setCoverFile(null); setCoverPreview(""); }}
+                  >
+                    移除
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className={styles.coverZonePlaceholder}>
+                <span className={styles.coverZoneIcon}>＋</span>
+                <span>新增封面圖片 / 影片</span>
+              </div>
+            )}
+          </div>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*,video/*"
+            style={{ display: "none" }}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) { setCoverFile(f); setCoverPreview(URL.createObjectURL(f)); } e.target.value = ""; }}
+          />
+
           <input
             type="text"
             value={form.title}

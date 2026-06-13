@@ -187,36 +187,124 @@
   opacity: 1;
 }
 
-/* ── Cover preview ── */
-.coverPreview {
+/* ── Cover zone (in document) ── */
+.coverZone {
   position: relative;
-  display: inline-block;
-  max-width: 220px;
+  width: calc(100% + 10rem);
+  margin-left: -5rem;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  outline: none;
 }
 
-.coverPreview img {
+@media (max-width: 640px) {
+  .coverZone {
+    width: calc(100% + 3rem);
+    margin-left: -1.5rem;
+  }
+}
+
+.coverZoneImg {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
-  border-radius: 4px;
   display: block;
 }
 
-.removeCover {
+.coverZoneOverlay {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  background: rgba(0,0,0,0.6);
+  inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  font-size: 0.85rem;
   color: #fff;
-  border: none;
+  font-family: inherit;
+}
+
+.coverZone:hover .coverZoneOverlay,
+.coverZone:focus .coverZoneOverlay {
+  opacity: 1;
+  background: rgba(0,0,0,0.4);
+}
+
+.coverZoneRemove {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.5);
+  color: #fff;
   border-radius: 3px;
-  padding: 0.2rem 0.45rem;
-  font-size: 0.73rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
   cursor: pointer;
   font-family: inherit;
 }
 
-/* ── Gallery grid ── */
+.coverZonePlaceholder {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #f5f4f1;
+  border: 2px dashed #d0cfc9;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #aaa;
+  font-size: 0.85rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.coverZone:hover .coverZonePlaceholder,
+.coverZone:focus .coverZonePlaceholder {
+  background: #eeede9;
+  border-color: #b0afa9;
+  color: #777;
+}
+
+.coverZoneIcon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+/* ── Gallery list with captions ── */
+.galleryList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.galleryItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.captionInput {
+  flex: 1;
+  font-size: 0.82rem;
+  font-family: inherit;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  outline: none;
+  background: #fff;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 1;
+  color: inherit;
+}
+.captionInput:focus { border-color: #111; }
+.captionInput::placeholder { opacity: 0.4; }
+
+/* ── Gallery grid (legacy, keep for reference) ── */
 .imageGrid {
   display: flex;
   flex-wrap: wrap;

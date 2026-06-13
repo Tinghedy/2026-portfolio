@@ -22,6 +22,23 @@ export async function uploadImage(file, folder = "") {
   return data.publicUrl;
 }
 
+export async function uploadMedia(file, folder = "") {
+  if (file.type.startsWith("video/")) {
+    const safeName = file.name.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9.\-_]/g, "");
+    const filename = `${folder}${Date.now()}-${safeName}`;
+
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, file, { contentType: file.type });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename);
+    return data.publicUrl;
+  }
+  return uploadImage(file, folder);
+}
+
 export async function deleteImageByUrl(url) {
   if (!url) return;
   const marker = `/object/public/${STORAGE_BUCKET}/`;

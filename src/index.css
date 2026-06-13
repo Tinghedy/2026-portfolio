@@ -5,14 +5,12 @@
   padding: 0;
 }
 
-/* ─── Base ───────────────────────────────────────
-   Visual system (color, font, spacing) defined here.
-   Replace tokens with your own design system.
-───────────────────────────────────────────────── */
+/* ─── Base ───────────────────────────────────────── */
 :root {
   --color-bg: #ffffff;
   --color-fg: #111111;
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-heading: 'Raleway', system-ui, sans-serif;
+  --font-body: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
 }
 
 html {
@@ -21,11 +19,20 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   background-color: var(--color-bg);
   color: var(--color-fg);
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+body.dark-page {
+  background-color: #0d0d0d;
+  color: #f0f0f0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 img {

@@ -1,51 +1,36 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { supabase } from "../../lib/supabase";
 import styles from "./Works.module.css";
 
-gsap.registerPlugin(ScrollTrigger);
-
 const stripHtml = (html) => (html ?? "").replace(/<[^>]+>/g, "");
+const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 function WorkCard({ work }) {
-  const cardRef = useRef(null);
+  const videoRef = useRef(null);
+  const [hovered, setHovered] = useState(false);
+  const tagline = stripHtml(work.description).slice(0, 130) || null;
+  const hasVideo = isVideo(work.cover_image);
 
   useEffect(() => {
-    const el = cardRef.current;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: { trigger: el, start: "top 85%" },
-        }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
-
-  const tagline = stripHtml(work.description).slice(0, 100) || "—";
+    const v = videoRef.current;
+    if (!v) return;
+    if (hovered) v.play().catch(() => {});
+    else { v.pause(); v.currentTime = 0; }
+  }, [hovered]);
 
   return (
-    <li ref={cardRef} style={{ opacity: 0 }}>
-      <Link to={`/works/${work.id}`} className={styles.card}>
-        <div className={styles.cover}>
-          {work.cover_image ? (
-            <img src={work.cover_image} alt={work.title} className={styles.coverImg} />
-          ) : (
-            <div className={styles.imgPlaceholder} />
-          )}
-        </div>
-        <div className={styles.cardBody}>
-          <span className={styles.year}>{work.year}</span>
+    <div className={styles.cardWrapper}>
+      <Link
+        to={`/works/${work.id}`}
+        className={styles.card}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <div className={styles.cardTop}>
+          {work.year && <span className={styles.year}>{work.year}</span>}
           <h2 className={styles.title}>{work.title}</h2>
-          <p className={styles.tagline}>{tagline}</p>
+          {tagline && <p className={styles.tagline}>{tagline}</p>}
           {work.tags?.length > 0 && (
             <ul className={styles.tags}>
               {work.tags.map((tag) => (
@@ -54,14 +39,37 @@ function WorkCard({ work }) {
             </ul>
           )}
         </div>
+
+        {work.cover_image && (
+          <div className={styles.mediaWrap}>
+            {hasVideo ? (
+              <video
+                ref={videoRef}
+                src={work.cover_image}
+                className={styles.media}
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <img src={work.cover_image} alt={work.title} className={styles.media} />
+            )}
+          </div>
+        )}
       </Link>
-    </li>
+    </div>
   );
 }
 
 export default function Works() {
   const [works, setWorks] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    document.body.classList.add("dark-page");
+    return () => document.body.classList.remove("dark-page");
+  }, []);
 
   useEffect(() => {
     supabase
@@ -83,11 +91,11 @@ export default function Works() {
         ) : works.length === 0 ? (
           <p className={styles.empty}>No works yet.</p>
         ) : (
-          <ul className={styles.list}>
+          <div className={styles.grid}>
             {works.map((work) => (
               <WorkCard key={work.id} work={work} />
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </main>
