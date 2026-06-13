@@ -72,7 +72,7 @@ export default function Blog() {
   useEffect(() => {
     supabase
       .from("posts")
-      .select("slug, title, date, summary, cover_image, tags")
+      .select("*")
       .order("date", { ascending: false })
       .then(({ data }) => {
         setPosts(data ?? []);
