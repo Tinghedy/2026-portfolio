@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import styles from "./BlogPost.module.css";
 
@@ -7,6 +7,7 @@ const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 export default function BlogPost() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +37,7 @@ export default function BlogPost() {
   if (!post) return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link to="/blog" className={styles.back}>← Back</Link>
+        <button onClick={() => navigate("/blog")} className={styles.back}>← Back</button>
       </div>
       <p className={styles.stateText}>Post not found.</p>
     </main>
@@ -47,7 +48,7 @@ export default function BlogPost() {
 
       {/* ← Back (top) */}
       <div className={styles.topBar}>
-        <Link to="/blog" className={styles.back}>← Back</Link>
+        <button onClick={() => navigate("/blog")} className={styles.back}>← Back</button>
       </div>
 
       {/* Hero cover */}

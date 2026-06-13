@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import styles from "./WorkDetail.module.css";
 
@@ -7,6 +7,7 @@ const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 export default function WorkDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +37,7 @@ export default function WorkDetail() {
   if (!project) return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link to="/works" className={styles.back}>← Back</Link>
+        <button onClick={() => navigate("/works")} className={styles.back}>← Back</button>
       </div>
       <p className={styles.stateText}>Project not found.</p>
     </main>
@@ -54,7 +55,7 @@ export default function WorkDetail() {
 
       {/* ← Back (top) */}
       <div className={styles.topBar}>
-        <Link to="/works" className={styles.back}>← Back</Link>
+        <button onClick={() => navigate("/works")} className={styles.back}>← Back</button>
       </div>
 
       {/* Hero cover */}
