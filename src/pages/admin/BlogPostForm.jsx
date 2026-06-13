@@ -6,7 +6,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
-import { uploadImage } from "../../lib/uploadImage";
+import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
 import styles from "./BlogPostForm.module.css";
 
 const AUTO_SAVE_MS = 30 * 60 * 1000;
@@ -24,15 +24,46 @@ function formatTime(d) {
   return d.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
 }
 
+function TagsInput({ tags, onChange }) {
+  const [input, setInput] = useState("");
+  const add = () => {
+    const tag = input.trim();
+    if (tag && !tags.includes(tag)) onChange([...tags, tag]);
+    setInput("");
+  };
+  const remove = (tag) => onChange(tags.filter((t) => t !== tag));
+  return (
+    <div className={styles.tagsWrapper}>
+      {tags.map((tag) => (
+        <span key={tag} className={styles.tagPill}>
+          {tag}
+          <button type="button" onClick={() => remove(tag)} aria-label={`Remove ${tag}`}>×</button>
+        </span>
+      ))}
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); } }}
+        onBlur={add}
+        placeholder="Type and press Enter…"
+        className={styles.tagInput}
+      />
+    </div>
+  );
+}
+
 export default function BlogPostForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const slugTouched = useRef(false);
   const fileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
   const savedIdRef = useRef(id ?? null);
   const today = new Date().toISOString().slice(0, 10);
 
-  const [form, setForm] = useState({ title: "", slug: "", date: today, summary: "", content: "" });
+  const [form, setForm] = useState({ title: "", slug: "", date: today, summary: "", content: "", tags: [] });
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState("");
   const formRef = useRef(form);
   useEffect(() => { formRef.current = form; }, [form]);
 
@@ -61,9 +92,11 @@ export default function BlogPostForm() {
           date: data.date ?? today,
           summary: data.summary ?? "",
           content: data.content ?? "",
+          tags: data.tags ?? [],
         };
         setForm(loaded);
         formRef.current = loaded;
+        setCoverPreview(data.cover_image ?? "");
         setInitialContent(data.content ?? "");
         setEditorReady(true);
       });
@@ -101,12 +134,17 @@ export default function BlogPostForm() {
     setSaveStatus("saving");
     setError("");
 
+    let coverUrl = coverPreview;
+    if (coverFile) coverUrl = await uploadMedia(coverFile, "blog-covers/");
+
     const payload = {
       title: f.title,
       slug: f.slug || toSlug(f.title),
       date: f.date,
       summary: f.summary,
       content: f.content,
+      tags: f.tags,
+      cover_image: coverUrl,
     };
 
     try {
@@ -126,7 +164,7 @@ export default function BlogPostForm() {
     } finally {
       setSaving(false);
     }
-  }, [navigate]);
+  }, [coverFile, coverPreview, navigate]);
 
   // Auto-save every 30 minutes
   useEffect(() => {
@@ -253,6 +291,13 @@ export default function BlogPostForm() {
               style={{ resize: "vertical", lineHeight: "1.6" }}
             />
           </label>
+          <div className={styles.settingsLabel} style={{ gridColumn: "1 / -1" }}>
+            Tags
+            <TagsInput
+              tags={form.tags}
+              onChange={(tags) => { const next = { ...formRef.current, tags }; setForm(next); formRef.current = next; }}
+            />
+          </div>
         </div>
       )}
 
@@ -327,6 +372,49 @@ export default function BlogPostForm() {
       <div className={styles.document}>
         <div className={styles.documentInner}>
           {error && <p className={styles.error}>{error}</p>}
+
+          {/* Cover image / video zone */}
+          <div
+            className={styles.coverZone}
+            onClick={() => coverInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && coverInputRef.current?.click()}
+            aria-label="Upload cover image or video"
+          >
+            {coverPreview ? (
+              <>
+                {coverFile?.type?.startsWith("video/") || /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(coverPreview) ? (
+                  <video src={coverPreview} className={styles.coverZoneImg} muted loop playsInline autoPlay />
+                ) : (
+                  <img src={coverPreview} alt="Cover" className={styles.coverZoneImg} />
+                )}
+                <div className={styles.coverZoneOverlay}>
+                  <span>點擊更換封面</span>
+                  <button
+                    type="button"
+                    className={styles.coverZoneRemove}
+                    onClick={(e) => { e.stopPropagation(); setCoverFile(null); setCoverPreview(""); }}
+                  >
+                    移除
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className={styles.coverZonePlaceholder}>
+                <span className={styles.coverZoneIcon}>＋</span>
+                <span>新增封面圖片 / 影片</span>
+              </div>
+            )}
+          </div>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/*,video/*"
+            style={{ display: "none" }}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) { setCoverFile(f); setCoverPreview(URL.createObjectURL(f)); } e.target.value = ""; }}
+          />
+
           <input
             type="text"
             value={form.title}
