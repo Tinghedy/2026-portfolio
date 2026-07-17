@@ -1,5 +1,10 @@
--- ─── 1. Projects table ───────────────────────────────────────────────────────
-CREATE TABLE projects (
+-- ⚠️  Tables only. RLS policies live in supabase/migrations/ and are applied with
+--     `supabase db push`. Do not add policies here — an older copy of this file
+--     granted every authenticated user write access, and re-running it would
+--     silently undo the admin-only policies.
+
+-- ─── 1. Projects ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS projects (
   id            UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
   title         TEXT        NOT NULL,
   description   TEXT,
@@ -11,84 +16,31 @@ CREATE TABLE projects (
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ─── 2. Row Level Security ────────────────────────────────────────────────────
-ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+-- ─── 2. Posts ────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS posts (
+  id          UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug        TEXT        NOT NULL UNIQUE,
+  title       TEXT        NOT NULL,
+  date        DATE        NOT NULL DEFAULT CURRENT_DATE,
+  summary     TEXT,
+  content     TEXT,
+  cover_image TEXT,
+  tags        TEXT[]      DEFAULT '{}',
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
 
--- Anyone can read
-CREATE POLICY "Public read"
-  ON projects FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
--- Only authenticated users can insert / update / delete
-CREATE POLICY "Auth insert"
-  ON projects FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
-CREATE POLICY "Auth update"
-  ON projects FOR UPDATE
-  TO authenticated
-  USING (true) WITH CHECK (true);
-
-CREATE POLICY "Auth delete"
-  ON projects FOR DELETE
-  TO authenticated
-  USING (true);
-
--- ─── 2b. Posts table ─────────────────────────────────────────────────────────
-CREATE TABLE posts (
+-- ─── 3. Notes ────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notes (
   id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  slug       TEXT        NOT NULL UNIQUE,
   title      TEXT        NOT NULL,
   date       DATE        NOT NULL DEFAULT CURRENT_DATE,
+  tags       TEXT[]      DEFAULT '{}',
   summary    TEXT,
   content    TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public read posts"
-  ON posts FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
-CREATE POLICY "Auth insert posts"
-  ON posts FOR INSERT
-  TO authenticated
-  WITH CHECK (true);
-
-CREATE POLICY "Auth update posts"
-  ON posts FOR UPDATE
-  TO authenticated
-  USING (true) WITH CHECK (true);
-
-CREATE POLICY "Auth delete posts"
-  ON posts FOR DELETE
-  TO authenticated
-  USING (true);
-
--- ─── 3. Storage bucket ───────────────────────────────────────────────────────
--- Run this in the SQL editor (or create the bucket manually in the Storage UI)
+-- ─── 4. Storage bucket ───────────────────────────────────────────────────────
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('project-images', 'project-images', true)
-ON CONFLICT DO NOTHING;
-
--- Public read for storage
-CREATE POLICY "Public read storage"
-  ON storage.objects FOR SELECT
-  TO anon, authenticated
-  USING (bucket_id = 'project-images');
-
--- Authenticated upload
-CREATE POLICY "Auth upload storage"
-  ON storage.objects FOR INSERT
-  TO authenticated
-  WITH CHECK (bucket_id = 'project-images');
-
--- Authenticated delete
-CREATE POLICY "Auth delete storage"
-  ON storage.objects FOR DELETE
-  TO authenticated
-  USING (bucket_id = 'project-images');
+VALUES ('project-images', 'project-images', TRUE)
+ON CONFLICT (id) DO NOTHING;
