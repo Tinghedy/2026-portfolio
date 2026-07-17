@@ -53,6 +53,12 @@ button {
     cursor: none !important;
   }
 
+  /* Restore real cursor inside rich-text editors and form controls */
+  [contenteditable="true"] { cursor: text !important; }
+  [contenteditable="true"] * { cursor: auto !important; }
+  input, textarea, select { cursor: text !important; }
+  [data-resize-handle="true"] { cursor: se-resize !important; }
+
   .cursor {
     position: fixed;
     top: 0;

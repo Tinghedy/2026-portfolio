@@ -59,13 +59,13 @@ function ResizableImageView({ node, updateAttributes, selected }) {
 
         {/* Resize handle */}
         <div
+          data-resize-handle="true"
           onMouseDown={onMouseDown}
-          title="Drag to resize"
           style={{
             position: "absolute", right: -6, bottom: -6,
             width: 14, height: 14,
             background: "#111", border: "2px solid #fff",
-            borderRadius: 3, cursor: "se-resize",
+            borderRadius: 3,
             opacity: selected ? 1 : 0,
             transition: "opacity 0.15s",
           }}

@@ -147,10 +147,12 @@
   inset: 0;
   z-index: 100;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.2s ease;
+  padding: 0 16px;
 }
 
 @keyframes fadeIn {
@@ -216,6 +218,46 @@
 }
 .modalClose:hover { background: #f0f0f0; }
 
+.modalCounter {
+  font-size: 0.75rem;
+  color: #bbb;
+  font-family: "Helvetica Neue", sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Nav arrows ── */
+.navArrow {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  font-size: 1.8rem;
+  line-height: 1;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s, opacity 0.15s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+.navArrow:hover:not(:disabled) {
+  background: #fff;
+  transform: scale(1.08);
+}
+.navArrow:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+.navLeft  { margin-right: 16px; }
+.navRight { margin-left: 16px; }
+
 .modalDate {
   font-size: 0.8rem;
   color: #888;
@@ -251,4 +293,9 @@
   .grid { grid-template-columns: 1fr; }
   .header { flex-direction: column; align-items: flex-start; gap: 16px; }
   .modal { padding: 24px; }
+  .overlay { flex-direction: column; padding: 16px; gap: 12px; }
+  .navLeft, .navRight { margin: 0; }
+  .navLeft  { order: 2; }
+  .navRight { order: 3; }
+  .modal    { order: 1; }
 }

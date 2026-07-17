@@ -36,7 +36,7 @@ export default function Notes() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTag, setActiveTag] = useState("all");
-  const [selectedNote, setSelectedNote] = useState(null);
+  const [selectedIdx, setSelectedIdx] = useState(null);
 
   useEffect(() => {
     supabase
@@ -49,34 +49,43 @@ export default function Notes() {
       });
   }, []);
 
-  // Esc to close modal
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") setSelectedNote(null); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    document.body.style.overflow = selectedNote ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [selectedNote]);
-
   const allTags = ["all", ...new Set(notes.flatMap((n) => n.tags ?? []))];
-
   const filtered =
     activeTag === "all"
       ? notes
       : notes.filter((n) => (n.tags ?? []).includes(activeTag));
 
-  const colorOf = (note) => {
-    const idx = notes.indexOf(note);
-    return CARD_COLORS[idx % CARD_COLORS.length];
-  };
+  const isOpen = selectedIdx !== null;
+  const selectedNote = isOpen ? filtered[selectedIdx] : null;
+  const hasPrev = isOpen && selectedIdx > 0;
+  const hasNext = isOpen && selectedIdx < filtered.length - 1;
+
+  const prev = () => hasPrev && setSelectedIdx(i => i - 1);
+  const next = () => hasNext && setSelectedIdx(i => i + 1);
+  const close = () => setSelectedIdx(null);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedIdx, filtered.length]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  const colorOf = (idx) => CARD_COLORS[idx % CARD_COLORS.length];
 
   return (
     <>
-      <main className={`${styles.page} ${selectedNote ? styles.blurred : ""}`}>
+      <main className={`${styles.page} ${isOpen ? styles.blurred : ""}`}>
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <h1 className={styles.title}>Learning Notes</h1>
@@ -104,32 +113,42 @@ export default function Notes() {
           <p className={styles.empty}>No notes yet.</p>
         ) : (
           <div className={styles.grid}>
-            {filtered.map((note) => (
+            {filtered.map((note, i) => (
               <NoteCard
                 key={note.id}
                 note={note}
-                color={colorOf(note)}
-                onClick={() => setSelectedNote(note)}
+                color={colorOf(i)}
+                onClick={() => setSelectedIdx(i)}
               />
             ))}
           </div>
         )}
       </main>
 
-      {selectedNote && (
-        <div className={styles.overlay} onClick={() => setSelectedNote(null)}>
+      {isOpen && selectedNote && (
+        <div className={styles.overlay} onClick={close}>
+
+          {/* ── Left arrow ── */}
+          <button
+            className={`${styles.navArrow} ${styles.navLeft}`}
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+            disabled={!hasPrev}
+            aria-label="Previous note"
+          >
+            ‹
+          </button>
+
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <div
                 className={styles.modalDot}
-                style={{ backgroundColor: colorOf(selectedNote) }}
+                style={{ backgroundColor: colorOf(selectedIdx) }}
               />
               <h2 className={styles.modalTitle}>{selectedNote.title}</h2>
-              <button
-                className={styles.modalClose}
-                onClick={() => setSelectedNote(null)}
-                aria-label="Close"
-              >
+              <span className={styles.modalCounter}>
+                {selectedIdx + 1} / {filtered.length}
+              </span>
+              <button className={styles.modalClose} onClick={close} aria-label="Close">
                 ✕
               </button>
             </div>
@@ -153,6 +172,17 @@ export default function Notes() {
               </div>
             )}
           </div>
+
+          {/* ── Right arrow ── */}
+          <button
+            className={`${styles.navArrow} ${styles.navRight}`}
+            onClick={(e) => { e.stopPropagation(); next(); }}
+            disabled={!hasNext}
+            aria-label="Next note"
+          >
+            ›
+          </button>
+
         </div>
       )}
     </>

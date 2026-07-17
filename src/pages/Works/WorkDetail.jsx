@@ -133,9 +133,12 @@ export default function WorkDetail() {
         )}
 
         {/* ← Back (bottom) */}
-        <Link to="/works" className={`${styles.back} ${styles.backBottom}`}>
+        <button
+          onClick={() => navigate("/works")}
+          className={`${styles.back} ${styles.backBottom}`}
+        >
           ← Back
-        </Link>
+        </button>
 
       </div>
     </main>

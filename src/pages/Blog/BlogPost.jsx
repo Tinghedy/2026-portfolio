@@ -92,9 +92,12 @@ export default function BlogPost() {
         )}
 
         {/* ← Back (bottom) */}
-        <Link to="/blog" className={`${styles.back} ${styles.backBottom}`}>
+        <button
+          onClick={() => navigate("/blog")}
+          className={`${styles.back} ${styles.backBottom}`}
+        >
           ← Back
-        </Link>
+        </button>
 
       </div>
     </main>
