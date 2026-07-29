@@ -8,6 +8,8 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
 import { uploadImage } from "../../lib/uploadImage";
 import DrawingCanvas from "../../components/DrawingCanvas/DrawingCanvas";
+import FigmaImportModal from "../../components/admin/FigmaImportModal";
+import AIAssistantBar from "../../components/admin/AIAssistantBar";
 import styles from "./BlogPostForm.module.css";
 
 const AUTO_SAVE_MS = 30 * 60 * 1000;
@@ -35,6 +37,14 @@ export default function NoteForm() {
   const [showSettings, setShowSettings] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showDrawing, setShowDrawing] = useState(false);
+  const [showFigmaModal, setShowFigmaModal] = useState(false);
+
+  const handleImportFigmaImages = (images) => {
+    if (!editor || !images?.length) return;
+    images.forEach((img) => {
+      editor.chain().focus().setImage({ src: img.url }).run();
+    });
+  };
 
   // Load existing note
   useEffect(() => {
@@ -268,12 +278,42 @@ export default function NoteForm() {
           <button type="button" onClick={() => setShowDrawing(true)} disabled={uploading}>
             ✏ Draw
           </button>
+          <span className={styles.divider} />
+          <button type="button" onClick={() => setShowFigmaModal(true)} style={{ color: "#0d99ff", fontWeight: 500 }}>
+            🎨 Figma 匯入
+          </button>
         </div>
       )}
 
       {/* ── Document ── */}
       <div className={styles.document}>
         <div className={styles.documentInner}>
+          <AIAssistantBar
+            title={form.title}
+            content={editor?.getText() ?? ""}
+            onApplyOutline={(outline) => {
+              if (editor) {
+                const formatted = outline.replace(/\n/g, "<br>");
+                editor.chain().focus().setContent(editor.getHTML() + "<br>" + formatted).run();
+              }
+            }}
+            onApplyPolish={(polished) => {
+              if (editor) editor.chain().focus().setContent(polished.replace(/\n/g, "<br>")).run();
+            }}
+            onApplySummary={(summary) => {
+              const next = { ...formRef.current, summary };
+              setForm(next);
+              formRef.current = next;
+            }}
+            onApplyTags={(tags) => {
+              const currentTags = (form.tags || "").split(",").map((s) => s.trim()).filter(Boolean);
+              const merged = Array.from(new Set([...currentTags, ...tags])).join(", ");
+              const next = { ...formRef.current, tags: merged };
+              setForm(next);
+              formRef.current = next;
+            }}
+          />
+
           {error && <p className={styles.error}>{error}</p>}
           <input
             type="text"
@@ -295,6 +335,12 @@ export default function NoteForm() {
           onClose={() => setShowDrawing(false)}
         />
       )}
+
+      <FigmaImportModal
+        isOpen={showFigmaModal}
+        onClose={() => setShowFigmaModal(false)}
+        onImportImages={handleImportFigmaImages}
+      />
     </div>
   );
 }

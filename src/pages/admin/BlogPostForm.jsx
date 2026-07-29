@@ -7,6 +7,8 @@ import { ResizableImage as Image } from "../../lib/ResizableImage";
 import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
 import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
+import FigmaImportModal from "../../components/admin/FigmaImportModal";
+import AIAssistantBar from "../../components/admin/AIAssistantBar";
 import styles from "./BlogPostForm.module.css";
 
 const AUTO_SAVE_MS = 30 * 60 * 1000;
@@ -74,6 +76,14 @@ export default function BlogPostForm() {
   const [error, setError] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showFigmaModal, setShowFigmaModal] = useState(false);
+
+  const handleImportFigmaImages = (images) => {
+    if (!editor || !images?.length) return;
+    images.forEach((img) => {
+      editor.chain().focus().setImage({ src: img.url }).run();
+    });
+  };
 
   // Load existing post for edit mode
   useEffect(() => {
@@ -365,12 +375,41 @@ export default function BlogPostForm() {
             style={{ display: "none" }}
             onChange={handleImageFile}
           />
+          <span className={styles.divider} />
+          <button type="button" onClick={() => setShowFigmaModal(true)} style={{ color: "#0d99ff", fontWeight: 500 }}>
+            🎨 Figma 匯入
+          </button>
         </div>
       )}
 
       {/* ── Document ── */}
       <div className={styles.document}>
         <div className={styles.documentInner}>
+          <AIAssistantBar
+            title={form.title}
+            content={editor?.getText() ?? ""}
+            onApplyOutline={(outline) => {
+              if (editor) {
+                const formatted = outline.replace(/\n/g, "<br>");
+                editor.chain().focus().setContent(editor.getHTML() + "<br>" + formatted).run();
+              }
+            }}
+            onApplyPolish={(polished) => {
+              if (editor) editor.chain().focus().setContent(polished.replace(/\n/g, "<br>")).run();
+            }}
+            onApplySummary={(summary) => {
+              const next = { ...formRef.current, summary };
+              setForm(next);
+              formRef.current = next;
+            }}
+            onApplyTags={(tags) => {
+              const merged = Array.from(new Set([...(form.tags || []), ...tags]));
+              const next = { ...formRef.current, tags: merged };
+              setForm(next);
+              formRef.current = next;
+            }}
+          />
+
           {error && <p className={styles.error}>{error}</p>}
 
           {/* Cover image / video zone */}
@@ -427,6 +466,12 @@ export default function BlogPostForm() {
           )}
         </div>
       </div>
+
+      <FigmaImportModal
+        isOpen={showFigmaModal}
+        onClose={() => setShowFigmaModal(false)}
+        onImportImages={handleImportFigmaImages}
+      />
     </div>
   );
 }
