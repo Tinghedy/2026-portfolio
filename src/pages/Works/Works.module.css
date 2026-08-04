@@ -116,6 +116,12 @@
 }
 
 /* ── Media ── */
+/* Non-clipping shell so the CoverTag can overflow the rounded cover.
+   Keeps the inner .mediaWrap overflow:hidden (image scale-on-hover) intact. */
+.coverOuter {
+  position: relative;
+}
+
 .mediaWrap {
   width: 100%;
   overflow: hidden;
