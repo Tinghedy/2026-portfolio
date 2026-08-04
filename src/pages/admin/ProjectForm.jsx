@@ -9,6 +9,7 @@ import { supabase } from "../../lib/supabase";
 import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
 import FigmaImportModal from "../../components/admin/FigmaImportModal";
 import AIAssistantBar from "../../components/admin/AIAssistantBar";
+import { DEFAULT_TAG_COLOR, readableTextColor } from "../Works/CoverTag";
 import styles from "./ProjectForm.module.css";
 
 const AUTO_SAVE_MS = 30 * 60 * 1000;
@@ -61,6 +62,8 @@ export default function ProjectForm() {
     role: "",
     team: "",
     link: "",
+    tag: "",
+    tag_color: DEFAULT_TAG_COLOR,
   });
   const formRef = useRef(form);
   useEffect(() => { formRef.current = form; }, [form]);
@@ -105,6 +108,8 @@ export default function ProjectForm() {
           role: data.role ?? "",
           team: data.team ?? "",
           link: data.link ?? "",
+          tag: data.tag ?? "",
+          tag_color: data.tag_color ?? DEFAULT_TAG_COLOR,
         };
         setForm(loaded);
         formRef.current = loaded;
@@ -173,6 +178,7 @@ export default function ProjectForm() {
       const newUrls = await Promise.all(imageFiles.map((file) => uploadImage(file, "gallery/")));
       await Promise.all(removedRef.current.map(deleteImageByUrl));
       const allCaptions = [...existingCaptions, ...newCaptions];
+      const tagLabel = f.tag?.trim() ? f.tag.trim() : null;
       const payload = {
         title: f.title,
         year: Number(f.year),
@@ -181,6 +187,8 @@ export default function ProjectForm() {
         role: f.role,
         team: f.team,
         link: f.link,
+        tag: tagLabel,
+        tag_color: tagLabel ? (f.tag_color || DEFAULT_TAG_COLOR) : null,
         cover_image: coverUrl,
         images: [...existingImages, ...newUrls],
         image_captions: allCaptions,
@@ -343,6 +351,55 @@ export default function ProjectForm() {
                 className={styles.settingsInput}
               />
             </label>
+          </div>
+          <div className={styles.settingsRow}>
+            <label className={styles.settingsLabel}>
+              封面標籤 Cover Tag
+              <input
+                type="text"
+                value={form.tag}
+                onChange={(e) => { const next = { ...formRef.current, tag: e.target.value }; setForm(next); formRef.current = next; setSaveStatus(null); }}
+                placeholder="留空 = 不顯示標籤"
+                className={styles.settingsInput}
+              />
+            </label>
+            <div className={styles.settingsLabel}>
+              標籤顏色 Color
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <input
+                  type="color"
+                  value={/^#[0-9a-fA-F]{6}$/.test(form.tag_color) ? form.tag_color : DEFAULT_TAG_COLOR}
+                  onChange={(e) => { const next = { ...formRef.current, tag_color: e.target.value }; setForm(next); formRef.current = next; setSaveStatus(null); }}
+                  style={{ width: "40px", height: "34px", padding: "2px", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "6px", background: "none", cursor: "pointer" }}
+                  aria-label="選擇標籤顏色"
+                />
+                <input
+                  type="text"
+                  value={form.tag_color}
+                  onChange={(e) => { const next = { ...formRef.current, tag_color: e.target.value }; setForm(next); formRef.current = next; setSaveStatus(null); }}
+                  placeholder={DEFAULT_TAG_COLOR}
+                  className={styles.settingsInput}
+                  style={{ maxWidth: "120px", fontFamily: "ui-monospace, monospace" }}
+                />
+                {form.tag?.trim() && (
+                  <span
+                    style={{
+                      background: form.tag_color?.trim() || DEFAULT_TAG_COLOR,
+                      color: readableTextColor(form.tag_color),
+                      padding: "4px 10px",
+                      fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {form.tag}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           <div className={styles.settingsRow} style={{ gridTemplateColumns: "1fr" }}>
             <div className={styles.settingsLabel}>

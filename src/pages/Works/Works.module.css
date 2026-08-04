@@ -3,20 +3,21 @@
   min-height: 100vh;
   padding-top: 7rem;
   padding-bottom: 6rem;
+  background: var(--bg);
 }
 
 .inner {
-  max-width: 1280px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
 
 .pageTitle {
-  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
-  margin: 0 0 3rem;
-  color: #fff;
+  letter-spacing: -0.03em;
+  margin: 0 0 2.5rem;
+  color: var(--fg);
 }
 
 .empty {
@@ -24,118 +25,102 @@
   font-size: 0.9rem;
 }
 
-/* ── Masonry grid (CSS columns) ── */
+/* ── Image grid ── */
 .grid {
-  columns: 3;
-  column-gap: 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
-@media (max-width: 960px) {
-  .grid { columns: 2; }
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 520px) {
-  .grid { columns: 1; }
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr; }
 }
 
-/* ── Card wrapper (prevents column break inside) ── */
+/* Grid cell — min-width:0 lets the ellipsis title shrink instead of overflow */
 .cardWrapper {
-  break-inside: avoid;
-  margin-bottom: 0.65rem;
+  min-width: 0;
 }
 
-/* ── Card ── */
+/* ── Card (image-first, no container) ── */
 .card {
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: inherit;
-  background: #141414;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: border-color 0.25s ease;
-}
-
-.card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* ── Card text section ── */
-.cardTop {
-  padding: 1.2rem 1.2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.year {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.title {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  margin: 0;
-  color: #fff;
-}
-
-.tagline {
-  font-size: 0.8rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.45);
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.tags {
-  list-style: none;
-  margin: 0.15rem 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.tag {
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 2px;
-  padding: 0.15rem 0.5rem;
-  color: rgba(255, 255, 255, 0.45);
 }
 
 /* ── Media ── */
-/* Non-clipping shell so the CoverTag can overflow the rounded cover.
-   Keeps the inner .mediaWrap overflow:hidden (image scale-on-hover) intact. */
-.coverOuter {
-  position: relative;
-}
-
 .mediaWrap {
   width: 100%;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: #0a0a0a;
+  background: var(--surface-alt);
 }
 
 .media {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
-  transition: transform 0.55s ease;
+  object-fit: cover;
+  border-radius: 0;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover .media {
-  transform: scale(1.04);
+  transform: scale(1.02);
+}
+
+/* No-cover fallback: same-size tile so the grid never has a hole */
+.fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--surface-alt);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fallbackTitle {
+  font-size: 13px;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--fg-secondary);
+}
+
+/* ── Minimal text under the image ── */
+.meta {
+  margin-top: 12px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.year {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--fg-tertiary);
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover .year {
+  color: var(--fg-secondary);
 }

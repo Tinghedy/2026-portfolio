@@ -11,6 +11,14 @@
   --color-fg: #111111;
   --font-heading: 'Raleway', system-ui, sans-serif;
   --font-body: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Works list palette (image-first grid). Used only on /works for now. */
+  --bg:           #000000;
+  --fg:           #FFFFFF;
+  --fg-secondary: #9C9C9C;
+  --fg-tertiary:  #5A5A5A;
+  --surface-alt:  #1A1A1A;   /* no-cover fallback tile */
+  --accent:       #D8FF3E;   /* hover / rare states only */
 }
 
 html {

@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import CoverTag from "./CoverTag";
 import styles from "./Works.module.css";
 
-const stripHtml = (html) => (html ?? "").replace(/<[^>]+>/g, "");
 const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 /**
@@ -18,15 +16,20 @@ const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
  * @property {string[]} [tags]
  * @property {number} [year]
  * @property {string | null} tag  Cover-badge label; null = no badge.
+ * @property {string | null} [tag_color]  Cover-badge hex color; null = default.
  */
 
 /** @param {{ work: Work }} props */
 function WorkCard({ work }) {
   const videoRef = useRef(null);
   const [hovered, setHovered] = useState(false);
-  const tagline = stripHtml(work.description).slice(0, 130) || null;
-  const hasVideo = isVideo(work.cover_image);
-  const coverTag = work.cover_image ? work.tag : null;
+  // Treat null / undefined / empty / whitespace-only all as "no cover"
+  // so those cards always fall through to the fallback tile.
+  const cover = typeof work.cover_image === "string" ? work.cover_image.trim() : "";
+  const hasCover = cover !== "";
+  const hasVideo = isVideo(cover);
+  // One secondary line only: prefer the year, else a single category.
+  const meta = work.year || work.tags?.[0] || null;
 
   useEffect(() => {
     const v = videoRef.current;
@@ -43,39 +46,32 @@ function WorkCard({ work }) {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <div className={styles.cardTop}>
-          {work.year && <span className={styles.year}>{work.year}</span>}
-          <h2 className={styles.title}>{work.title}</h2>
-          {tagline && <p className={styles.tagline}>{tagline}</p>}
-          {work.tags?.length > 0 && (
-            <ul className={styles.tags}>
-              {work.tags.map((tag) => (
-                <li key={tag} className={styles.tag}>{tag}</li>
-              ))}
-            </ul>
+        <div className={styles.mediaWrap}>
+          {hasCover ? (
+            hasVideo ? (
+              <video
+                ref={videoRef}
+                src={cover}
+                className={styles.media}
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <img src={cover} alt={work.title} className={styles.media} />
+            )
+          ) : (
+            <div className={styles.fallback}>
+              <span className={styles.fallbackTitle}>{work.title}</span>
+            </div>
           )}
         </div>
 
-        {work.cover_image && (
-          <div className={styles.coverOuter}>
-            <div className={styles.mediaWrap}>
-              {hasVideo ? (
-                <video
-                  ref={videoRef}
-                  src={work.cover_image}
-                  className={styles.media}
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                />
-              ) : (
-                <img src={work.cover_image} alt={work.title} className={styles.media} />
-              )}
-            </div>
-            {coverTag && <CoverTag label={coverTag} />}
-          </div>
-        )}
+        <div className={styles.meta}>
+          <h2 className={styles.title}>{work.title}</h2>
+          {meta && <span className={styles.year}>{meta}</span>}
+        </div>
       </Link>
     </div>
   );
@@ -105,12 +101,13 @@ export default function Works() {
       const normalizeWorks = (rows, includeTag) =>
         (rows ?? []).map((work) => ({
           ...work,
-          tag: includeTag ? work.tag ?? null : work.title === "Young Ones" ? "Young Ones Awards — UX" : null,
+          tag: includeTag ? work.tag ?? null : null,
+          tag_color: includeTag ? work.tag_color ?? null : null,
         }));
 
       const primaryResult = await supabase
         .from("projects")
-        .select("id, title, description, cover_image, tags, year, tag")
+        .select("id, title, description, cover_image, tags, year, tag, tag_color")
         .order("order_index", { ascending: true });
 
       if (!primaryResult.error) {
