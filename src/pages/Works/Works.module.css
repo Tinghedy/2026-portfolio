@@ -1,27 +1,27 @@
 /* ── Page ── */
 .page {
   min-height: 100vh;
-  padding-top: 7rem;
-  padding-bottom: 6rem;
+  padding-top: var(--space-10);
+  padding-bottom: var(--space-9);
   background: var(--bg);
 }
 
 .inner {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 var(--space-5);
 }
 
 .pageTitle {
   font-size: clamp(1.4rem, 2.4vw, 1.9rem);
   font-weight: 700;
   letter-spacing: -0.03em;
-  margin: 0 0 2.5rem;
+  margin: 0 0 var(--space-7);
   color: var(--fg);
 }
 
 .empty {
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--fg-tertiary);
   font-size: 0.9rem;
 }
 
@@ -29,7 +29,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 @media (max-width: 1024px) {
@@ -55,6 +55,7 @@
 
 /* ── Media ── */
 .mediaWrap {
+  position: relative; /* anchors the cover badge */
   width: 100%;
   aspect-ratio: 3 / 2;
   overflow: hidden;
@@ -81,7 +82,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: var(--space-4);
   background: var(--surface-alt);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -95,11 +96,11 @@
 
 /* ── Minimal text under the image ── */
 .meta {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .title {

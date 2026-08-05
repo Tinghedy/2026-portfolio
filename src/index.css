@@ -19,6 +19,18 @@
   --fg-tertiary:  #5A5A5A;
   --surface-alt:  #1A1A1A;   /* no-cover fallback tile */
   --accent:       #D8FF3E;   /* hover / rare states only */
+
+  /* Spacing scale — px only. Use the nearest step; round up when between two. */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
 }
 
 html {
@@ -35,8 +47,8 @@ body {
 }
 
 body.dark-page {
-  background-color: #0d0d0d;
-  color: #f0f0f0;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 h1, h2, h3, h4, h5, h6 {
