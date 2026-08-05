@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -9,6 +9,8 @@ import { supabase } from "../../lib/supabase";
 import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
 import FigmaImportModal from "../../components/admin/FigmaImportModal";
 import AIAssistantBar from "../../components/admin/AIAssistantBar";
+import ContentPreview from "../../components/admin/ContentPreview";
+import ImageCropModal from "../../components/admin/ImageCropModal";
 import { DEFAULT_TAG_COLOR, readableTextColor } from "../Works/CoverTag";
 import styles from "./ProjectForm.module.css";
 
@@ -17,6 +19,13 @@ const AUTO_SAVE_MS = 30 * 60 * 1000;
 function formatTime(d) {
   return d.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
 }
+
+/** Wrap a cropped canvas blob so it can go through the normal upload path. */
+function blobToFile(blob, type) {
+  return new File([blob], `crop-${Date.now()}.${type === "image/png" ? "png" : "jpg"}`, { type });
+}
+
+const isVideoUrl = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 function TagsInput({ tags, onChange }) {
   const [input, setInput] = useState("");
@@ -86,6 +95,9 @@ export default function ProjectForm() {
   const [showSettings, setShowSettings] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showFigmaModal, setShowFigmaModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  // { src, handle(blob, type) } for the cropper; null = closed.
+  const [cropRequest, setCropRequest] = useState(null);
 
   const handleImportFigmaImages = (images) => {
     if (!editor || !images?.length) return;
@@ -125,7 +137,19 @@ export default function ProjectForm() {
     extensions: [
       StarterKit.configure({ bold: {}, italic: {}, heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false }),
-      Image.configure({ inline: false, allowBase64: false }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        // Inline images live in saved HTML, so the crop has to be uploaded
+        // before the node can point at it.
+        onCropRequest: ({ src, replace }) => setCropRequest({
+          src,
+          handle: async (blob, type) => {
+            const url = await uploadImage(blobToFile(blob, type), "projects/");
+            replace(url);
+          },
+        }),
+      }),
       Placeholder.configure({ placeholder: "Start writing…" }),
     ],
     content: "",
@@ -262,6 +286,35 @@ export default function ProjectForm() {
     }
   };
 
+  // Object URLs for gallery files that have not been uploaded yet, so the
+  // preview shows them alongside the already-saved images.
+  const pendingImageUrls = useMemo(
+    () => imageFiles.map((file) => URL.createObjectURL(file)),
+    [imageFiles],
+  );
+  useEffect(
+    () => () => pendingImageUrls.forEach((url) => URL.revokeObjectURL(url)),
+    [pendingImageUrls],
+  );
+
+  // The cover only uploads on save, so a cropped cover stays a local File and
+  // never costs an extra round trip to storage.
+  const openCoverCrop = () => {
+    if (!coverPreview) return;
+    setCropRequest({
+      src: coverPreview,
+      handle: (blob, type) => {
+        const file = blobToFile(blob, type);
+        setCoverFile(file);
+        setCoverPreview((prev) => {
+          if (prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(file);
+        });
+        setSaveStatus(null);
+      },
+    });
+  };
+
   const statusText =
     saveStatus === "saving" ? "儲存中..." :
     saveStatus instanceof Date ? `已自動儲存 ${formatTime(saveStatus)}` : "";
@@ -277,6 +330,13 @@ export default function ProjectForm() {
           {form.title || (isEdit ? "Edit Project" : "New Project")}
         </span>
         {statusText && <span className={styles.saveStatus}>{statusText}</span>}
+        <button
+          type="button"
+          onClick={() => setShowPreview(p => !p)}
+          className={`${styles.btnSettings}${showPreview ? ` ${styles.btnSettingsActive}` : ""}`}
+        >
+          {showPreview ? "✎ 編輯" : "👁 預覽"}
+        </button>
         <button
           type="button"
           onClick={() => setShowSettings(s => !s)}
@@ -468,7 +528,7 @@ export default function ProjectForm() {
       )}
 
       {/* ── Toolbar ── */}
-      {editor && (
+      {editor && !showPreview && (
         <div className={styles.toolbar}>
           <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? styles.toolbarActive : ""} aria-label="Bold">
             <strong>B</strong>
@@ -494,7 +554,22 @@ export default function ProjectForm() {
         </div>
       )}
 
-      {/* ── Document ── */}
+      {/* ── Preview ── */}
+      {showPreview ? (
+        <ContentPreview
+          title={form.title}
+          year={form.year}
+          role={form.role}
+          team={form.team}
+          link={form.link}
+          cover={coverPreview}
+          html={editor?.getHTML() ?? form.description}
+          images={[...existingImages, ...pendingImageUrls]}
+          captions={[...existingCaptions, ...newCaptions]}
+        />
+      ) : (
+
+      /* ── Document ── */
       <div className={styles.document}>
         <div className={styles.documentInner}>
           <AIAssistantBar
@@ -550,6 +625,15 @@ export default function ProjectForm() {
                 )}
                 <div className={styles.coverZoneOverlay}>
                   <span>點擊更換封面</span>
+                  {!coverFile?.type?.startsWith("video/") && !isVideoUrl(coverPreview) && (
+                    <button
+                      type="button"
+                      className={styles.coverZoneRemove}
+                      onClick={(e) => { e.stopPropagation(); openCoverCrop(); }}
+                    >
+                      裁切
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={styles.coverZoneRemove}
@@ -586,6 +670,18 @@ export default function ProjectForm() {
           )}
         </div>
       </div>
+      )}
+
+      {cropRequest && (
+        <ImageCropModal
+          src={cropRequest.src}
+          onCancel={() => setCropRequest(null)}
+          onApply={async (blob, type) => {
+            await cropRequest.handle(blob, type);
+            setCropRequest(null);
+          }}
+        />
+      )}
 
       <FigmaImportModal
         isOpen={showFigmaModal}

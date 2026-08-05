@@ -1,0 +1,91 @@
+/* Admin-side chrome around the preview. The page itself is rendered with
+   WorkDetail's own CSS module inside an iframe, so it stays in sync with the
+   live page and reacts to its real breakpoints. */
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f0efeb;
+}
+
+/* ── Device switcher ── */
+.deviceBar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.deviceBtn {
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s, background 0.15s;
+}
+.deviceBtn:hover { opacity: 1; background: #f0f0f0; }
+
+.deviceBtnActive {
+  opacity: 1;
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+.deviceBtnActive:hover { background: #111; }
+
+.deviceHint {
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.4;
+  font-family: ui-monospace, monospace;
+}
+
+/* ── Frame area ── */
+.viewport {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.viewport > :global(iframe) {
+  border-radius: 6px;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* Mobile: a phone-ish shell so the narrow frame reads as a device */
+.viewportMobile {
+  padding: 1.5rem 1rem;
+}
+.viewportMobile > :global(iframe) {
+  border-radius: 22px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Page content (inside the frame) ── */
+.frame {
+  min-height: 100%;
+  padding-bottom: 4rem;
+  background: #000;
+  color: #fff;
+}
+
+.emptyNote {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9rem;
+  padding: 3rem 0;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .viewport { padding: 0.75rem; }
+}

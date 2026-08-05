@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import CoverTag from "./CoverTag";
 import styles from "./Works.module.css";
 
 const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
@@ -66,6 +67,7 @@ function WorkCard({ work }) {
               <span className={styles.fallbackTitle}>{work.title}</span>
             </div>
           )}
+          <CoverTag label={work.tag} color={work.tag_color} />
         </div>
 
         <div className={styles.meta}>
