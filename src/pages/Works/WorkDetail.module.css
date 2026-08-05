@@ -241,6 +241,74 @@
   padding-left: 0.1rem;
 }
 
+/* ── TOC layout ──
+   The content column keeps .inner's own 860px box untouched; the sidebar is
+   simply a second grid column to its left. */
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: var(--space-7);
+  /* border-box: the side padding has to be added on, or it would eat into the
+     860px content column. */
+  max-width: calc(860px + 240px + var(--space-7) + 2 * var(--space-5));
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* No headings → single column, exactly as the page was before. */
+.layoutFull {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 860px;
+  padding: 0;
+}
+
+.sidebar {
+  position: sticky;
+  /* Below the fixed navbar (4.5rem) with room to breathe. */
+  top: 6rem;
+  align-self: start;
+  width: 240px;
+  /* Matches .inner's top padding so the list starts level with the title. */
+  padding-top: 3.5rem;
+  max-height: calc(100vh - 9rem);
+  overflow-y: auto;
+}
+
+/* ── Collapsible TOC (≤900px) ── */
+.mobileToc {
+  display: none;
+}
+
+.mobileTocSummary {
+  list-style: none;
+  cursor: pointer;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+  transition: color 0.2s;
+}
+.mobileTocSummary::-webkit-details-marker { display: none; }
+.mobileTocSummary:hover { color: var(--fg); }
+
+.mobileTocSummary::after {
+  content: "＋";
+  margin-left: var(--space-2);
+}
+.mobileToc[open] .mobileTocSummary::after { content: "－"; }
+.mobileToc[open] .mobileTocSummary { margin-bottom: var(--space-4); }
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    max-width: 860px;
+    padding: 0;
+  }
+  .sidebar { display: none; }
+  .mobileToc { display: block; }
+}
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .inner { padding: 2.5rem 1.25rem 5rem; gap: 2rem; }

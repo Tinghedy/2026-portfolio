@@ -1,9 +1,19 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { useTableOfContents } from "../../lib/useTableOfContents";
+import TableOfContents from "./TableOfContents";
 import styles from "./WorkDetail.module.css";
 
 const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
+
+/**
+ * Memoized so highlighting a TOC item — which re-renders WorkDetail on every
+ * scroll — does not make React rebuild the whole article subtree.
+ */
+const Prose = memo(function Prose({ className, html }) {
+  return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+});
 
 export default function WorkDetail() {
   const { id } = useParams();
@@ -27,6 +37,9 @@ export default function WorkDetail() {
         setLoading(false);
       });
   }, [id]);
+
+  const { headings, contentHtml, activeId, goToHeading, goToTop } =
+    useTableOfContents(project?.description);
 
   if (loading) return (
     <main className={styles.page}>
@@ -77,7 +90,21 @@ export default function WorkDetail() {
         </div>
       )}
 
-      <div className={styles.inner}>
+      <div className={`${styles.layout}${headings.length === 0 ? ` ${styles.layoutFull}` : ""}`}>
+
+        {/* Sticky table of contents (desktop) */}
+        {headings.length > 0 && (
+          <aside className={styles.sidebar}>
+            <TableOfContents
+              headings={headings}
+              activeId={activeId}
+              onSelect={goToHeading}
+              onBackToTop={goToTop}
+            />
+          </aside>
+        )}
+
+        <div className={styles.inner}>
 
         {/* Title */}
         <h1 className={styles.title}>{project.title}</h1>
@@ -105,12 +132,23 @@ export default function WorkDetail() {
           </div>
         )}
 
+        {/* Collapsible table of contents (≤900px) */}
+        {headings.length > 0 && (
+          <details className={styles.mobileToc}>
+            <summary className={styles.mobileTocSummary}>Table of Contents</summary>
+            <TableOfContents
+              headings={headings}
+              activeId={activeId}
+              onSelect={goToHeading}
+              onBackToTop={goToTop}
+              showHeading={false}
+            />
+          </details>
+        )}
+
         {/* Description — user writes "What's been done" + "Context" as H2 sections */}
         {project.description && (
-          <div
-            className={styles.prose}
-            dangerouslySetInnerHTML={{ __html: project.description }}
-          />
+          <Prose className={styles.prose} html={contentHtml} />
         )}
 
         {/* Gallery images with captions */}
@@ -140,6 +178,7 @@ export default function WorkDetail() {
           ← Back
         </button>
 
+        </div>
       </div>
     </main>
   );
