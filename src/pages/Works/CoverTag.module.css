@@ -1,8 +1,11 @@
+/* Flush to the cover's top-right corner — the media box clips overflow,
+   so the badge sits at inset 0 rather than hanging outside it. */
 .tag {
   position: absolute;
-  top: -12px;
-  right: -8px;
+  top: 0;
+  right: 0;
   z-index: 2;
+  max-width: 100%;
 
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 12px;
@@ -27,8 +30,6 @@
 
 @media (max-width: 767px) {
   .tag {
-    top: -10px;
-    right: -4px;
     font-size: 11px;
     padding: 3px 8px;
   }
