@@ -24,5 +24,30 @@
 
 ---
 
+## 本機開發
 
+```bash
+npm install
+cp .env.example .env.local   # 填入實際的值
+npm run dev                  # 前台與後台一般功能
+```
+
+後台的 **AI 助手**和 **Figma 匯入**會呼叫 `api/` 底下的 Vercel Serverless Function，`npm run dev` 不會啟動它們。要測這兩個功能請改用：
+
+```bash
+npx vercel link              # 第一次才需要
+npx vercel env pull .env.local
+npx vercel dev
+```
+
+## 環境變數
+
+| 變數 | 位置 | 說明 |
+|---|---|---|
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | 前端（公開） | 設計上可公開，寫入權限由 RLS 控管 |
+| `GEMINI_API_KEY` | 僅伺服器 | Gemini API，由 `api/gemini.js` 使用 |
+| `FIGMA_TOKEN` | 僅伺服器 | Figma REST API，由 `api/figma.js` 使用 |
+| `ADMIN_EMAIL` | 僅伺服器 | 只有此 email 登入後才能呼叫 `/api/*` |
+
+> ⚠️ 金鑰類變數**不要**加 `VITE_` 前綴，否則會被打包進前端 JS 公開。
 

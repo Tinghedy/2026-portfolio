@@ -26,4 +26,11 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Vercel Serverless Functions and local Node scripts run in Node, not the browser.
+    files: ['api/**/*.js', 'figma-mcp-server.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

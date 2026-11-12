@@ -1,8 +1,8 @@
 /**
- * Figma REST API Service Helper
+ * Figma REST API helper — calls our own /api/figma serverless function,
+ * which holds the Figma token server-side. Admin login required.
  */
-
-const FIGMA_TOKEN = import.meta.env.VITE_FIGMA_TOKEN;
+import { callApi } from "./apiClient";
 
 /**
  * Extract file key and node id from a Figma URL
@@ -40,70 +40,34 @@ export function parseFigmaUrl(url) {
 /**
  * Fetch Figma file metadata
  */
-export async function getFigmaFile(fileKey, token = FIGMA_TOKEN) {
-  if (!token) throw new Error("Figma Personal Access Token is missing in .env (VITE_FIGMA_TOKEN)");
+export async function getFigmaFile(fileKey) {
   if (!fileKey) throw new Error("Figma file key is required");
-
-  const res = await fetch(`https://api.figma.com/v1/files/${fileKey}`, {
-    headers: {
-      "X-Figma-Token": token,
-    },
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Figma API Error (${res.status})`);
-  }
-
-  return await res.json();
+  return await callApi("/api/figma", { action: "file", fileKey });
 }
 
 /**
  * Fetch exported image URLs for specific node IDs in a Figma file
  */
-export async function getFigmaImages(fileKey, nodeIds, options = {}, token = FIGMA_TOKEN) {
-  if (!token) throw new Error("Figma Personal Access Token is missing in .env (VITE_FIGMA_TOKEN)");
+export async function getFigmaImages(fileKey, nodeIds, options = {}) {
   if (!fileKey) throw new Error("Figma file key is required");
-
-  const ids = Array.isArray(nodeIds) ? nodeIds.join(",") : nodeIds;
-  const format = options.format || "png";
-  const scale = options.scale || 2;
-
-  const url = `https://api.figma.com/v1/images/${fileKey}?ids=${encodeURIComponent(ids)}&format=${format}&scale=${scale}`;
-
-  const res = await fetch(url, {
-    headers: {
-      "X-Figma-Token": token,
-    },
+  const data = await callApi("/api/figma", {
+    action: "images",
+    fileKey,
+    nodeIds: Array.isArray(nodeIds) ? nodeIds : [nodeIds],
+    format: options.format || "png",
+    scale: options.scale || 2,
   });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Figma API Image Export Error (${res.status})`);
-  }
-
-  const data = await res.json();
   return data.images; // Object mapping nodeId -> imageUrl
 }
 
 /**
  * Fetch node details (e.g. layer names, dimensions, frame info)
  */
-export async function getFigmaNodes(fileKey, nodeIds, token = FIGMA_TOKEN) {
-  if (!token) throw new Error("Figma Personal Access Token is missing in .env (VITE_FIGMA_TOKEN)");
+export async function getFigmaNodes(fileKey, nodeIds) {
   if (!fileKey) throw new Error("Figma file key is required");
-
-  const ids = Array.isArray(nodeIds) ? nodeIds.join(",") : nodeIds;
-  const res = await fetch(`https://api.figma.com/v1/files/${fileKey}/nodes?ids=${encodeURIComponent(ids)}`, {
-    headers: {
-      "X-Figma-Token": token,
-    },
+  return await callApi("/api/figma", {
+    action: "nodes",
+    fileKey,
+    nodeIds: Array.isArray(nodeIds) ? nodeIds : [nodeIds],
   });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || `Figma API Nodes Error (${res.status})`);
-  }
-
-  return await res.json();
 }

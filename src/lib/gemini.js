@@ -1,61 +1,20 @@
 /**
- * Google Gemini AI REST API Helper
+ * Google Gemini helper — calls our own /api/gemini serverless function,
+ * which holds the API key server-side. Admin login required.
  */
-
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+import { callApi } from "./apiClient";
 
 /**
- * Send prompt to Google Gemini 2.5 Flash API
+ * Send prompt to Gemini 2.5 Flash (via /api/gemini)
  */
 export async function generateText(prompt, options = {}) {
-  const apiKey = options.apiKey || GEMINI_API_KEY;
-
-  if (!apiKey || apiKey === "your-gemini-api-key-here") {
-    throw new Error("Gemini API Key 尚未設定。請在 .env 檔案中的 VITE_GEMINI_API_KEY 設定您的 API Key。");
-  }
-
-  const model = options.model || "gemini-2.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-  const payload = {
-    contents: [
-      {
-        parts: [{ text: prompt }],
-      },
-    ],
-    generationConfig: {
-      temperature: options.temperature ?? 0.7,
-      maxOutputTokens: options.maxOutputTokens ?? 2048,
-    },
-  };
-
-  if (options.systemInstruction) {
-    payload.systemInstruction = {
-      parts: [{ text: options.systemInstruction }],
-    };
-  }
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
+  const { text } = await callApi("/api/gemini", {
+    prompt,
+    temperature: options.temperature ?? 0.7,
+    maxOutputTokens: options.maxOutputTokens ?? 2048,
+    systemInstruction: options.systemInstruction,
   });
-
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.error?.message || `Gemini API Error (${response.status})`);
-  }
-
-  const data = await response.json();
-  const candidate = data.candidates?.[0];
-
-  if (!candidate || !candidate.content?.parts?.[0]?.text) {
-    throw new Error("Gemini 未返回有效的回應內容");
-  }
-
-  return candidate.content.parts[0].text;
+  return text;
 }
 
 /**

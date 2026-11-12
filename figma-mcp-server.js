@@ -1,10 +1,12 @@
 import http from "node:http";
 
 const PORT = 3845;
-const FIGMA_TOKEN = process.env.VITE_FIGMA_TOKEN || process.env.FIGMA_PERSONAL_ACCESS_TOKEN || "";
+const FIGMA_TOKEN = process.env.FIGMA_TOKEN || process.env.FIGMA_PERSONAL_ACCESS_TOKEN || "";
 
 const headers = {
-  "Access-Control-Allow-Origin": "*",
+  // Only the local Vite dev server may call this; "*" would let any website
+  // you visit use your Figma token through 127.0.0.1.
+  "Access-Control-Allow-Origin": "http://localhost:5173",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Content-Type": "application/json",
