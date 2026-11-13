@@ -1,0 +1,37 @@
+/* HandwrittenHello — ink uses currentColor, so set `color` on the parent to restyle it. */
+.hh-root {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 760px;
+}
+
+.hh-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.hh-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--hello-stroke, 4.2);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hh-nib {
+  fill: var(--hello-nib, #2f4fb8);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hh-line {
+  margin: 0;
+  font-family: var(--hello-line-font, 'Caveat', 'Bradley Hand', 'Segoe Print', cursive);
+  font-weight: 500;
+  font-size: clamp(1.625rem, 5vw, 2.5rem);
+  line-height: 1.2;
+  color: inherit;
+}
