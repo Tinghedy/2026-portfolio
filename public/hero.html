@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hedy Liang — Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Space+Mono&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0A0C; --graphite:#4A4F55; --fog:#EEF1F3; --mist:#D5DBE0; --steel:#AEB6BD; --ice:#CFE3F2;
+  --line:rgba(10,10,12,.26);
+  --u:2.55vw;                 /* 一格方塊的高度，最高的 H 是 5 格 */
+  --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  --sans:"Instrument Sans","Noto Sans TC",system-ui,sans-serif;
+  --fall:cubic-bezier(.55,.02,.78,.36);   /* 下墜：越掉越快 */
+  --land:cubic-bezier(.2,1.5,.4,1);       /* 落地：輕微彈一下 */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--mist);overflow-x:hidden}
+
+.light{position:fixed;inset:0;z-index:0;overflow:hidden;background:linear-gradient(180deg,var(--fog),var(--steel))}
+.blob{position:absolute;border-radius:50%;filter:blur(90px)}
+.blob i{display:block;width:100%;height:100%;border-radius:50%}
+.b1{left:-14vw;top:-22vh;width:62vw;height:70vh}
+.b1 i{background:#fff;opacity:.95;animation:d1 17s ease-in-out infinite alternate}
+.b2{right:-12vw;top:34vh;width:60vw;height:72vh}
+.b2 i{background:var(--ice);opacity:.85;animation:d2 21s ease-in-out infinite alternate}
+.b3{left:22vw;bottom:-22vh;width:50vw;height:46vh}
+.b3 i{background:var(--graphite);opacity:.30;animation:d3 25s ease-in-out infinite alternate}
+@keyframes d1{to{transform:translate(9vw,7vh) scale(1.12)}}
+@keyframes d2{to{transform:translate(-8vw,-9vh) scale(.92)}}
+@keyframes d3{to{transform:translate(-10vw,-6vh) scale(1.18)}}
+
+.bar{position:relative;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:16px 2.2vw;font:12px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.bar .sp{flex:1}
+button{font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;
+  border:1px solid var(--ink);background:transparent;color:var(--ink);padding:8px 13px}
+button[aria-pressed=true]{background:var(--ink);color:var(--fog)}
+button:hover{background:var(--graphite);color:var(--fog);border-color:var(--graphite)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+.hero{position:relative;z-index:1;height:78vh;min-height:470px;margin:0 2.2vw}
+.rule{position:absolute;top:0;bottom:0;width:1px;background:var(--line);transform-origin:top;
+  transition:left .62s cubic-bezier(.7,0,.2,1),opacity .3s linear}
+.playing .rule{animation:ruled .6s steps(9,end) both}
+@keyframes ruled{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+/* 一欄＝一個字母 */
+.slot{position:absolute;bottom:0;top:0;
+  transition:left .62s cubic-bezier(.7,0,.2,1),width .62s cubic-bezier(.7,0,.2,1)}
+.glyph{position:absolute;left:0;right:.4vw;bottom:34%;
+  display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
+  height:calc(var(--u)*5*var(--s));
+  transition:height .62s cubic-bezier(.7,0,.2,1),grid-template-rows .62s cubic-bezier(.7,0,.2,1)}
+.cell{background:var(--ink);margin:-.5px;will-change:transform,opacity}
+
+/* 橫槓：字還沒長出來、或收回去之後留下的那一條 */
+.m-bar .glyph::before{content:"";position:absolute;left:0;right:0;top:40%;height:20%;background:var(--ink);
+  transform-origin:left;transform:scaleX(0);transition:transform .45s cubic-bezier(.7,0,.2,1),opacity .18s linear}
+.m-bar.playing .glyph::before,.freeze .m-bar .glyph::before{transform:scaleX(1)}
+.m-bar .glyph.on::before{opacity:0;transition:opacity .18s linear .12s}
+/* 出現：橫槓模式 — 從中間那列往上下長出來 */
+.m-bar .cell{transform:scaleY(0);transform-origin:var(--org);opacity:1;
+  transition:transform .3s cubic-bezier(.2,.9,.3,1) var(--d)}
+.m-bar .on .cell{transform:scaleY(1)}
+
+/* 出現：方塊模式 — 從上面掉下來堆起來 */
+.m-tetris .cell{transform:translateY(calc(-78vh - var(--fy)));opacity:0;
+  transition:transform .4s var(--fall) var(--d),opacity 1ms linear var(--d)}
+.m-tetris .on .cell{transform:translateY(0);opacity:1;
+  transition:transform .42s var(--land) var(--d),opacity 1ms linear var(--d)}
+/* 消行：整列閃一下再消失，上面的往下掉一格 */
+.m-tetris .cell.flash{background:var(--fog);box-shadow:0 0 0 2px var(--ink)}
+.m-tetris .on .cell.gone{opacity:0;transform:translateY(calc(var(--dy)*100%)) scaleY(.1);
+  transition:opacity .1s linear,transform .1s linear}
+.m-tetris .on .cell.drop{transform:translateY(calc(var(--dy)*100%));
+  transition:transform .13s cubic-bezier(.4,0,.5,1)}
+
+.label{position:absolute;left:0;right:1.1vw;top:70%;overflow:hidden;
+  transition:left .62s cubic-bezier(.7,0,.2,1),opacity .35s linear}
+.label b{display:block;font:600 clamp(12px,1.2vw,19px)/1.2 var(--sans);white-space:nowrap;
+  transform:translateX(-106%);transition:transform .65s cubic-bezier(.16,1,.3,1) var(--ld)}
+.label small{display:block;margin-top:11px;font:clamp(9px,.75vw,12px)/1.5 var(--mono);
+  color:var(--graphite);text-transform:uppercase;letter-spacing:.04em;
+  transform:translateX(-106%);transition:transform .65s cubic-bezier(.16,1,.3,1) calc(var(--ld) + .12s)}
+.labels-in .label b,.labels-in .label small{transform:none}
+
+.foot{position:relative;z-index:1;margin:14px 2.2vw 0;display:flex;justify-content:space-between;
+  font:11px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--graphite)}
+.cap{position:relative;z-index:1;margin:26px 2.2vw 40px;max-width:680px;
+  font:14px/1.75 var(--sans);color:var(--graphite)}
+.cap b{color:var(--ink)}
+
+@media (max-width:760px){:root{--u:2.55vw}.hero{height:60vh}.label small{display:none}}
+.freeze *,.freeze *::before,.freeze *::after{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:1ms!important;transition-duration:1ms!important}
+}
+.rain{position:absolute;left:0;right:0;bottom:34%;height:0;pointer-events:none}
+.blk{position:absolute;width:var(--bs);height:var(--bs);background:var(--ink);
+  border:1px solid rgba(238,241,243,.28);transition:left .07s linear,bottom .07s linear,opacity .12s linear}
+.blk.flash{background:var(--fog);border-color:var(--ink)}
+.blk.dim{opacity:.25}
+/* 嵌入首頁用：拿掉原型工具列與說明文字，讓出 Navbar 的高度，不出現內部捲軸 */
+html,body{height:100%;overflow:hidden}
+.bar,.cap{display:none}
+main{padding-top:72px}
+.hero{height:calc(100vh - 72px - 40px);min-height:0}
+</style>
+</head>
+<body>
+<div class="light" aria-hidden="true"><div class="blob b1"><i></i></div><div class="blob b2"><i></i></div><div class="blob b3"><i></i></div></div>
+
+<div class="bar">
+  <span>HELLO → HEDY</span>
+  <span class="sp"></span>
+  <button id="rp" type="button">重播 ↻</button>
+</div>
+
+<main>
+  <h1 style="position:absolute;left:-9999px">Hedy Liang — UI/UX Designer Portfolio 2026</h1>
+  <section class="hero m-tetris" id="hero" aria-hidden="true"></section>
+  <div class="foot"><span>Tainan, TW · GMT+8</span><span id="phase">—</span></div>
+  <p class="cap" id="cap"></p>
+</main>
+
+<script>
+// 像素字：c＝字寬幾顆像素（像素大小＝欄寬÷c）。字高固定，頭尾兩列依像素大小裁短；eq＝各列等高
+const G = {
+  H: {c:8,  r:['10000001','11111111','10000001']},
+  E: {c:11, eq:1, r:['11111111111','10000000000','11111111100','10000000000','01111111111']},   // 左下角缺一格
+  L1:{c:7,  r:['1000000','1000000','1000000','1000000','1111111']},
+  L2:{c:6,  r:['100000','100000','100000','100000','100000','111111']},
+  O: {c:4,  r:['0110','1001','1001','1001','1001','1001','1001','0110']},
+  D: {c:7,  r:['1111100','1000010','1000001','1000010','1111100']},
+  Y: {c:5,  r:['10001','10001','01010','00100','00100','00100','00100']}
+};
+// 欄寬：HELLO 6:5:4:3:2，HEDY 5:4:3:2
+const SLOT = [
+  {a:'H', b:'H', x:[0,0],        w:[30,35.714],     lab:['HEDY LIANG','梁雅婷']},
+  {a:'E', b:'E', x:[30,35.714],  w:[25,28.571],     lab:['UI/UX DESIGNER','Research × Design × Code']},
+  {a:'L1',b:'D', x:[55,64.286],  w:[20,21.429],     lab:['PORTFOLIO','NCKU Industrial Design<br>Tainan, Taiwan']},
+  {a:'L2',b:'Y', x:[75,85.714],  w:[15,14.286],     lab:['2026','V.01']},
+  {a:'O', b:null,x:[90,100],     w:[10,0],          lab:null}
+];
+const RULES = [[0,0],[30,35.714],[55,64.286],[75,85.714],[90,100],[100,100]];
+const HERO_VW = 95.6, HH_VW = 12.75;      // 版面寬、字高（vw）
+
+const hero = document.getElementById('hero');
+const phase = document.getElementById('phase');
+const cap = document.getElementById('cap');
+let timers = [];
+
+function rowsFor(letter, wPct){
+  const g = G[letter], n = g.r.length;
+  const total = HH_VW / (wPct/100*HERO_VW/g.c);
+  if(g.eq || total <= n-2+.8) return Array(n).fill('1fr').join(' ');
+  const e = ((total-(n-2))/2).toFixed(3)+'fr';
+  return [e, ...Array(n-2).fill('1fr'), e].join(' ');
+}
+function paint(slotEl, letter, wPct){
+  const gl = slotEl.querySelector('.glyph');
+  const g = G[letter], rows = g.r.length, k = 5/rows;
+  gl.style.gridTemplateColumns = `repeat(${g.c},1fr)`;
+  gl.style.gridTemplateRows = rowsFor(letter, wPct);
+  gl.dataset.rows = rows;
+  let h = '';
+  g.r.forEach((row,r)=>[...row].forEach((v,x)=>{
+    if(v!=='1') return;
+    const d = (rows-1-r)*0.075*k + ((x*7)%5)*0.022;        // 越下面越早落地
+    h += `<span class="cell" data-r="${r}" style="grid-column:${x+1};grid-row:${r+1};--d:${d.toFixed(3)}s;--fy:${(r*10/rows).toFixed(1)}vh;--dy:0"></span>`;
+  }));
+  gl.innerHTML = h;
+  return gl;
+}
+function build(){
+  hero.innerHTML =
+    RULES.map((p,i)=>`<span class="rule" data-i="${i}" style="left:${p[0]}%"></span>`).join('') +
+    SLOT.map((s,i)=>`<div class="slot" data-i="${i}" style="left:${s.x[0]}%;width:${s.w[0]}%">
+        <div class="glyph" style="--s:1"></div>
+        ${s.lab?`<div class="label" style="--ld:${(i*.08).toFixed(2)}s"><b>${s.lab[0]}</b><small>${s.lab[1]}</small></div>`:''}
+      </div>`).join('') + '<div class="rain"></div>';
+  SLOT.forEach((s,i)=>paint(hero.querySelector(`.slot[data-i="${i}"]`), s.a, s.w[0]));
+}
+const at = (t,fn)=>timers.push(setTimeout(fn,t));
+
+// 消行：由下往上一列一列閃掉，上面的往下掉一格。回傳結束時間
+function clearSlots(slots, idx, t0){
+  let end = t0;
+  idx.forEach((si,k)=>{
+    const gl = slots[si].querySelector('.glyph');
+    const rows = +gl.dataset.rows;
+    for(let r=rows-1;r>=0;r--){
+      const t = t0 + k*70 + (rows-1-r)*(550/rows);
+      at(t, ()=>{
+        const cs = [...gl.querySelectorAll('.cell')];
+        cs.filter(c=>+c.dataset.r===r).forEach(c=>c.classList.add('flash'));
+        cs.filter(c=>+c.dataset.r<r).forEach(c=>{
+          c.style.setProperty('--dy', (+c.style.getPropertyValue('--dy')||0) + 1);
+          c.classList.add('drop');
+        });
+      });
+      at(t+Math.min(70,440/rows), ()=>[...gl.querySelectorAll('.cell')].filter(c=>+c.dataset.r===r).forEach(c=>{c.classList.remove('flash');c.classList.add('gone');}));
+      end = Math.max(end, t+120);
+    }
+  });
+  return end;
+}
+
+// 最後：會自己玩的俄羅斯方塊。游標移進來就接手：游標在哪一欄方塊就跟到哪，點一下直接落到底。
+// 沒有分數、沒有輸贏：堆太高就整片消行重來。閒置時先排出一個往下的箭頭（提示往下捲）。
+const TYPES = [
+  [[[0,0],[1,0],[2,0],[3,0]], [[0,0],[0,1],[0,2],[0,3]]],                                   // I
+  [[[0,0],[1,0],[0,1],[1,1]]],                                                               // O
+  [[[0,0],[1,0],[2,0],[1,1]], [[0,1],[1,1],[2,1],[1,0]], [[0,0],[0,1],[0,2],[1,1]], [[1,0],[1,1],[1,2],[0,1]]],   // T
+  [[[0,0],[1,0],[2,0],[0,1]], [[0,0],[0,1],[0,2],[1,0]], [[0,1],[1,1],[2,1],[2,0]], [[1,0],[1,1],[1,2],[0,2]]],   // L
+  [[[0,0],[1,0],[2,0],[2,1]], [[0,0],[1,0],[1,1],[1,2]], [[0,0],[0,1],[1,1],[2,1]], [[0,0],[0,1],[0,2],[1,2]]],   // J
+  [[[0,0],[1,0],[1,1],[2,1]], [[1,0],[1,1],[0,1],[0,2]]],                                   // S
+  [[[1,0],[2,0],[0,1],[1,1]], [[0,0],[0,1],[1,1],[1,2]]]                                    // Z
+];
+const O_ = TYPES[1][0], T_DOWN = TYPES[2][1];
+// 往下的箭頭，用四塊方塊拼成（由下往上落）：x 是相對於箭頭左緣的欄
+const ARROW = [{sh:O_,x:2},{sh:T_DOWN,x:0},{sh:T_DOWN,x:3},{sh:O_,x:2}];
+let game = null;
+
+function startGame(staticOnly){
+  const box = hero.querySelector('.rain');
+  const COLS = 28, IDLE_MS = 6000;
+  const ctl = new AbortController();
+  let bs = 0;
+  const setBs = ()=>{ bs = hero.clientWidth/COLS; box.style.setProperty('--bs', bs+'px'); };
+  setBs();
+  const SPAWN = Math.max(9, Math.ceil(hero.clientHeight*0.66/bs)+1);
+  const grid = [];                       // grid[row][col] = 元素
+  const filled = (r,c)=> !!(grid[r] && grid[r][c]);
+  let cur = null, stopped = false, paused = false, busy = false;
+  let mode = 'pattern', queue = ARROW.slice(), count = 0;
+  let lastInput = -1e9, cursorCol = null;
+  const tids = [];
+  const wait = (ms,fn)=>tids.push(setTimeout(()=>{ if(!stopped) fn(); }, ms));
+  const userActive = ()=> mode==='free' && performance.now()-lastInput < IDLE_MS;
+
+  const place = (el,r,c)=>{ el.style.left = `calc(var(--bs)*${c})`; el.style.bottom = `calc(var(--bs)*${r})`; };
+  const mk = ()=>{ const b=document.createElement('span'); b.className='blk'; box.appendChild(b); return b; };
+  const fits = (sh,x,y)=> sh.every(([dx,dy])=>{ const c=x+dx, r=y+dy; return c>=0 && c<COLS && r>=0 && !filled(r,c); });
+  const landing = (sh,x,y)=>{ while(fits(sh,x,y-1)) y--; return y; };
+  const width = sh=> Math.max(...sh.map(c=>c[0]))+1;
+  const draw = ()=> cur.sh.forEach(([dx,dy],i)=>place(cur.els[i], cur.y+dy, cur.x+dx));
+
+  // 自動排：盡量補滿一列、不留洞、不堆高
+  function best(rots){
+    let top = null;
+    for(const sh of rots) for(let x=0; x<=COLS-width(sh); x++){
+      if(!fits(sh,x,SPAWN)) continue;
+      const y = landing(sh,x,SPAWN);
+      let holes = 0, lines = 0, high = 0;
+      const rowsHit = new Set();
+      sh.forEach(([dx,dy])=>{
+        high = Math.max(high, y+dy+1); rowsHit.add(y+dy);
+        for(let r=y+dy-1; r>=0 && !filled(r,x+dx) && !sh.some(([a,b])=>a===dx && y+b===r); r--) holes++;
+      });
+      rowsHit.forEach(r=>{
+        let n = sh.filter(([,dy])=>y+dy===r).length;
+        for(let c=0;c<COLS;c++) if(filled(r,c)) n++;
+        if(n===COLS) lines++;
+      });
+      const score = lines*12 - holes*5 - high*1.3 + Math.random()*.6;
+      if(!top || score>top.score) top = {sh,x,score};
+    }
+    return top;
+  }
+  function spawn(){
+    let sh, x, rots = null, ri = 0;
+    if(mode==='pattern'){
+      const p = queue.shift(); sh = p.sh; x = Math.floor(COLS/2)-3 + p.x;
+    } else {
+      rots = TYPES[Math.floor(Math.random()*TYPES.length)];
+      if(userActive() && cursorCol!==null){
+        ri = Math.floor(Math.random()*rots.length);
+        sh = rots[ri];
+        x = Math.min(COLS-width(sh), Math.max(0, cursorCol-Math.floor(width(sh)/2)));
+      } else {
+        const b = best(rots);
+        if(!b){ return wipe(()=>{ mode='pattern'; queue=ARROW.slice(); }); }
+        sh = b.sh; x = b.x; ri = rots.indexOf(sh);
+      }
+    }
+    if(!fits(sh,x,SPAWN)) return wipe(()=>{ mode='pattern'; queue=ARROW.slice(); });
+    cur = {sh, x, y:SPAWN, els:sh.map(mk), rots, ri};
+    cur.els.forEach(e=>{ e.style.transition='none'; });
+    draw();
+    void box.offsetWidth;
+    cur.els.forEach(e=>{ e.style.transition=''; });
+  }
+  function follow(){
+    if(!cur || mode!=='free' || cursorCol===null) return;
+    const want = Math.min(COLS-width(cur.sh), Math.max(0, cursorCol-Math.floor(width(cur.sh)/2)));
+    const dir = Math.sign(want-cur.x);
+    while(cur.x!==want && fits(cur.sh, cur.x+dir, cur.y)) cur.x += dir;
+    draw();
+  }
+  function shiftDown(from){ for(let r=from;r<grid.length;r++) (grid[r]||[]).forEach((el,c)=>{ if(el) place(el,r,c); }); }
+  function clearRow(r, done){
+    const els = (grid[r]||[]).filter(Boolean);
+    els.forEach(e=>e.classList.add('flash'));
+    wait(90, ()=>{ els.forEach(e=>e.remove()); grid.splice(r,1); shiftDown(r); done(); });
+  }
+  // 整片由下往上消行
+  function wipe(then){
+    busy = true;
+    const step = ()=>{
+      while(grid.length && !(grid[0]||[]).some(Boolean)) grid.shift();
+      if(!grid.length){ shiftDown(0); count = 0; then(); busy = false; return; }
+      clearRow(0, ()=>wait(40, step));
+    };
+    step();
+  }
+  function lock(){
+    cur.sh.forEach(([dx,dy],i)=>{ const r=cur.y+dy; (grid[r] = grid[r]||[])[cur.x+dx] = cur.els[i]; });
+    cur = null; count++;
+    busy = true;
+    const next = ()=>{
+      // 不逐行消，堆滿到頂才整片消除（spawn 時檢測）
+      if(mode==='pattern' && !queue.length){
+        // 箭頭排好：閃兩下、停一下，再整片消掉開始自由落下
+        phase.textContent = '往下捲看作品';
+        const all = [...box.querySelectorAll('.blk')];
+        [300,600,900,1200].forEach((t,i)=>wait(t, ()=>all.forEach(e=>e.classList.toggle('dim', i%2===0))));
+        if(staticOnly){ busy = true; return; }
+        return wait(3200, ()=>wipe(()=>{ mode='free'; phase.textContent='移動游標選位置，點一下旋轉'; }));
+      }
+      busy = false;
+    };
+    next();
+  }
+  function tick(){
+    if(stopped) return;
+    if(!paused && !busy){
+      if(!cur) spawn();
+      else if(fits(cur.sh,cur.x,cur.y-1)){ cur.y--; draw(); }
+      else lock();
+    }
+    tids.push(setTimeout(tick, userActive() ? 170 : 60));
+  }
+
+  // 互動：只用游標和點擊，不碰鍵盤和捲動
+  const colAt = e=>{ const r = hero.getBoundingClientRect(); return Math.floor((e.clientX-r.left)/bs); };
+  hero.addEventListener('pointermove', e=>{ lastInput = performance.now(); cursorCol = colAt(e); follow(); }, {signal:ctl.signal});
+  hero.addEventListener('pointerdown', e=>{
+    lastInput = performance.now(); cursorCol = colAt(e); follow();
+    // 點擊 = 旋轉方塊（有多種旋轉形態時）
+    if(cur && mode==='free' && !busy && cur.rots && cur.rots.length>1){
+      const nri = (cur.ri+1) % cur.rots.length;
+      const nsh = cur.rots[nri];
+      let nx = cur.x;
+      // wall kick：旋轉後超出邊界或卡住，嘗試左右微移
+      if(!fits(nsh,nx,cur.y)){ for(const d of [-1,1,-2,2]){ if(fits(nsh,nx+d,cur.y)){nx+=d; break;} } }
+      if(fits(nsh,nx,cur.y)){ cur.sh=nsh; cur.ri=nri; cur.x=nx; draw(); }
+    }
+  }, {signal:ctl.signal});
+  const ro = new ResizeObserver(setBs); ro.observe(hero);
+  document.addEventListener('visibilitychange', ()=>{ paused = document.hidden; }, {signal:ctl.signal});
+  const io = new IntersectionObserver(es=>{ paused = !es[0].isIntersecting || document.hidden; });
+  io.observe(hero);
+
+  if(staticOnly){
+    // 減少動態：只擺出靜止的箭頭
+    ARROW.forEach(p=>{ const x=Math.floor(COLS/2)-3+p.x, y=landing(p.sh,x,SPAWN);
+      p.sh.forEach(([dx,dy])=>{ const el=mk(); (grid[y+dy]=grid[y+dy]||[])[x+dx]=el; place(el,y+dy,x+dx); }); });
+    phase.textContent = '往下捲看作品';
+  } else tick();
+
+  return { stop(){ stopped = true; tids.forEach(clearTimeout); ctl.abort(); io.disconnect(); ro.disconnect(); } };
+}
+
+function run(){
+  timers.forEach(clearTimeout); timers = [];
+  if(game){ game.stop(); game = null; }
+  hero.className = 'hero m-tetris';
+  build();
+  void hero.offsetWidth;
+  hero.classList.add('playing');
+  const slots = [...hero.querySelectorAll('.slot')];
+
+  // 1 — HELLO 落下堆起
+  phase.textContent = 'HELLO 落下';
+  slots.forEach((el,i)=>at(560 + i*150, ()=>el.querySelector('.glyph').classList.add('on')));
+  const M = 560 + 4*150 + 700 + 650;
+
+  // 2 — 欄位重排，LLO 消行
+  at(M, ()=>{
+    phase.textContent = 'LLO 消行';
+    SLOT.forEach((s,i)=>{
+      const el = slots[i];
+      el.style.left = s.x[1] + '%';
+      el.style.width = s.w[1] + '%';
+      if(s.b === s.a) el.querySelector('.glyph').style.gridTemplateRows = rowsFor(s.a, s.w[1]);
+      if(!s.b) el.style.opacity = 0;
+    });
+    RULES.forEach((p,i)=>{ hero.querySelector(`.rule[data-i="${i}"]`).style.left = p[1] + '%'; });
+    hero.querySelector('.rule[data-i="4"]').style.opacity = 0;
+  });
+  clearSlots(slots, [2,3,4], M + 160);
+
+  // 3 — D Y 落下
+  const N = M + 1000;
+  at(N, ()=>{
+    phase.textContent = 'D Y 落下';
+    [2,3].forEach((si,k)=>{
+      const gl = paint(slots[si], SLOT[si].b, SLOT[si].w[1]);
+      gl.classList.remove('on'); void gl.offsetWidth;
+      at(k*130, ()=>gl.classList.add('on'));
+    });
+  });
+  at(N + 900, ()=>{ phase.textContent = 'HEDY'; hero.classList.add('labels-in'); });
+
+  // 4 — HEDY 停一下，然後整個字也消行
+  const C = N + 900 + 1800;
+  // （列數要到這一刻才讀：第三、四欄這時已經從 L 換成 D、Y）
+  at(C, ()=>{ phase.textContent = 'HEDY 消行'; clearSlots(slots, [0,1,2,3], 0); });
+  const endClear = C + 3*70 + 550 + 150;
+
+  // 5 — 會自己玩的俄羅斯方塊
+  at(endClear + 250, ()=>{
+    phase.textContent = '—';
+    game = startGame(matchMedia('(prefers-reduced-motion: reduce)').matches);
+  });
+
+  cap.innerHTML = '方塊堆成 HELLO，L L O 消行，D Y 落下變成 HEDY，HEDY 也消行。之後方塊先排出一個往下的箭頭，再開始自己玩：排滿一列就消行，堆太高就整片重來。把游標移進畫面可以接手，游標在哪一欄方塊就跟到哪，點一下直接落到底。沒有分數。';
+}
+document.getElementById('rp').onclick = run;
+
+// ?still=hello|hedy — 定格，給截圖與字形檢查用
+const still = new URLSearchParams(location.search).get('still');
+if(still){
+  document.body.classList.add('freeze');
+  const k = still === 'hedy' ? 1 : 0;
+  hero.className = 'hero m-tetris';
+  build();
+  [...hero.querySelectorAll('.slot')].forEach((el,i)=>{
+    const s = SLOT[i];
+    el.style.left = s.x[k] + '%'; el.style.width = s.w[k] + '%';
+    if(k && !s.b){ el.style.opacity = 0; return; }
+    paint(el, k ? s.b : s.a, s.w[k]).classList.add('on');
+  });
+  RULES.forEach((p,i)=>{ hero.querySelector(`.rule[data-i="${i}"]`).style.left = p[k] + '%'; });
+  if(k) hero.querySelector('.rule[data-i="4"]').style.opacity = 0;
+  hero.classList.add('labels-in');
+  if(still === 'rain'){ hero.querySelectorAll('.glyph').forEach(g=>g.innerHTML=''); game = startGame(true); }
+  if(still === 'play'){ hero.querySelectorAll('.glyph').forEach(g=>g.innerHTML=''); document.body.classList.remove('freeze'); game = startGame(false); }
+  phase.textContent = still.toUpperCase();
+} else run();
+</script>
+</body>
+</html>
