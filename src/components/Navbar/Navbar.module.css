@@ -4,24 +4,15 @@
   left: 0;
   right: 0;
   z-index: 100;
-  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+  transition:
+    background var(--duration-base) var(--ease-focus),
+    backdrop-filter var(--duration-base) var(--ease-focus);
 }
 
 .navbar.scrolled {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-
-/* Dark page override (e.g. Works) */
-:global(body.dark-page) .navbar {
-  color: #f0f0f0;
-}
-
-:global(body.dark-page) .navbar.scrolled {
-  background: rgba(13, 13, 13, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 .inner {
@@ -69,7 +60,7 @@
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.25s ease;
+  transition: transform var(--duration-base) var(--ease-focus);
 }
 
 .link:hover::after,
@@ -85,7 +76,7 @@
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
-  transition: background 0.2s ease;
+  transition: background var(--duration-base) var(--ease-focus);
 }
 
 .loginBtn:hover {
@@ -112,7 +103,9 @@
   width: 24px;
   height: 2px;
   background: currentColor;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform var(--duration-base) var(--ease-focus),
+    opacity var(--duration-base) var(--ease-focus);
   transform-origin: center;
 }
 
@@ -135,7 +128,7 @@
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--duration-base) var(--ease-focus);
   z-index: 99;
 }
 

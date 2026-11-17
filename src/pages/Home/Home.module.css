@@ -10,6 +10,8 @@
   border: 0;
 }
 
-.placeholder {
-  min-height: 60vh;
+/* Only there so the hero can scroll up far enough to trigger the
+   switch to /works (see Home.jsx). */
+.scrollRoom {
+  height: 60vh;
 }

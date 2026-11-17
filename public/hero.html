@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hedy Liang — Hero</title>
+<!-- 共用 design tokens（與主站同一份）。這頁只把緩動與時長換成 token，時間軸與 JS 邏輯不動。 -->
+<link rel="stylesheet" href="/tokens.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Space+Mono&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
@@ -14,8 +16,7 @@
   --u:2.55vw;                 /* 一格方塊的高度，最高的 H 是 5 格 */
   --mono:"Space Mono",ui-monospace,Menlo,monospace;
   --sans:"Instrument Sans","Noto Sans TC",system-ui,sans-serif;
-  --fall:cubic-bezier(.55,.02,.78,.36);   /* 下墜：越掉越快 */
-  --land:cubic-bezier(.2,1.5,.4,1);       /* 落地：輕微彈一下 */
+  --fall:var(--ease-fall);               /* 下墜：越掉越快（token ease-fall）*/
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);color:var(--ink);background:var(--mist);overflow-x:hidden}
@@ -44,48 +45,48 @@ button:hover{background:var(--graphite);color:var(--fog);border-color:var(--grap
 
 .hero{position:relative;z-index:1;height:78vh;min-height:470px;margin:0 2.2vw}
 .rule{position:absolute;top:0;bottom:0;width:1px;background:var(--line);transform-origin:top;
-  transition:left .62s cubic-bezier(.7,0,.2,1),opacity .3s linear}
-.playing .rule{animation:ruled .6s steps(9,end) both}
+  transition:left var(--duration-focus) var(--ease-focus),opacity var(--duration-base) var(--ease-focus)}
+.playing .rule{animation:ruled var(--duration-focus) var(--ease-step) both}
 @keyframes ruled{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 
 /* 一欄＝一個字母 */
 .slot{position:absolute;bottom:0;top:0;
-  transition:left .62s cubic-bezier(.7,0,.2,1),width .62s cubic-bezier(.7,0,.2,1)}
+  transition:left var(--duration-focus) var(--ease-focus),width var(--duration-focus) var(--ease-focus)}
 .glyph{position:absolute;left:0;right:.4vw;bottom:34%;
   display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);
   height:calc(var(--u)*5*var(--s));
-  transition:height .62s cubic-bezier(.7,0,.2,1),grid-template-rows .62s cubic-bezier(.7,0,.2,1)}
+  transition:height var(--duration-focus) var(--ease-focus),grid-template-rows var(--duration-focus) var(--ease-focus)}
 .cell{background:var(--ink);margin:-.5px;will-change:transform,opacity}
 
 /* 橫槓：字還沒長出來、或收回去之後留下的那一條 */
 .m-bar .glyph::before{content:"";position:absolute;left:0;right:0;top:40%;height:20%;background:var(--ink);
-  transform-origin:left;transform:scaleX(0);transition:transform .45s cubic-bezier(.7,0,.2,1),opacity .18s linear}
+  transform-origin:left;transform:scaleX(0);transition:transform var(--duration-focus) var(--ease-focus),opacity var(--duration-step) var(--ease-focus)}
 .m-bar.playing .glyph::before,.freeze .m-bar .glyph::before{transform:scaleX(1)}
-.m-bar .glyph.on::before{opacity:0;transition:opacity .18s linear .12s}
+.m-bar .glyph.on::before{opacity:0;transition:opacity var(--duration-step) var(--ease-focus) var(--duration-step)}
 /* 出現：橫槓模式 — 從中間那列往上下長出來 */
 .m-bar .cell{transform:scaleY(0);transform-origin:var(--org);opacity:1;
-  transition:transform .3s cubic-bezier(.2,.9,.3,1) var(--d)}
+  transition:transform var(--duration-base) var(--ease-focus) var(--d)}
 .m-bar .on .cell{transform:scaleY(1)}
 
 /* 出現：方塊模式 — 從上面掉下來堆起來 */
 .m-tetris .cell{transform:translateY(calc(-78vh - var(--fy)));opacity:0;
-  transition:transform .4s var(--fall) var(--d),opacity 1ms linear var(--d)}
+  transition:transform var(--duration-focus) var(--ease-fall) var(--d),opacity 1ms linear var(--d)}
 .m-tetris .on .cell{transform:translateY(0);opacity:1;
-  transition:transform .42s var(--land) var(--d),opacity 1ms linear var(--d)}
+  transition:transform var(--duration-focus) var(--ease-fall) var(--d),opacity 1ms linear var(--d)}
 /* 消行：整列閃一下再消失，上面的往下掉一格 */
 .m-tetris .cell.flash{background:var(--fog);box-shadow:0 0 0 2px var(--ink)}
 .m-tetris .on .cell.gone{opacity:0;transform:translateY(calc(var(--dy)*100%)) scaleY(.1);
-  transition:opacity .1s linear,transform .1s linear}
+  transition:opacity var(--duration-step) var(--ease-step),transform var(--duration-step) var(--ease-step)}
 .m-tetris .on .cell.drop{transform:translateY(calc(var(--dy)*100%));
-  transition:transform .13s cubic-bezier(.4,0,.5,1)}
+  transition:transform var(--duration-step) var(--ease-step)}
 
 .label{position:absolute;left:0;right:1.1vw;top:70%;overflow:hidden;
-  transition:left .62s cubic-bezier(.7,0,.2,1),opacity .35s linear}
+  transition:left var(--duration-focus) var(--ease-focus),opacity var(--duration-base) var(--ease-focus)}
 .label b{display:block;font:600 clamp(12px,1.2vw,19px)/1.2 var(--sans);white-space:nowrap;
-  transform:translateX(-106%);transition:transform .65s cubic-bezier(.16,1,.3,1) var(--ld)}
+  transform:translateX(-106%);transition:transform var(--duration-focus) var(--ease-focus) var(--ld)}
 .label small{display:block;margin-top:11px;font:clamp(9px,.75vw,12px)/1.5 var(--mono);
   color:var(--graphite);text-transform:uppercase;letter-spacing:.04em;
-  transform:translateX(-106%);transition:transform .65s cubic-bezier(.16,1,.3,1) calc(var(--ld) + .12s)}
+  transform:translateX(-106%);transition:transform var(--duration-focus) var(--ease-focus) calc(var(--ld) + var(--duration-step))}
 .labels-in .label b,.labels-in .label small{transform:none}
 
 .foot{position:relative;z-index:1;margin:14px 2.2vw 0;display:flex;justify-content:space-between;
@@ -101,7 +102,7 @@ button:hover{background:var(--graphite);color:var(--fog);border-color:var(--grap
 }
 .rain{position:absolute;left:0;right:0;bottom:34%;height:0;pointer-events:none}
 .blk{position:absolute;width:var(--bs);height:var(--bs);background:var(--ink);
-  border:1px solid rgba(238,241,243,.28);transition:left .07s linear,bottom .07s linear,opacity .12s linear}
+  border:1px solid rgba(238,241,243,.28);transition:left var(--duration-step) var(--ease-step),bottom var(--duration-step) var(--ease-step),opacity var(--duration-step) var(--ease-step)}
 .blk.flash{background:var(--fog);border-color:var(--ink)}
 .blk.dim{opacity:.25}
 /* 嵌入首頁用：拿掉原型工具列與說明文字，讓出 Navbar 的高度，不出現內部捲軸 */

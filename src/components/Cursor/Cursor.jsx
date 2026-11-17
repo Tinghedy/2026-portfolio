@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import gsap from "gsap";
+import { gsap, getMotion, prefersReducedMotion } from "../../motion/tokens";
 
 export default function Cursor() {
   useEffect(() => {
@@ -9,13 +9,15 @@ export default function Cursor() {
     const cursor = document.querySelector(".cursor");
     if (!cursor) return;
 
-    // GSAP-driven position tracking with lag
+    // GSAP-driven position tracking with lag (none under reduced motion)
+    const m = getMotion();
     const onMouseMove = (e) => {
       gsap.to(cursor, {
         x: e.clientX,
         y: e.clientY,
-        duration: 0.4,
-        ease: "power3.out",
+        duration: prefersReducedMotion() ? 0 : m.duration.base,
+        ease: m.ease.focus,
+        overwrite: "auto",
       });
     };
 

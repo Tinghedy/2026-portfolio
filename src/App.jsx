@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar/Navbar";
 import Cursor from "./components/Cursor/Cursor";
 import AuthGuard from "./components/AuthGuard/AuthGuard";
+import PublicLayout from "./motion/PublicLayout";
 
 // Public pages
 import Home from "./pages/Home/Home";
@@ -103,21 +104,27 @@ export default function App() {
           }
         />
 
-        {/* ── Public routes ── */}
+        {/* ── Public routes ──
+            Navbar stays outside PublicLayout: it is position:fixed and
+            ScrollSmoother transforms the content element. */}
         <Route
           path="/*"
           element={
             <>
               <Navbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/works" element={<Works />} />
-                <Route path="/works/:id" element={<WorkDetail />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/notes" element={<Notes />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-              </Routes>
+              <PublicLayout>
+                {(location) => (
+                  <Routes location={location}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/works" element={<Works />} />
+                    <Route path="/works/:id" element={<WorkDetail />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/notes" element={<Notes />} />
+                    <Route path="/portfolio" element={<Portfolio />} />
+                  </Routes>
+                )}
+              </PublicLayout>
             </>
           }
         />

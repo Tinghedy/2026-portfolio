@@ -1,0 +1,22 @@
+/* Above the fixed navbar (z 100); below the cursor (z 9999). */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+/* Dark veil over /works while the card grows */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--ink-rgb), 0.6);
+}
+
+/* The case page itself: scrolls on its own, page behind stays put */
+.sheet {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-bg-warm);
+}
