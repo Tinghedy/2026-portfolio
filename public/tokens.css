@@ -51,6 +51,8 @@
   --duration-step:  120ms;
   --duration-base:  240ms;
   --duration-focus: 550ms;
+  /* Card ↔ case page FLIP only (surface + cover), paired with --ease-flip */
+  --duration-flip:  700ms;
   --ease-step:  steps(4, end);
   --ease-focus: cubic-bezier(.2, .6, .2, 1);
   --ease-fall:  cubic-bezier(.55, .02, .78, .36);

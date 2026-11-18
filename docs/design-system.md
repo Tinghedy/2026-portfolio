@@ -83,6 +83,7 @@ Figma 裡這層別名到 Primitives 集合（`grey/50…700`、`ink`、`white`�
 | `--duration-step` | `120ms` | 方塊走一格、小的狀態切換（按鈕底色） |
 | `--duration-base` | `240ms` | 一般過場：hover 顏色、導覽列、換頁淡出 |
 | `--duration-focus` | `550ms` | 對焦：卡片對焦、捲動淡入、換頁淡入、平滑捲動的追趕時間 |
+| `--duration-flip` | `700ms` | **只給**作品卡片 ↔ 案例頁的 FLIP：米白底長出來＋封面飛行 |
 | `--ease-step` | `steps(4, end)` | **方塊類**：一格一格跳，不平滑 |
 | `--ease-focus` | `cubic-bezier(.2,.6,.2,1)` | **對焦類**與其他所有平滑動態 |
 | `--ease-fall` | `cubic-bezier(.55,.02,.78,.36)` | 下墜：越掉越快（首頁方塊落下） |
@@ -187,8 +188,9 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 [`src/motion/CaseOverlay.jsx`](../src/motion/CaseOverlay.jsx)、[`src/motion/flip.js`](../src/motion/flip.js)。
 
 - 從卡片點進去：網址變成 `/works/:id`（可分享），但作品牆不卸載，案例頁以 overlay 疊在上面（`history.state.backgroundLocation`，由 `PublicLayout` 判斷）。
-- 開啟：遮罩淡入（`--duration-base`）→ 卡片圖從格子位置連續放大到案例頁頂端主視覺（`--duration-focus` + `--ease-flip`，直角不變，3:2 等比）→ 米白底與內容淡入、上浮 8px → 主視覺重播一次劇本；焦點移到標題。
-- 關閉（Back 按鈕、`Esc`、瀏覽器上一頁）：倒著縮回原卡片，作品牆捲動位置不變，焦點回到卡片。
+- 開啟（`--duration-flip` + `--ease-flip`，以下同時開始）：遮罩淡入（`--duration-base`）；米白底從卡片的位置長成全螢幕；卡片圖從格子位置飛到頂端主視覺（3:2 等比、直角不變）。飛到 55% 時上方 Back 與標題淡入、上浮 8px。落地後才掛上 meta、正文、圖庫並淡入（Supabase 抓回來的完整資料也等落地才套用）；主視覺重播一次劇本；焦點移到標題。
+- 關閉（Back 按鈕、`Esc`、瀏覽器上一頁）：文字先淡出（`--duration-step`），封面與米白底一起縮回原卡片、遮罩淡出。作品牆捲動位置不變，焦點回到卡片。
+- 效能規則：飛行中只動 transform 與 opacity。Flip 一律 `scale: true`、不加 `absolute`；飛行中不要讓 React 改案例頁的 DOM（新內容等落地再掛）。
 - 直接打開 `/works/:id`：一般頁面＋淡入，不跑 FLIP。減少動態：不放大，只淡入淡出。
 - 開啟期間背後鎖捲動、設 `inert`；動畫中忽略重複點擊。
 - 注意：ScrollSmoother 會把取得焦點的元素捲進畫面，已用 `onFocusIn` 限定只處理平滑捲動內容裡的元素，否則焦點移進 overlay 會把背後的頁面捲到底。

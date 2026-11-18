@@ -12,11 +12,30 @@
   background: rgba(var(--ink-rgb), 0.6);
 }
 
-/* The case page itself: scrolls on its own, page behind stays put */
+/* Page-coloured surface that grows out of the card (open) and shrinks
+   back into it (close). Animated with transform only (x / y / scale), so
+   it stays on the compositor. Corners are square site-wide
+   (--radius-none), so a non-uniform scale never shows. */
+.surface {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg-warm);
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* The case page itself: scrolls on its own, page behind stays put.
+   Transparent — the colour comes from .surface underneath.
+   scrollbar-gutter: the body mounts after landing and makes the sheet
+   scrollable; reserving the gutter up front stops the hero from
+   shifting sideways when the scrollbar appears. */
 .sheet {
   position: absolute;
   inset: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--color-bg-warm);
+  scrollbar-gutter: stable;
 }
