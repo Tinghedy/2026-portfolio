@@ -72,32 +72,44 @@ export default function WorkDetail() {
  *   title exist on the first frame — the FLIP needs the hero right away —
  *   then fetches the full row.
  * - The hero (cover + script, data-flip-id={id}) is the FLIP target.
- * - Blocks marked data-enter fade in after the card lands (overlay mode).
+ * - Overlay mode: data-enter blocks (top Back, title) fade in during the
+ *   flight; data-body blocks (meta, prose, gallery, bottom Back) mount and
+ *   fade in after landing. The fetched row is held until then, too.
  *
- * @param {{ id: string, mode?: "page" | "overlay", onClose?: () => void, heroActive?: boolean }} props
+ * @param {{ id: string, mode?: "page" | "overlay", onClose?: () => void, heroActive?: boolean, bodyReady?: boolean }} props
  */
-export function CaseView({ id, mode = "page", onClose, heroActive }) {
+export function CaseView({ id, mode = "page", onClose, heroActive, bodyReady }) {
   const navigate = useNavigate();
-  const [project, setProject] = useState(() => workCache.get(id) ?? null);
-  const [loading, setLoading] = useState(() => !workCache.has(id));
+  // Overlay: only Back + hero + title on the first frame; the rest mounts
+  // after the card has landed (CaseOverlay sets bodyReady). Page mode: all at once.
+  const showBody = mode !== "overlay" || Boolean(bodyReady);
+
+  // What the /works list already had (hero + title render from this).
+  const [cached] = useState(() => workCache.get(id) ?? null);
+  // The full row: undefined = not back yet, null = not found.
+  const [fetched, setFetched] = useState(undefined);
   const [zoomed, setZoomed] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
     supabase
       .from("projects")
       .select("*")
       .eq("id", id)
       .single()
       .then(({ data }) => {
-        if (data) {
-          workCache.set(id, { ...workCache.get(id), ...data });
-          setProject((prev) => ({ ...prev, ...data }));
-        } else {
-          setProject((prev) => prev ?? null);
-        }
-        setLoading(false);
+        if (cancelled) return;
+        if (data) workCache.set(id, { ...workCache.get(id), ...data });
+        setFetched(data ?? null);
       });
+    return () => { cancelled = true; };
   }, [id]);
+
+  // Hold the fetched row until the body is shown: swapping data in
+  // mid-flight re-lays-out the page and drops frames.
+  const arrived = showBody && fetched !== undefined;
+  const project = arrived && fetched ? { ...cached, ...fetched } : cached;
+  const loading = !cached && !arrived;
 
   const html = useMemo(() => prepareHtml(project?.description), [project?.description]);
 
@@ -111,8 +123,9 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
   };
 
   const goBack = onClose ?? (() => navigate("/works"));
-  const back = (extra = "") => (
-    <button onClick={goBack} className={`${styles.back} ${extra}`} data-enter="">← Back</button>
+  // attr: data-enter (fades in with the title) or data-body (after landing).
+  const back = (extra = "", attr = { "data-enter": "" }) => (
+    <button onClick={goBack} className={`${styles.back} ${extra}`} {...attr}>← Back</button>
   );
 
   if (loading && !project) return (
@@ -165,15 +178,15 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
             {cover && (isVideo(cover) ? (
               <video src={cover} className={styles.heroMedia} muted autoPlay loop playsInline />
             ) : (
-              <img src={cover} alt="" className={styles.heroMedia} />
+              <img src={cover} alt="" className={styles.heroMedia} decoding="sync" />
             ))}
           </HoverPlayCard>
         )}
 
-        <header className={styles.header} data-enter="">
-          <h1 id={titleId} className={styles.title} tabIndex={-1}>{project.title}</h1>
-          {metaItems.length > 0 && (
-            <p className={styles.meta}>
+        <header className={styles.header}>
+          <h1 id={titleId} className={styles.title} tabIndex={-1} data-enter="">{project.title}</h1>
+          {showBody && metaItems.length > 0 && (
+            <p className={styles.meta} data-body="">
               {metaItems.map(({ label, value, isLink }) => (
                 <span key={label} className={styles.metaItem}>
                   {label !== "Year" && <span className={styles.metaLabel}>{label} </span>}
@@ -190,36 +203,40 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
           )}
         </header>
 
-        {/* Description (Tiptap HTML): intro paragraph → h2 sections */}
-        {html && (
-          <div className={styles.prose} data-enter="" dangerouslySetInnerHTML={{ __html: html }} />
-        )}
+        {showBody && (
+          <>
+            {/* Description (Tiptap HTML): intro paragraph → h2 sections */}
+            {html && (
+              <div className={styles.prose} data-body="" dangerouslySetInnerHTML={{ __html: html }} />
+            )}
 
-        {/* Gallery images with captions */}
-        {project.images?.length > 0 && (
-          <div className={styles.prose} data-enter="">
-            {project.images.map((url, i) => {
-              const caption = project.image_captions?.[i];
-              return (
-                <figure key={url} className={styles.figure}>
-                  <img
-                    src={url}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    data-zoomable=""
-                    tabIndex={0}
-                    role="button"
-                  />
-                  {caption && <figcaption>{caption}</figcaption>}
-                </figure>
-              );
-            })}
-          </div>
-        )}
+            {/* Gallery images with captions */}
+            {project.images?.length > 0 && (
+              <div className={styles.prose} data-body="">
+                {project.images.map((url, i) => {
+                  const caption = project.image_captions?.[i];
+                  return (
+                    <figure key={url} className={styles.figure}>
+                      <img
+                        src={url}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        data-zoomable=""
+                        tabIndex={0}
+                        role="button"
+                      />
+                      {caption && <figcaption>{caption}</figcaption>}
+                    </figure>
+                  );
+                })}
+              </div>
+            )}
 
-        <hr className={styles.rule} data-enter="" />
-        {back()}
+            <hr className={styles.rule} data-body="" />
+            {back("", { "data-body": "" })}
+          </>
+        )}
       </article>
 
       <Lightbox image={zoomed} onClose={() => setZoomed(null)} />

@@ -106,7 +106,12 @@ export default function WorkCard({ work, index }) {
     setHovered(false);
     setFocused(false);
     setCentered(false);
-    flip.pending = { id: work.id, state: Flip.getState(mediaRef.current) };
+    flip.pending = {
+      id: work.id,
+      state: Flip.getState(mediaRef.current),
+      // Where the page-coloured surface starts growing from (viewport px).
+      rect: mediaRef.current.getBoundingClientRect(),
+    };
     // Block a second click before the overlay has even rendered
     // (it would push the same URL twice). CaseOverlay clears it on landing.
     flip.animating = true;

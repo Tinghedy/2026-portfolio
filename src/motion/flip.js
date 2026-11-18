@@ -1,8 +1,10 @@
 /**
  * Shared state for the card → case-page FLIP (see CaseOverlay.jsx).
  *
- * - pending:   Flip.getState() of the clicked card's image box, captured
- *              on click and consumed once by the overlay when it mounts.
+ * - pending:   { id, state, rect } captured on click and consumed once by
+ *              the overlay when it mounts. state = Flip.getState() of the
+ *              card's image box (the cover flies from here); rect = its
+ *              getBoundingClientRect() (the surface grows from here).
  * - animating: true while the open/close animation runs; extra clicks,
  *              Esc and Back-button closes are ignored meanwhile.
  *
