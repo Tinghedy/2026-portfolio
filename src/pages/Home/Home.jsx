@@ -1,71 +1,38 @@
 import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import gsap from "gsap";
+import { useNavigate } from "react-router-dom";
+import { ScrollTrigger } from "../../motion/tokens";
 import styles from "./Home.module.css";
 
 export default function Home() {
-  const headingRef = useRef(null);
-  const subheadingRef = useRef(null);
-  const bioRef = useRef(null);
-  const ctaRef = useRef(null);
+  const heroRef = useRef(null);
+  const navigate = useNavigate();
 
+  // 往下捲過開場動畫（hero 下緣捲到畫面一半）→ 自動切到「作品集」。
+  // 用捲動位置判斷而不是 wheel 事件：滑鼠停在 iframe 上時，wheel 事件
+  // 只會進到 iframe，但捲動會傳回主頁，ScrollTrigger 一樣收得到。
   useEffect(() => {
-    const tl = gsap.timeline();
-
-    tl.fromTo(
-      headingRef.current,
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
-    )
-      .fromTo(
-        subheadingRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-        "-=0.5"
-      )
-      .fromTo(
-        bioRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-        "-=0.5"
-      )
-      .fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-        "-=0.5"
-      );
-
-    return () => {
-      tl.kill();
-    };
-  }, []);
+    const st = ScrollTrigger.create({
+      trigger: heroRef.current,
+      start: "bottom 50%",
+      once: true,
+      onEnter: () => navigate("/works"),
+    });
+    return () => st.kill();
+  }, [navigate]);
 
   return (
     <main>
-      {/* Hero */}
-      <section className={styles.hero}>
-        <div className={styles.heroInner}>
-          <h1 ref={headingRef} className={styles.heading} style={{ opacity: 0 }}>
-            Hedy
-          </h1>
-          <h2 ref={subheadingRef} className={styles.subheading} style={{ opacity: 0 }}>
-            Designer / Researcher / Something Else
-          </h2>
-          <p ref={bioRef} className={styles.bio} style={{ opacity: 0 }}>
-            One line about who you are, what you do, and what you care about.
-          </p>
-          <div ref={ctaRef} style={{ opacity: 0 }}>
-            <Link to="/works" className={styles.cta}>
-              View Works
-            </Link>
-          </div>
-        </div>
+      {/* Hero — HELLO → HEDY 開場動畫（public/hero.html） */}
+      <section ref={heroRef} className={styles.hero}>
+        <iframe
+          src="/hero.html"
+          title="Hedy Liang — HELLO → HEDY"
+          className={styles.heroFrame}
+        />
       </section>
 
-      {/* Placeholder sections */}
-      <section id="intro" className={styles.placeholder} />
-      <section id="featured-works" className={styles.placeholder} />
+      {/* 捲動空間：讓 hero 能被捲上去，觸發切換到作品集 */}
+      <div className={styles.scrollRoom} aria-hidden="true" />
     </main>
   );
 }

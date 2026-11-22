@@ -1,0 +1,60 @@
+/* ─────────────────────────────────────────────────────────────
+   Design tokens — Style C「Light Grey × Blue」
+   Source of truth: Figma x2xfHe6kMY0IHgoM4WfbYq, page "01 Design system",
+   frame 59:2. Variable names = Figma WEB code syntax.
+
+   This file lives in /public so BOTH the React app (index.html) and the
+   standalone hero iframe (public/hero.html) load the same values.
+   JS reads the motion tokens at runtime (src/motion/tokens.js), so
+   change a value here and CSS + GSAP follow.
+
+   See docs/design-system.md for what each token is for.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Color (semantic) ── */
+  --color-bg-page:           #F6F6F6;
+  --color-bg-surface:        #ECEDEF;
+  --color-bg-surface-strong: #DCDEE2;
+  --color-text-primary:      #0A0A0C;
+  --color-text-secondary:    #5A6069;
+  --color-text-on-accent:    #FFFFFF;
+  --color-accent:            #1043E5;
+  --color-accent-strong:     #0B2FA6;
+  --color-border-hairline:   #C6CAD0;
+  --color-rule-on-photo:     #FFFFFF;
+
+  /* ── Warm ink scale (case study / article pages) ──
+     One RGB base; every level is an alpha of it. For a dark mode,
+     swap --ink-rgb (and --color-bg-warm) only. */
+  --ink-rgb:              54, 54, 48;
+  --color-bg-warm:        #FBFAF4;
+  --color-ink-secondary:  rgba(var(--ink-rgb), 0.6);   /* meta, dates, captions, quotes */
+  --color-ink-code:       rgba(var(--ink-rgb), 0.08);  /* inline code background */
+  --color-ink-fill:       rgba(var(--ink-rgb), 0.05);  /* image placeholder / backing */
+  --color-ink-line:       rgba(var(--ink-rgb), 0.1);   /* hairlines, image borders, hr */
+
+  /* ── Grid & spacing ──
+     --grid-unit is a unitless multiplier: calc(var(--grid-unit) * 3px) = 24px */
+  --grid-unit:      8;
+  --spacing-xs:     4px;
+  --spacing-sm:     8px;
+  --spacing-md:     16px;
+  --spacing-lg:     24px;
+  --spacing-xl:     40px;
+  --spacing-2xl:    64px;
+  --spacing-gutter: 56px;
+
+  /* ── Radius ── */
+  --radius-none: 0;
+
+  /* ── Motion ── */
+  --duration-step:  120ms;
+  --duration-base:  240ms;
+  --duration-focus: 550ms;
+  --duration-flip:  700ms;  /* card → case page only */
+  --ease-step:  steps(4, end);
+  --ease-focus: cubic-bezier(.2, .6, .2, 1);
+  --ease-fall:  cubic-bezier(.55, .02, .78, .36);
+  /* Card → case page FLIP only: slight overshoot (y2 > 1) then settle */
+  --ease-flip:  cubic-bezier(.34, 1.1, .64, 1);
+}

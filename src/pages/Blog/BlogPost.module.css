@@ -1,50 +1,59 @@
+/* Blog post — Style C tokens (see docs/design-system.md).
+   Same article layout as Works/WorkDetail.module.css. */
+
 /* ── Page ── */
 .page {
   min-height: 100vh;
-  padding-top: 4.5rem;
+  padding-top: calc(var(--grid-unit) * 10px); /* 80px: below fixed navbar */
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
 }
 
 .stateText {
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
-  padding: 5rem 2rem;
+  padding: var(--spacing-2xl) var(--spacing-lg);
   text-align: center;
 }
 
 /* ── Top bar ── */
 .topBar {
-  max-width: 860px;
+  max-width: 864px;
   margin: 0 auto;
-  padding: 1.25rem 2rem 0;
+  padding: var(--spacing-lg) var(--spacing-lg) 0;
 }
 
 .back {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
+  gap: var(--spacing-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
   background: none;
   border: none;
   padding: 0;
-  color: rgba(255, 255, 255, 0.4);
-  transition: color 0.2s;
-  font-family: inherit;
+  color: var(--color-text-secondary);
+  transition: color var(--duration-base) var(--ease-focus);
 }
-.back:hover { color: #fff; }
+.back:hover { color: var(--color-accent-strong); }
+.back:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: var(--spacing-xs);
+}
 
 .backBottom {
-  margin-top: 2rem;
+  align-self: flex-start;
+  margin-top: var(--spacing-xl);
 }
 
 /* ── Hero ── */
 .hero {
-  width: 100%;
-  margin-top: 1.5rem;
-  overflow: hidden;
-  max-height: 75vh;
+  max-width: 1600px;
+  margin: var(--spacing-lg) auto 0;
+  padding: 0 var(--spacing-gutter);
 }
 
 .heroMedia {
@@ -52,16 +61,17 @@
   max-height: 75vh;
   object-fit: cover;
   display: block;
+  background: var(--color-bg-surface);
 }
 
 /* ── Inner content ── */
 .inner {
-  max-width: 860px;
+  max-width: 864px;
   margin: 0 auto;
-  padding: 3rem 2rem 8rem;
+  padding: var(--spacing-2xl) var(--spacing-lg) calc(var(--grid-unit) * 16px);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-lg);
 }
 
 /* ── Meta (date + tags) ── */
@@ -69,14 +79,15 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--spacing-sm) var(--spacing-md);
 }
 
 .date {
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-text-secondary);
 }
 
 .tags {
@@ -85,50 +96,54 @@
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: var(--spacing-xs);
 }
 
 .tag {
-  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 2px;
-  padding: 0.15rem 0.5rem;
-  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-none);
+  padding: 2px var(--spacing-sm);
+  color: var(--color-text-secondary);
 }
 
 /* ── Title ── */
 .title {
-  font-size: clamp(2rem, 5.5vw, 3.75rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 /* ── Prose ── */
 .prose {
+  margin-top: var(--spacing-md);
   font-size: 1rem;
   line-height: 1.85;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--color-text-primary);
 }
 
 .prose :global(h2) {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.02em;
-  margin: 3rem 0 0.8rem;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  margin: var(--spacing-2xl) 0 var(--spacing-md);
 }
 .prose :global(h2:first-child) { margin-top: 0; }
 
 .prose :global(h3) {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 2rem 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  margin: var(--spacing-xl) 0 var(--spacing-sm);
 }
 
 .prose :global(p) { margin: 0 0 1em; }
@@ -142,30 +157,33 @@
 .prose :global(li) { margin-bottom: 0.4em; }
 
 .prose :global(a) {
-  color: #fff;
+  color: var(--color-accent-strong);
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-decoration-thickness: 1px;
 }
+.prose :global(a:hover) { color: var(--color-accent); }
 
 .prose :global(strong) {
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .prose :global(em) {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-secondary);
 }
 
 .prose :global(img) {
   width: 100%;
   height: auto;
   display: block;
-  margin: 2.5rem 0;
-  border-radius: 4px;
+  margin: var(--spacing-xl) 0;
+  border-radius: var(--radius-none);
 }
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
-  .inner { padding: 2.5rem 1.25rem 5rem; gap: 1.5rem; }
+  .topBar { padding: var(--spacing-md) var(--spacing-md) 0; }
+  .hero { padding: 0 var(--spacing-md); }
+  .inner { padding: var(--spacing-xl) var(--spacing-md) var(--spacing-2xl); gap: var(--spacing-md); }
 }

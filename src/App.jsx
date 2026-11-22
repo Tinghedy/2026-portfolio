@@ -2,7 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar/Navbar";
 import Cursor from "./components/Cursor/Cursor";
+import CursorTooltip from "./components/CursorTooltip/CursorTooltip";
 import AuthGuard from "./components/AuthGuard/AuthGuard";
+import PublicLayout from "./motion/PublicLayout";
 
 // Public pages
 import Home from "./pages/Home/Home";
@@ -15,6 +17,7 @@ import Portfolio from "./pages/Portfolio/Portfolio";
 
 // Admin pages — no Navbar on these
 import Login from "./pages/admin/Login";
+import ResetPassword from "./pages/admin/ResetPassword";
 import Dashboard from "./pages/admin/Dashboard";
 import ProjectForm from "./pages/admin/ProjectForm";
 import BlogDashboard from "./pages/admin/BlogDashboard";
@@ -26,10 +29,12 @@ export default function App() {
   return (
     <AuthProvider>
       <Cursor />
+      <CursorTooltip />
       <Routes>
         {/* ── Admin routes (no public Navbar) ── */}
         <Route path="/admin" element={<Login />} />
         <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/reset-password" element={<ResetPassword />} />
         <Route
           path="/admin/dashboard"
           element={
@@ -103,21 +108,27 @@ export default function App() {
           }
         />
 
-        {/* ── Public routes ── */}
+        {/* ── Public routes ──
+            Navbar stays outside PublicLayout: it is position:fixed and
+            ScrollSmoother transforms the content element. */}
         <Route
           path="/*"
           element={
             <>
               <Navbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/works" element={<Works />} />
-                <Route path="/works/:id" element={<WorkDetail />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/notes" element={<Notes />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-              </Routes>
+              <PublicLayout>
+                {(location) => (
+                  <Routes location={location}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/works" element={<Works />} />
+                    <Route path="/works/:id" element={<WorkDetail />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/notes" element={<Notes />} />
+                    <Route path="/portfolio" element={<Portfolio />} />
+                  </Routes>
+                )}
+              </PublicLayout>
             </>
           }
         />

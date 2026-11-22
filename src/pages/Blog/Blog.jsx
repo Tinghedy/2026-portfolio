@@ -65,11 +65,6 @@ export default function Blog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.body.classList.add("dark-page");
-    return () => document.body.classList.remove("dark-page");
-  }, []);
-
-  useEffect(() => {
     supabase
       .from("posts")
       .select("*")

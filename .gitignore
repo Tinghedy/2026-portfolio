@@ -27,3 +27,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Original design exports (Figma PNG/JPG); only resized web copies in public/ are committed
+.asset-source/
+
+*storybook.log
+storybook-static

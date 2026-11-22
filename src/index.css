@@ -5,38 +5,31 @@
   padding: 0;
 }
 
-/* ─── Base ───────────────────────────────────────── */
+/* ─── Base ───────────────────────────────────────────
+   Design tokens (color / spacing / motion) live in public/tokens.css,
+   loaded from index.html. Only font stacks are defined here, because
+   the webfont switch (LINE Seed) is still pending.
+───────────────────────────────────────────────────── */
 :root {
-  --color-bg: #ffffff;
-  --color-fg: #111111;
   --font-heading: 'Raleway', system-ui, sans-serif;
   --font-body: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
-
-  /* Works list palette (image-first grid). Used only on /works for now. */
-  --bg:           #000000;
-  --fg:           #FFFFFF;
-  --fg-secondary: #9C9C9C;
-  --fg-tertiary:  #5A5A5A;
-  --surface-alt:  #1A1A1A;   /* no-cover fallback tile */
-  --accent:       #D8FF3E;   /* hover / rare states only */
+  /* Small labels (card tags, years). Whether Space Mono stays is undecided. */
+  --font-mono: 'Space Mono', ui-monospace, Menlo, monospace;
 }
 
+/* No `scroll-behavior: smooth` here: smooth scrolling is handled by
+   GSAP ScrollSmoother (src/motion/PublicLayout.jsx), and the CSS
+   property fights it. */
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-bg);
-  color: var(--color-fg);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-}
-
-body.dark-page {
-  background-color: #0d0d0d;
-  color: #f0f0f0;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -66,6 +59,8 @@ button {
   [contenteditable="true"] * { cursor: auto !important; }
   input, textarea, select { cursor: text !important; }
   [data-resize-handle="true"] { cursor: se-resize !important; }
+  /* Case study images open a lightbox: show the zoom cursor */
+  [data-zoomable] { cursor: zoom-in !important; }
 
   .cursor {
     position: fixed;
@@ -80,10 +75,10 @@ button {
     z-index: 9999;
     /* Size and color transitions — no GSAP */
     transition:
-      width 0.25s ease,
-      height 0.25s ease,
-      border-color 0.25s ease,
-      background-color 0.25s ease;
+      width var(--duration-base) var(--ease-focus),
+      height var(--duration-base) var(--ease-focus),
+      border-color var(--duration-base) var(--ease-focus),
+      background-color var(--duration-base) var(--ease-focus);
   }
 
   .cursor.is-hover {
@@ -92,5 +87,17 @@ button {
     mix-blend-mode: difference;
     background-color: #ffffff;
     border-color: #ffffff;
+  }
+}
+
+/* ─── Reduced motion ─────────────────────────────
+   Everything lands in its final state with no transition.
+   (GSAP motion checks the same media query in src/motion/tokens.js.)
+───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

@@ -1,0 +1,26 @@
+/* Above the fixed navbar (z 100); below the cursor (z 9999). */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+/* Frosted veil over /works while the card grows */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--ink-rgb), 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* The case page itself: scrolls on its own, page behind stays put.
+   During open/close it is clipped (clip-path) to the card's box, so the
+   page surface grows out of the card instead of appearing afterwards. */
+.sheet {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-bg-warm);
+}
