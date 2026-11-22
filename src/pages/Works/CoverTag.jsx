@@ -1,6 +1,7 @@
 import styles from "./CoverTag.module.css";
 
-export const DEFAULT_TAG_COLOR = "#D8FF3E";
+/** Default badge colour = --color-accent (Style C blue), white text. */
+export const DEFAULT_TAG_COLOR = "#1043E5";
 
 /**
  * Pick a readable text color (near-black or white) for a hex background,
@@ -21,7 +22,7 @@ export function readableTextColor(hex) {
 }
 
 /**
- * Cover badge shown at the top-right corner of a WorkCard cover.
+ * Cover badge shown at the top-left corner of a WorkCard cover.
  * Renders nothing when there is no label.
  *
  * @param {{ label: string, color?: string | null }} props

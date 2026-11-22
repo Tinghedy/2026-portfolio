@@ -83,6 +83,7 @@ Figma 裡這層別名到 Primitives 集合（`grey/50…700`、`ink`、`white`�
 | `--duration-step` | `120ms` | 方塊走一格、小的狀態切換（按鈕底色） |
 | `--duration-base` | `240ms` | 一般過場：hover 顏色、導覽列、換頁淡出 |
 | `--duration-focus` | `550ms` | 對焦：卡片對焦、捲動淡入、換頁淡入、平滑捲動的追趕時間 |
+| `--duration-flip` | `700ms` | **只給**作品卡片 → 案例頁的展開 / 收合 |
 | `--ease-step` | `steps(4, end)` | **方塊類**：一格一格跳，不平滑 |
 | `--ease-focus` | `cubic-bezier(.2,.6,.2,1)` | **對焦類**與其他所有平滑動態 |
 | `--ease-fall` | `cubic-bezier(.55,.02,.78,.36)` | 下墜：越掉越快（首頁方塊落下） |
@@ -134,7 +135,7 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 
 - 不建立 ScrollSmoother（原生捲動），沒有換頁轉場，新頁直接出現在頂端。
 - `<Reveal>` 不做動畫，內容直接就位。
-- 作品卡片直接顯示清楚版本，沒有模糊、方框、標籤。
+- 作品卡片不播劇本。
 - 全域 CSS（`src/index.css`）把所有 transition / animation 時長歸零。
 - 首頁開場動畫有自己的處理（俄羅斯方塊只擺出靜止箭頭）。
 
@@ -147,10 +148,10 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 ### 外觀
 
 - 圖片 3:2（Figma 360×240），底色 `--color-bg-surface`。
-- **Default**：整張失焦（`blur(8px)`，對應 Figma 的 layer blur），只有兩個方框內清楚。方框有 1px 白色細框線（`--color-rule-on-photo`）。旁邊有小字標籤（`01 / 類別`、年份）和一個 16px 十字記號。
-- **Active**：整張對焦，方框、標籤、十字淡出。`--duration-focus` + `--ease-focus`。
+- 封面清楚顯示，沒有模糊、方框、十字或小字。
+- **Badge**：封面左上角（內縮 `--spacing-md`，手機 `--spacing-sm`），文字 = `work.tag`，底色 = `work.tag_color`（後台設定），沒設定時用 `#1043E5`（`--color-accent`）。字色依底色自動選黑或白。mono 11px、大寫、直角。沒有 `tag` 就不顯示。元件：[`src/pages/Works/CoverTag.jsx`](../src/pages/Works/CoverTag.jsx)。
+- **Active**：目前沒有變化（劇本已停用，見下方 HoverPlayCard）。影片封面會播放。
 - 標題與年份在圖**外**，永遠清楚（規則 4）。標題最多兩行。
-- 方框位置是 Figma 的版面，以百分比寫在 `WorkCard.jsx` 的 `FRAMES`；想讓卡片之間有變化，往這個陣列加預設即可。
 
 ### 什麼時候是 Active
 
@@ -159,21 +160,19 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 | 滑鼠 | hover |
 | 鍵盤 | `:focus-visible`（等同 hover；滑鼠點擊造成的 focus 不算） |
 | 觸控裝置（沒有 hover） | 卡片圖片進入畫面中央 10% 的帶狀區時（IntersectionObserver） |
-| 減少動態 | 永遠是清楚版本，沒有過場 |
+| 減少動態 | 不播劇本 |
 
 影片封面在 Active 時播放，離開時停止並回到開頭。
 
-### 實作方式
-
-只用一個 `<img>` / `<video>`（清楚的），上面蓋一層 `backdrop-filter: blur()`，再用 CSS mask 在方框位置挖洞。Active 時把模糊動畫到 0。這樣影片封面也適用，不必疊好幾份媒體。
-
 ### 沒有封面
 
-不會壞：顯示 `--color-bg-surface` 的方塊，方框改用 `--color-border-hairline`、標籤用 `--color-text-secondary`，hover 時一樣消失。
+不會壞：顯示 `--color-bg-surface` 的方塊，badge 照常顯示。
 
 ---
 
 ## 作品卡片的小劇本（HoverPlayCard）
+
+> **目前停用**：作品卡片和案例頁封面都不播劇本。劇本裡的關鍵字方塊看起來像可以點的 tag，但其實沒有互動，容易讓人困惑。元件與 `scripts.js` 保留，之後若要恢復，在 `WorkCard.jsx`／`WorkDetail.jsx` 傳回 `script={scriptFor(id)}` 即可。
 
 元件：[`src/components/HoverPlayCard/`](../src/components/HoverPlayCard/)。**改劇本只改 [`scripts.js`](../src/components/HoverPlayCard/scripts.js)**，以作品 id 對應；沒列的作品不播劇本，只保留模糊 → 對焦。
 
@@ -182,13 +181,27 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 - 減少動態：不播動畫，作用中時直接顯示完成狀態。
 - 劇本內容取自各案例內文裡實際出現的詞。
 
+## 游標提示（Cursor Tooltip）
+
+[`src/components/CursorTooltip/`](../src/components/CursorTooltip/)，掛在 `App.jsx`，全站只有一個。參考 mchiu.co.uk。
+
+- 任何元素加上 `data-tooltip="…"`，滑鼠移上去就在游標**右下 24px** 顯示這段字；右邊快超出畫面時往左推，離邊緣 8px。
+- 跟隨游標有一點延遲（`--duration-base` + `--ease-focus`，GSAP `quickTo`），文字每 18ms 打一個字；移出元素立刻消失，點擊也會消失。
+- 外觀：直角、`--color-accent` 底、`--color-text-on-accent` 字、15px/500、內距 8×16、最寬 360px，`\n` 換行。出現時 `--duration-step` 淡入並上移 4px。
+- 作品卡片的文字來自後台「滑鼠提示 Hover Text」欄位（`projects.hover_text`），留空就不顯示。
+- 觸控／沒有 hover 的裝置、螢幕 ≤ 768px、減少動態：不顯示。
+
 ## 卡片 → 案例頁（FLIP）
 
 [`src/motion/CaseOverlay.jsx`](../src/motion/CaseOverlay.jsx)、[`src/motion/flip.js`](../src/motion/flip.js)。
 
 - 從卡片點進去：網址變成 `/works/:id`（可分享），但作品牆不卸載，案例頁以 overlay 疊在上面（`history.state.backgroundLocation`，由 `PublicLayout` 判斷）。
-- 開啟：遮罩淡入（`--duration-base`）→ 卡片圖從格子位置連續放大到案例頁頂端主視覺（`--duration-focus` + `--ease-flip`，直角不變，3:2 等比）→ 米白底與內容淡入、上浮 8px → 主視覺重播一次劇本；焦點移到標題。
-- 關閉（Back 按鈕、`Esc`、瀏覽器上一頁）：倒著縮回原卡片，作品牆捲動位置不變，焦點回到卡片。
+- 開啟：所有動作**同時**開始，`--duration-flip` + `--ease-flip`。
+  - 遮罩（ink 30% + `blur(10px)` 毛玻璃）淡入，`--duration-base`。
+  - **頁面本身從卡片長出來**：案例頁的 `clip-path` 從卡片的框擴到整個視窗，米白底一開始就在，不是等落地才淡入。
+  - 卡片圖用同一條曲線 FLIP 到頂端主視覺（直角不變，3:2 等比），所以始終在展開中的頁面裡。
+  - 內容在飛行約 55% 時就開始淡入、上浮 8px（與展開重疊）；落地後焦點移到標題。
+- 關閉（Back 按鈕、`Esc`、瀏覽器上一頁）：內容先快速淡出（`--duration-step`），頁面與主視覺一起縮回原卡片，遮罩同時淡出；作品牆捲動位置不變，焦點回到卡片。
 - 直接打開 `/works/:id`：一般頁面＋淡入，不跑 FLIP。減少動態：不放大，只淡入淡出。
 - 開啟期間背後鎖捲動、設 `inert`；動畫中忽略重複點擊。
 - 注意：ScrollSmoother 會把取得焦點的元素捲進畫面，已用 `onFocusIn` 限定只處理平滑捲動內容裡的元素，否則焦點移進 overlay 會把背後的頁面捲到底。
@@ -198,7 +211,7 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 `src/pages/Works/WorkDetail.jsx` + `WorkDetail.module.css`。排版對齊 haoqi.design/adrive，只動樣式層，資料與文字不變。
 
 - **容器**：單欄置中，`max-width: 880px`，左右 24px，上下 72px（≥1024px 為 96px）。沒有雙欄、卡片或 grid 區塊。
-- **頁首**：← Back → 10vh 留白 → 封面主視覺（3:2，FLIP 終點，重播劇本）→ h1 → meta 一行（4px，mono、tabular-nums、14px、secondary）→ 正文（第一段即 intro）。沒有封面大圖。
+- **頁首**：← Back → 64px → 封面主視覺（3:2，最寬 640px 置中，FLIP 終點）→ h1 → meta 一行（4px，mono、tabular-nums、14px、secondary）→ 正文（第一段即 intro）。沒有封面大圖。
 - **字級**：h1 48/60/700/−1.2px（<768px 為 30px）；h2 28/35/600，上 56 下 16；h3 24/30/600，上 48 下 16；h4 20/27.5/600，上 40 下 16；正文 16/26（<768px 為 14px）。標題都有 `scroll-margin-top: 96px`。
 - **垂直節奏**：只有一條規則：`.prose > * + * { margin-top: 16px }`。標題、圖片、hr 用自己的 margin 覆蓋（margin 會合併取大值）。每個區塊的第一個子元素 `margin-top: 0`。
 - **圖片**：滿寬、直角、`--color-ink-line` 細框、`--color-ink-fill` 底色，上下 24px；無陰影、無裝置框。點擊或 Enter 開 lightbox（`src/components/Lightbox/`，原生 `<dialog>`，Esc 關閉）。

@@ -1,9 +1,6 @@
 /* Work card — see WorkCard.jsx and docs/design-system.md#work-card */
 
 .card {
-  /* Component-local: Figma blur (stdDeviation 6.96 on a ×1.16 photo) ≈ 8px */
-  --card-blur: 8px;
-
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -35,106 +32,9 @@
   object-fit: cover;
 }
 
-/* Out-of-focus layer: blurs whatever is behind it, except inside the
-   frames (mask holes). Mask layers: frame 1, frame 2, full box —
-   composited with "exclude" so the frames become transparent holes. */
-.blur {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(var(--card-blur));
-  -webkit-backdrop-filter: blur(var(--card-blur));
-
-  -webkit-mask:
-    linear-gradient(#000 0 0) var(--f1-x) var(--f1-y) / var(--f1-w) var(--f1-h) no-repeat,
-    linear-gradient(#000 0 0) var(--f2-x) var(--f2-y) / var(--f2-w) var(--f2-h) no-repeat,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) var(--f1-x) var(--f1-y) / var(--f1-w) var(--f1-h) no-repeat exclude,
-    linear-gradient(#000 0 0) var(--f2-x) var(--f2-y) / var(--f2-w) var(--f2-h) no-repeat exclude,
-    linear-gradient(#000 0 0);
-
-  transition:
-    backdrop-filter var(--duration-focus) var(--ease-focus),
-    -webkit-backdrop-filter var(--duration-focus) var(--ease-focus);
-}
-
-/* ── Frames, labels, crosshair ── */
-.marks {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  color: var(--color-rule-on-photo);
-  transition: opacity var(--duration-focus) var(--ease-focus);
-}
-
-.frame {
-  position: absolute;
-  border: 1px solid currentColor;
-}
-
-.label {
-  position: absolute;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-
-.labelTag  { left: 6.667%;  top: 6.667%; }   /* Figma 24,16 */
-.labelYear { left: 75.556%; top: 48.333%; }  /* Figma 272,116 */
-
-/* Crosshair: 16px, centred at Figma 124,128 */
-.cross {
-  position: absolute;
-  left: 34.444%;
-  top: 53.333%;
-  width: 16px;
-  height: 16px;
-  transform: translate(-50%, -50%);
-  background:
-    linear-gradient(currentColor 0 0) center / 100% 1px no-repeat,
-    linear-gradient(currentColor 0 0) center / 1px 100% no-repeat;
-}
-
-/* ── Active: whole card in focus, marks gone ── */
-.card[data-active] .blur {
-  backdrop-filter: blur(0);
-  -webkit-backdrop-filter: blur(0);
-}
-
-.card[data-active] .marks {
-  opacity: 0;
-}
-
-/* ── Clean cover for the FLIP take-off (set on click, cleared on close) ── */
-.card[data-clean] .blur {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  transition: none;
-}
-
-.card[data-clean] .marks {
-  opacity: 0;
-  transition: none;
-}
-
-/* ── No cover: plain surface, marks drawn in grey so they stay visible ── */
-.noCover .marks {
-  color: var(--color-border-hairline);
-}
-
-.noCover .label {
-  color: var(--color-text-secondary);
-}
-
-/* ── Reduced motion: no transition, always the sharp version ── */
-@media (prefers-reduced-motion: reduce) {
-  .blur,
-  .marks {
-    display: none;
-  }
+/* ── No cover: plain surface ── */
+.noCover {
+  background: var(--color-bg-surface);
 }
 
 /* ── Text under the image: always sharp ── */

@@ -1,59 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import HoverPlayCard from "../HoverPlayCard/HoverPlayCard";
-import { scriptFor } from "../HoverPlayCard/scripts";
 import { Flip } from "../../motion/tokens";
 import { flip } from "../../motion/flip";
+import CoverTag from "../../pages/Works/CoverTag";
 import styles from "./WorkCard.module.css";
 
 /**
  * Work card — Figma component set "Work Card" (node 60:44).
  *
- * Default: the whole image is out of focus except a few sharp frames
- *          (hairline white border + small label + crosshair).
- * Active:  the whole image comes into focus and the frames, labels and
- *          crosshair fade out — --duration-focus / --ease-focus.
+ * The cover is shown as-is, with a badge in the top-left corner
+ * (work.tag, colour work.tag_color — set in the admin; see CoverTag).
  *
  * "Active" = mouse hover, keyboard focus (:focus-visible), or — on devices
  * without hover — the card crossing the middle of the viewport.
- * prefers-reduced-motion: always shows the sharp version (handled in CSS).
- * Title and year sit outside the image and are never blurred.
  *
- * Once in focus, the card plays its script (HoverPlayCard, content in
- * HoverPlayCard/scripts.js). Clicking grows it into the case page (FLIP).
+ * No hover script: the keyword chips looked clickable but weren't
+ * (HoverPlayCard/scripts.js is kept, unused). Clicking grows the card
+ * into the case page (FLIP).
  */
-
-/**
- * Sharp frames, in % of the image box. Values are the Figma layout
- * (360×240 card: Window 1 = 24,40 200×72, Window 2 = 160,144 176×64).
- * Add more presets here if cards should vary.
- */
-const FRAMES = [
-  { left: 6.667, top: 16.667, width: 55.556, height: 30 },
-  { left: 44.444, top: 60, width: 48.889, height: 26.667 },
-];
-
-/** CSS mask-position % for a layer is relative to (box − layer). */
-const maskPos = (offset, size) => (size >= 100 ? 0 : (offset / (100 - size)) * 100);
-
-const maskVars = Object.fromEntries(
-  FRAMES.flatMap((f, i) => [
-    [`--f${i + 1}-x`, `${maskPos(f.left, f.width)}%`],
-    [`--f${i + 1}-y`, `${maskPos(f.top, f.height)}%`],
-    [`--f${i + 1}-w`, `${f.width}%`],
-    [`--f${i + 1}-h`, `${f.height}%`],
-  ])
-);
 
 const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 /**
- * @param {{ work: import("../../pages/Works/Works").Work, index: number }} props
+ * @param {{ work: import("../../pages/Works/Works").Work }} props
  */
-export default function WorkCard({ work, index }) {
+export default function WorkCard({ work }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const script = scriptFor(work.id);
   const mediaRef = useRef(null);
   const videoRef = useRef(null);
   const [hovered, setHovered] = useState(false);
@@ -65,8 +39,6 @@ export default function WorkCard({ work, index }) {
   const cover = typeof work.cover_image === "string" ? work.cover_image.trim() : "";
   const hasCover = cover !== "";
   const hasVideo = hasCover && isVideo(cover);
-  const category = work.tag || work.tags?.[0] || "";
-  const frameLabel = `${String(index + 1).padStart(2, "0")}${category ? ` / ${category}` : ""}`;
   // One secondary line under the title: the year, else a single category.
   const meta = work.year || work.tags?.[0] || null;
 
@@ -101,7 +73,7 @@ export default function WorkCard({ work, index }) {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     if (flip.animating || !mediaRef.current) return;
-    // Reset to a clean cover (no blur, frames or script) for the take-off frame.
+    // Reset to a clean cover (no script) for the take-off frame.
     e.currentTarget.setAttribute("data-clean", "");
     setHovered(false);
     setFocused(false);
@@ -121,6 +93,7 @@ export default function WorkCard({ work, index }) {
       to={`/works/${work.id}`}
       className={styles.card}
       data-active={active || undefined}
+      data-tooltip={work.hover_text?.trim() || undefined}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
       // Keyboard focus counts as hover; a mouse click's focus does not.
@@ -131,8 +104,6 @@ export default function WorkCard({ work, index }) {
       <HoverPlayCard
         ref={mediaRef}
         className={hasCover ? styles.media : `${styles.media} ${styles.noCover}`}
-        style={maskVars}
-        script={script}
         active={active}
         waitForFocus
         data-flip-id={work.id}
@@ -153,26 +124,7 @@ export default function WorkCard({ work, index }) {
             <img src={cover} alt="" className={styles.asset} loading="lazy" />
           ))}
 
-        {/* Out-of-focus layer with holes where the frames are */}
-        {hasCover && <div className={styles.blur} aria-hidden="true" />}
-
-        <div className={styles.marks} aria-hidden="true">
-          {FRAMES.map((f, i) => (
-            <span
-              key={i}
-              className={styles.frame}
-              style={{
-                left: `${f.left}%`,
-                top: `${f.top}%`,
-                width: `${f.width}%`,
-                height: `${f.height}%`,
-              }}
-            />
-          ))}
-          <span className={`${styles.label} ${styles.labelTag}`}>{frameLabel}</span>
-          {work.year && <span className={`${styles.label} ${styles.labelYear}`}>{work.year}</span>}
-          <span className={styles.cross} />
-        </div>
+        <CoverTag label={work.tag} color={work.tag_color} />
       </HoverPlayCard>
 
       <div className={styles.meta}>

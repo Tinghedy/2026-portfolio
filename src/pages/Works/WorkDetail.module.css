@@ -50,8 +50,9 @@
    Same 3:2 as the work card, so the FLIP scales uniformly. */
 .hero {
   position: relative;
-  margin-top: 10vh;
+  margin: var(--spacing-2xl) auto 0;
   width: 100%;
+  max-width: 640px;
   aspect-ratio: 3 / 2;
   overflow: hidden;
   border: 1px solid var(--color-ink-line);

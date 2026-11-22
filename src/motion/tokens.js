@@ -68,7 +68,7 @@ let cache = null;
  * Lazily read the tokens (the stylesheet must have loaded, so call this
  * from effects / event handlers, not at module top level).
  * @returns {{
- *   duration: { step: number, base: number, focus: number },
+ *   duration: { step: number, base: number, focus: number, flip: number },
  *   ease: { step: Function, focus: Function|string, fall: Function|string, flip: Function|string },
  *   offset: number,
  * }}
@@ -89,6 +89,7 @@ export function getMotion() {
       step: toSeconds(read("--duration-step"), "--duration-step"),
       base: toSeconds(read("--duration-base"), "--duration-base"),
       focus: toSeconds(read("--duration-focus"), "--duration-focus"),
+      flip: toSeconds(read("--duration-flip"), "--duration-flip"),
     },
     ease: {
       step: toEase(read("--ease-step"), "ease-step"),

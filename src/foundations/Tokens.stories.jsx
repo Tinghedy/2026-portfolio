@@ -40,6 +40,7 @@ const GROUPS = {
     "--duration-step",
     "--duration-base",
     "--duration-focus",
+    "--duration-flip",
     "--ease-step",
     "--ease-focus",
     "--ease-fall",

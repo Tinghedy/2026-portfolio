@@ -12,7 +12,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "作品卡片（Figma「Work Card」60:44）。預設模糊、只有幾個清楚的框；hover / 鍵盤 focus 時對焦並播放 HoverPlayCard 劇本。點擊會導向 `/works/:id`（Storybook 內不會開出案例頁）。",
+          "作品卡片（Figma「Work Card」60:44）。封面左上角有 badge（`work.tag`／`work.tag_color`）；hover / 鍵盤 focus 時播放 HoverPlayCard 劇本。點擊會導向 `/works/:id`（Storybook 內不會開出案例頁）。",
       },
     },
   },
@@ -29,21 +29,17 @@ const meta = {
       );
     },
   ],
-  argTypes: {
-    index: { control: { type: "number", min: 0, max: 98 } },
-  },
 };
 export default meta;
 
 export const WithCover = {
   args: {
-    index: 0,
     work: {
       id: METROSENSE_ID,
       title: "MetroSense 捷境",
       cover_image: "/images/metrosense/metrosense-cover.webp",
       tags: ["UI Design", "Research"],
-      tag: "UI Design",
+      tag: "台北捷運 · UI/UX",
       year: 2025,
     },
   },
@@ -51,18 +47,18 @@ export const WithCover = {
 
 export const WithoutScript = {
   args: {
-    index: 1,
     work: {
       ...WithCover.args.work,
       id: "no-script",
       title: "沒有劇本的作品",
+      tag: "Young Ones Awards",
+      tag_color: "#1043E5",
     },
   },
 };
 
 export const NoCover = {
   args: {
-    index: 2,
     work: {
       id: "no-cover",
       title: "尚未上傳封面",

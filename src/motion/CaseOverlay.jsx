@@ -12,22 +12,37 @@ import styles from "./CaseOverlay.module.css";
  * entry carries a backgroundLocation (i.e. it was opened from a card).
  * Opening /works/:id directly uses the normal route with a plain fade.
  *
- * Open  (≈ --duration-focus):
- *   1. dark backdrop fades in (--duration-base)
- *   2. hero FLIPs from the card's box to its place (--duration-focus, --ease-flip)
- *   3. page background + content fade in, rising 8px (--duration-base)
- *   4. hero replays the script once; focus moves to the title
- * Close (Back button, Esc, browser Back): the same in reverse, back into
- *   the card; the /works scroll position is untouched.
+ * Open — everything starts together (--duration-flip, --ease-flip):
+ *   - frosted backdrop fades in (--duration-base)
+ *   - the page surface grows out of the card: the sheet's clip-path goes
+ *     from the card's box to the full viewport
+ *   - the hero FLIPs from the card's box to its place, on the same curve,
+ *     so it always stays inside the growing surface
+ *   - content fades in, rising 8px, while the surface is still settling
+ *     (from ~55% of the flight); the hero starts its script near the end
+ *   - on landing, focus moves to the title
+ * Close (Back button, Esc, browser Back): content fades out fast while the
+ *   surface and hero shrink back into the card together; the /works scroll
+ *   position is untouched.
  * Reduced motion: no FLIP — a --duration-base fade in / out.
  */
+const FULL = "inset(0px 0px 0px 0px)";
+
+/** clip-path that crops the full-viewport overlay down to a box (viewport px). */
+const clipTo = (r, root) => {
+  const W = root.clientWidth;
+  const H = root.clientHeight;
+  const right = r.left + r.width;
+  const bottom = r.top + r.height;
+  return `inset(${r.top}px ${W - right}px ${H - bottom}px ${r.left}px)`;
+};
+
 export default function CaseOverlay({ id, closing, onClosed }) {
   const navigate = useNavigate();
   const rootRef = useRef(null);
   const backdropRef = useRef(null);
   const sheetRef = useRef(null);
   const [heroActive, setHeroActive] = useState(false);
-  const sheetBg = useRef("");
 
   const requestClose = useCallback(() => {
     if (flip.animating) return;
@@ -78,7 +93,6 @@ export default function CaseOverlay({ id, closing, onClosed }) {
     const card = flipSource(id);
     const pending = pendingRef.current;
     if (flip.pending?.id === id) flip.pending = null;
-    sheetBg.current = getComputedStyle(sheet).backgroundColor;
 
     const landed = () => {
       flip.animating = false;
@@ -95,17 +109,23 @@ export default function CaseOverlay({ id, closing, onClosed }) {
         });
         return;
       }
+      const D = m.duration.flip;
+      const box = card?.getBoundingClientRect() ?? pending.state.elementStates?.[0]?.bounds;
+      const from = box ? clipTo(box, rootRef.current) : FULL;
       if (card) gsap.set(card, { visibility: "hidden" });
       gsap.set(content, { autoAlpha: 0, y: 8 });
-      gsap.set(sheet, { backgroundColor: "transparent" });
 
       const tl = gsap.timeline({ onComplete: landed });
       tl.fromTo(backdropRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: m.duration.base, ease: m.ease.focus }, 0);
+      tl.fromTo(sheet, { clipPath: from }, { clipPath: FULL, duration: D, ease: m.ease.flip, clearProps: "clipPath" }, 0);
+      // scale (transform) instead of absolute: the hero keeps its slot in the
+      // layout, so the title/content below don't jump up into its place
+      // while it flies (they fade in mid-flight).
       tl.add(Flip.from(pending.state, {
-        targets: hero, duration: m.duration.focus, ease: m.ease.flip, absolute: true,
+        targets: hero, duration: D, ease: m.ease.flip, scale: true,
       }), 0);
-      tl.to(sheet, { backgroundColor: sheetBg.current, duration: m.duration.base, ease: m.ease.focus });
-      tl.to(content, { autoAlpha: 1, y: 0, duration: m.duration.base, ease: m.ease.focus, stagger: 0.04 }, "<");
+      tl.to(content, { autoAlpha: 1, y: 0, duration: m.duration.base, ease: m.ease.focus, stagger: 0.04 }, D * 0.55);
+      tl.call(() => setHeroActive(true), null, D * 0.8);
     });
     return () => {
       flip.animating = false;
@@ -138,13 +158,14 @@ export default function CaseOverlay({ id, closing, onClosed }) {
         autoAlpha: 0, duration: m.duration.base, ease: m.ease.focus, onComplete: done,
       });
     } else {
+      const D = m.duration.flip;
       tween = gsap.timeline({ onComplete: done });
       tween.to(content, { autoAlpha: 0, duration: m.duration.step, ease: m.ease.focus }, 0);
-      tween.to(sheet, { backgroundColor: "transparent", duration: m.duration.step, ease: m.ease.focus }, 0);
-      tween.add(Flip.fit(hero, card, {
-        duration: m.duration.focus, ease: m.ease.flip, absolute: true,
-      }), m.duration.step);
-      tween.to(backdropRef.current, { autoAlpha: 0, duration: m.duration.base, ease: m.ease.focus }, "<");
+      tween.fromTo(sheet, { clipPath: FULL }, {
+        clipPath: clipTo(card.getBoundingClientRect(), rootRef.current), duration: D, ease: m.ease.flip,
+      }, 0);
+      tween.add(Flip.fit(hero, card, { duration: D, ease: m.ease.flip, scale: true }), 0);
+      tween.to(backdropRef.current, { autoAlpha: 0, duration: D * 0.65, ease: m.ease.focus }, 0);
     }
     return () => tween.kill();
   }, [closing, id, onClosed]);

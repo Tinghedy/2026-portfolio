@@ -1,0 +1,195 @@
+/* MetroSense 主頁雙模式互動圖 — 色彩與尺寸取自 Figma node 4047:4049
+   (frame 1440 wide). Every size is in --u = 1 Figma px at the current width. */
+
+.board {
+  --metro-bg: #e7f0f6;
+  --metro-work: #4c90bd;
+  --metro-travel: #6aae59;
+  --metro-off-text: rgba(255, 255, 255, 0.82);
+  --metro-caption: #384554;
+
+  container-type: inline-size;
+  background: var(--metro-bg);
+  border: 1px solid var(--color-ink-line);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+
+.inner {
+  --u: calc(100cqw / 1440);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: calc(1386 * var(--u));
+  margin-inline: auto;
+  padding: calc(80 * var(--u)) 0 calc(72 * var(--u));
+}
+
+/* ── Toggle（Mode Toggle 4053:4152）── */
+.toggleHolder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(20 * var(--u));
+  width: calc(465 * var(--u));
+  padding-bottom: calc(66 * var(--u));
+}
+
+.toggle {
+  --w: calc(360 * var(--u));
+  --pad: calc(16 * var(--u));
+  --half: calc(162 * var(--u));
+  --seg: calc(var(--duration-focus) / 2);
+
+  position: relative;
+  display: block;
+  width: var(--w);
+  height: calc(88 * var(--u));
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--metro-work);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color var(--duration-focus) var(--ease-focus);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Knob: left / right insets move one after the other, so it stretches
+   toward the target first, then retracts from the side it left. */
+.knob {
+  position: absolute;
+  top: var(--pad);
+  bottom: var(--pad);
+  left: var(--pad);
+  right: calc(var(--w) - var(--pad) - var(--half));
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  /* back to Work: left edge leads, right edge follows */
+  transition:
+    left var(--seg) var(--ease-focus),
+    right var(--seg) var(--ease-focus) calc(var(--seg) * 0.6);
+}
+
+.board[data-mode="travel"] .toggle { background: var(--metro-travel); }
+
+.board[data-mode="travel"] .knob {
+  left: calc(var(--w) - var(--pad) - var(--half));
+  right: var(--pad);
+  /* to Travel: right edge leads, left edge follows */
+  transition:
+    right var(--seg) var(--ease-focus),
+    left var(--seg) var(--ease-focus) calc(var(--seg) * 0.6);
+}
+
+.option {
+  position: absolute;
+  top: var(--pad);
+  bottom: var(--pad);
+  width: var(--half);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(30 * var(--u));
+  font-weight: 700;
+  letter-spacing: calc(2.4 * var(--u));
+  line-height: 1;
+  transition: color var(--duration-focus) var(--ease-focus);
+}
+
+.optionWork { left: var(--pad); color: var(--metro-work); }
+.optionTravel { right: var(--pad); color: var(--metro-off-text); }
+.board[data-mode="travel"] .optionWork { color: var(--metro-off-text); }
+.board[data-mode="travel"] .optionTravel { color: var(--metro-travel); }
+
+.hint {
+  margin: 0;
+  font-size: max(12px, calc(16 * var(--u)));
+  color: #7d8a99;
+}
+
+/* ── Phones ── */
+.phones {
+  display: flex;
+  align-items: center;
+  gap: calc(96 * var(--u));
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(32 * var(--u));
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.4;
+  transform: scale(0.96);
+  transition:
+    opacity var(--duration-focus) var(--ease-focus),
+    transform var(--duration-focus) var(--ease-focus);
+}
+
+.col[data-active] {
+  opacity: 1;
+  transform: none;
+  cursor: default;
+}
+
+.col:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* Beats `.prose img` (border, backing, zoom cursor) from the case page. */
+.board img.phone {
+  display: block;
+  width: calc(376 * var(--u));
+  height: auto;
+  border: 0;
+  background: none;
+  cursor: inherit;
+}
+
+.caption {
+  font-size: max(12px, calc(24 * var(--u)));
+  font-weight: 500;
+  line-height: 1.42;
+  color: var(--metro-caption);
+  white-space: nowrap;
+}
+
+/* ── Narrow (phones / small embeds): toggle on top, phones side by side ── */
+@container (max-width: 600px) {
+  .inner {
+    --u: calc(100cqw / 880); /* 2 × 376 phones + 48 gap + 2 × 32 padding + slack */
+    flex-direction: column;
+    gap: calc(48 * var(--u));
+    width: auto;
+    padding: calc(56 * var(--u)) calc(32 * var(--u));
+  }
+
+  .toggleHolder {
+    width: auto;
+    padding-bottom: 0;
+  }
+
+  .phones { gap: calc(48 * var(--u)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .knob,
+  .board[data-mode="travel"] .knob,
+  .option,
+  .col {
+    transition: none;
+  }
+}

@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import Lightbox from "../../components/Lightbox/Lightbox";
 import HoverPlayCard from "../../components/HoverPlayCard/HoverPlayCard";
-import { scriptFor } from "../../components/HoverPlayCard/scripts";
 import { workCache } from "./workCache";
+import { useProseEmbeds } from "./proseEmbeds";
 import styles from "./WorkDetail.module.css";
 
 /**
@@ -71,7 +71,7 @@ export default function WorkDetail() {
  * - Starts from workCache (filled by the /works list) so the hero and
  *   title exist on the first frame — the FLIP needs the hero right away —
  *   then fetches the full row.
- * - The hero (cover + script, data-flip-id={id}) is the FLIP target.
+ * - The hero (cover, data-flip-id={id}) is the FLIP target.
  * - Blocks marked data-enter fade in after the card lands (overlay mode).
  *
  * @param {{ id: string, mode?: "page" | "overlay", onClose?: () => void, heroActive?: boolean }} props
@@ -100,6 +100,8 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
   }, [id]);
 
   const html = useMemo(() => prepareHtml(project?.description), [project?.description]);
+  const articleRef = useRef(null);
+  useProseEmbeds(articleRef); // e.g. MetroSense IA image → interactive map
 
   // One handler for every zoomable image on the page (prose + gallery).
   const zoomFrom = (e) => {
@@ -140,7 +142,6 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
   ].filter((m) => m && m.value);
 
   const cover = typeof project.cover_image === "string" ? project.cover_image.trim() : "";
-  const script = scriptFor(id);
   const titleId = `case-title-${id}`;
 
   // In the overlay the sheet carries the background (it fades in after
@@ -149,14 +150,13 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
 
   return (
     <main className={pageClass}>
-      <article className={styles.article} onClick={zoomFrom} onKeyDown={zoomFrom}>
+      <article ref={articleRef} className={styles.article} onClick={zoomFrom} onKeyDown={zoomFrom}>
         {back()}
 
-        {/* Hero: FLIP target, replays the card's script once */}
-        {(cover || script) && (
+        {/* Hero: FLIP target */}
+        {cover && (
           <HoverPlayCard
             className={styles.hero}
-            script={script}
             mode="once"
             active={mode === "overlay" ? Boolean(heroActive) : true}
             waitForFocus={mode === "page"}

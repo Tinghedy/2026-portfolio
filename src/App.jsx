@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Navbar from "./components/Navbar/Navbar";
 import Cursor from "./components/Cursor/Cursor";
+import CursorTooltip from "./components/CursorTooltip/CursorTooltip";
 import AuthGuard from "./components/AuthGuard/AuthGuard";
 import PublicLayout from "./motion/PublicLayout";
 
@@ -16,6 +17,7 @@ import Portfolio from "./pages/Portfolio/Portfolio";
 
 // Admin pages — no Navbar on these
 import Login from "./pages/admin/Login";
+import ResetPassword from "./pages/admin/ResetPassword";
 import Dashboard from "./pages/admin/Dashboard";
 import ProjectForm from "./pages/admin/ProjectForm";
 import BlogDashboard from "./pages/admin/BlogDashboard";
@@ -27,10 +29,12 @@ export default function App() {
   return (
     <AuthProvider>
       <Cursor />
+      <CursorTooltip />
       <Routes>
         {/* ── Admin routes (no public Navbar) ── */}
         <Route path="/admin" element={<Login />} />
         <Route path="/admin/login" element={<Login />} />
+        <Route path="/admin/reset-password" element={<ResetPassword />} />
         <Route
           path="/admin/dashboard"
           element={

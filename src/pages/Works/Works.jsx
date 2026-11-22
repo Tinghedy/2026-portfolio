@@ -17,6 +17,7 @@ import styles from "./Works.module.css";
  * @property {number} [year]
  * @property {string | null} tag  Cover-badge label; null = no badge.
  * @property {string | null} [tag_color]  Cover-badge hex color; null = default.
+ * @property {string | null} [hover_text]  Cursor tooltip text; null = none.
  */
 
 export default function Works() {
@@ -46,10 +47,19 @@ export default function Works() {
           return w;
         });
 
-      const primaryResult = await supabase
+      const BASE = "id, title, description, cover_image, tags, year, tag, tag_color";
+      let primaryResult = await supabase
         .from("projects")
-        .select("id, title, description, cover_image, tags, year, tag, tag_color")
+        .select(`${BASE}, hover_text`)
         .order("order_index", { ascending: true });
+
+      // hover_text migration not applied yet: load without it.
+      if (primaryResult.error?.message?.includes("hover_text")) {
+        primaryResult = await supabase
+          .from("projects")
+          .select(BASE)
+          .order("order_index", { ascending: true });
+      }
 
       if (!primaryResult.error) {
         setWorks(normalizeWorks(primaryResult.data, true));
@@ -97,9 +107,9 @@ export default function Works() {
           <p className={styles.empty}>No works yet.</p>
         ) : (
           <div className={styles.grid}>
-            {works.map((work, index) => (
+            {works.map((work) => (
               <Reveal key={work.id} className={styles.cell}>
-                <WorkCard work={work} index={index} />
+                <WorkCard work={work} />
               </Reveal>
             ))}
           </div>

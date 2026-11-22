@@ -1,0 +1,262 @@
+/* 北捷 App 資訊架構互動圖 — 色彩與尺寸取自 Figma node 4068:15153 */
+
+.figure {
+  --metro-root: #017ab1;
+  --metro-primary: #50b04d;
+  --metro-secondary: #d6e6f1;
+  --metro-text: #353535;
+  --metro-heading: #1a1a1a;
+  --metro-arrow: #aaaaaa;
+  --metro-arrow-hi: #353535;
+
+  margin: 0;
+  font-family: Inter, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-feature-settings: "case" 1, "lnum" 1, "tnum" 1;
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  color: #9a9a9a;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2e7d8c, #6c63e6);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.scroller {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.sizer {
+  position: relative;
+  margin: 0 auto;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #fff;
+  transform-origin: top left;
+}
+
+/* ── 圖例 ── */
+
+.legend {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 50px;
+}
+
+.legendItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.legendItem[data-dim] {
+  opacity: 0.35;
+}
+
+.swatch {
+  position: relative;
+  display: block;
+  width: 132px;
+  height: 80px;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition: outline-color 0.2s ease, transform 0.2s ease;
+}
+
+.legendItem:hover .swatch {
+  transform: translateY(-2px);
+}
+
+.legendItem[aria-pressed="true"] .swatch {
+  outline-color: var(--metro-heading);
+}
+
+.legendItem:focus-visible .swatch {
+  outline-color: var(--metro-root);
+}
+
+.count {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.legendLabel {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 21px;
+  color: var(--metro-heading);
+}
+
+/* ── 連線 ── */
+
+.edges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.edge {
+  fill: none;
+  stroke: var(--metro-arrow);
+  stroke-width: 1.5;
+  transition: opacity 0.25s ease, stroke 0.2s ease;
+}
+
+.edge[data-hi] {
+  stroke: var(--metro-arrow-hi);
+  stroke-width: 2;
+}
+
+/* ── 節點 ── */
+
+.figure *,
+.figure *::before,
+.figure *::after {
+  box-sizing: border-box;
+}
+
+.node {
+  position: absolute;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  margin: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  white-space: nowrap;
+  transition: opacity 0.25s ease, transform 0.15s ease;
+}
+
+.node::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 1000px;
+  background: var(--node-bg, var(--metro-secondary));
+  transition: box-shadow 0.15s ease;
+}
+
+.node:hover::before,
+.node:focus-visible::before {
+  box-shadow: 0 0 0 2px rgba(53, 53, 53, 0.25);
+}
+
+.node:focus-visible {
+  outline: none;
+}
+
+.nodeLabel {
+  position: relative;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--metro-text);
+  opacity: 0.95;
+}
+
+.node[data-kind="root"]::before {
+  inset: 0;
+  background: var(--metro-root);
+}
+
+.node[data-kind="primary"]::before {
+  background: var(--metro-primary);
+}
+
+.node[data-kind="root"] .nodeLabel,
+.node[data-kind="primary"] .nodeLabel {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.node[data-kind="leaf"]::before {
+  inset: 4px;
+}
+
+button.node {
+  cursor: pointer;
+}
+
+button.node:hover {
+  transform: translateY(-1px);
+}
+
+.node[data-focused]::before {
+  box-shadow: 0 0 0 3px rgba(1, 122, 177, 0.35);
+}
+
+/* ── 註解 & 說明 ── */
+
+.annotation {
+  position: absolute;
+  margin: 0;
+  font-size: 10px;
+  color: #000;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 2;
+  max-width: 240px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--metro-heading);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.5;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: metroFade 0.15s ease;
+}
+
+@keyframes metroFade {
+  from { opacity: 0; transform: translate(-50%, -4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node,
+  .edge,
+  .legendItem,
+  .swatch,
+  .tooltip {
+    transition: none;
+    animation: none;
+  }
+}

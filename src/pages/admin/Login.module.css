@@ -67,3 +67,33 @@
 .btn:disabled {
   opacity: 0.5;
 }
+
+.notice {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #1a6b2f;
+  margin: 0;
+}
+
+.link {
+  margin-top: 1rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  color: #555;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: #111;
+}
+
+.hint {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #555;
+  margin: -1rem 0 1.5rem;
+}

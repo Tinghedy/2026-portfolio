@@ -64,8 +64,10 @@ export default function ProjectForm() {
     link: "",
     tag: "",
     tag_color: DEFAULT_TAG_COLOR,
+    hover_text: "",
   });
   const formRef = useRef(form);
+  const hasHoverColRef = useRef(false);
   useEffect(() => { formRef.current = form; }, [form]);
 
   const [coverFile, setCoverFile] = useState(null);
@@ -110,7 +112,9 @@ export default function ProjectForm() {
           link: data.link ?? "",
           tag: data.tag ?? "",
           tag_color: data.tag_color ?? DEFAULT_TAG_COLOR,
+          hover_text: data.hover_text ?? "",
         };
+        hasHoverColRef.current = "hover_text" in data;
         setForm(loaded);
         formRef.current = loaded;
         setCoverPreview(data.cover_image ?? "");
@@ -189,6 +193,11 @@ export default function ProjectForm() {
         link: f.link,
         tag: tagLabel,
         tag_color: tagLabel ? (f.tag_color || DEFAULT_TAG_COLOR) : null,
+        // Only send hover_text once the column exists (or when filled in),
+        // so saving still works before the migration is applied.
+        ...(hasHoverColRef.current || f.hover_text?.trim()
+          ? { hover_text: f.hover_text?.trim() || null }
+          : {}),
         cover_image: coverUrl,
         images: [...existingImages, ...newUrls],
         image_captions: allCaptions,
@@ -337,6 +346,19 @@ export default function ProjectForm() {
                 onChange={(e) => { const next = { ...formRef.current, team: e.target.value }; setForm(next); formRef.current = next; }}
                 placeholder="e.g. 3 people"
                 className={styles.settingsInput}
+              />
+            </label>
+          </div>
+          <div className={styles.settingsRow} style={{ gridTemplateColumns: "1fr" }}>
+            <label className={styles.settingsLabel}>
+              滑鼠提示 Hover Text
+              <textarea
+                value={form.hover_text}
+                onChange={(e) => { const next = { ...formRef.current, hover_text: e.target.value }; setForm(next); formRef.current = next; setSaveStatus(null); }}
+                placeholder="滑鼠移到作品卡片上時，游標右下角浮出的一句話。留空 = 不顯示。可按 Enter 換行。"
+                rows={2}
+                className={styles.settingsInput}
+                style={{ resize: "vertical", fontFamily: "inherit" }}
               />
             </label>
           </div>

@@ -1,0 +1,34 @@
+/* Cursor tooltip — see CursorTooltip.jsx.
+   Square, accent blue: it marks "this card can be opened". */
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998;              /* just below the custom cursor (9999) */
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+
+  max-width: 360px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  border-radius: var(--radius-none);
+
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+/* GSAP owns `transform` (x/y); the entrance uses the separate `translate`. */
+.tooltip[data-visible] {
+  visibility: visible;
+  animation: tooltip-in var(--duration-step) var(--ease-focus) forwards;
+}
+
+@keyframes tooltip-in {
+  from { opacity: 0; translate: 0 4px; }
+  to   { opacity: 1; translate: 0 0; }
+}

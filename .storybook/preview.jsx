@@ -1,5 +1,6 @@
 import { MemoryRouter } from "react-router-dom";
 import "../src/index.css";
+import Cursor from "../src/components/Cursor/Cursor";
 
 /** @type { import('@storybook/react-vite').Preview } */
 const preview = {
@@ -25,6 +26,8 @@ const preview = {
   decorators: [
     (Story, { parameters }) => (
       <MemoryRouter initialEntries={parameters.router?.initialEntries ?? ["/"]}>
+        {/* Same custom cursor as the site (element in preview-body.html) */}
+        <Cursor />
         <Story />
       </MemoryRouter>
     ),
