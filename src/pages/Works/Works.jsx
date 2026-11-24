@@ -107,8 +107,8 @@ export default function Works() {
           <p className={styles.empty}>No works yet.</p>
         ) : (
           <div className={styles.grid}>
-            {works.map((work) => (
-              <Reveal key={work.id} className={styles.cell}>
+            {works.map((work, index) => (
+              <Reveal key={work.id} className={styles.cell} index={index}>
                 <WorkCard work={work} />
               </Reveal>
             ))}

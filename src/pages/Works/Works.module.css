@@ -1,40 +1,39 @@
-/* ── Page ── (light: --color-bg-page, no more black background) */
+/* Works page — page frame shared with Blog (S3 layout tokens). */
 .page {
   min-height: 100vh;
-  padding-top: calc(var(--grid-unit) * 14px);     /* 112px: clears the fixed navbar */
-  padding-bottom: calc(var(--grid-unit) * 12px);  /* 96px */
+  padding-top: var(--layout-nav-clearance);
+  padding-bottom: var(--spacing-3xl);
   background: var(--color-bg-page);
   color: var(--color-text-primary);
 }
 
 .inner {
-  max-width: 1600px;
+  max-width: var(--layout-max);
   margin: 0 auto;
-  padding: 0 var(--spacing-gutter);
+  padding: 0 var(--layout-gutter);
 }
 
 @media (max-width: 768px) {
-  .inner { padding: 0 var(--spacing-md); }
+  .inner { padding: 0 var(--layout-gutter-mobile); }
 }
 
 .pageTitle {
-  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font: var(--page-title-font);
+  letter-spacing: var(--page-title-tracking);
   margin: 0 0 var(--spacing-xl);
   color: var(--color-text-primary);
 }
 
 .empty {
+  font: var(--type-caption);
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
 }
 
 /* ── Image grid ── */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-xl) var(--spacing-lg);
+  gap: var(--layout-gap-y) var(--layout-gap-x);
 }
 
 @media (max-width: 1024px) {

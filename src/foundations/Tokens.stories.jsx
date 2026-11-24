@@ -1,119 +1,11 @@
 import { useEffect, useState } from "react";
+import { TokenTable, Section, useTokenDefs, pick, swatch, bar } from "./tokenUtils";
 
 /**
- * Design tokens from public/tokens.css (the single source of truth).
- * Only the token NAMES live here; values are read from the page at render
- * time, so editing tokens.css updates these stories automatically.
- * Click a row to copy `var(--token)`.
+ * Colour, spacing, layout, radius and motion tokens from public/tokens.css.
+ * Names are discovered from the file (see tokenUtils.jsx), so new tokens
+ * appear here automatically. Typography is its own page.
  */
-
-const GROUPS = {
-  color: [
-    "--color-bg-page",
-    "--color-bg-surface",
-    "--color-bg-surface-strong",
-    "--color-text-primary",
-    "--color-text-secondary",
-    "--color-text-on-accent",
-    "--color-accent",
-    "--color-accent-strong",
-    "--color-border-hairline",
-    "--color-rule-on-photo",
-  ],
-  warmInk: [
-    "--color-bg-warm",
-    "--color-ink-secondary",
-    "--color-ink-code",
-    "--color-ink-fill",
-    "--color-ink-line",
-  ],
-  spacing: [
-    "--spacing-xs",
-    "--spacing-sm",
-    "--spacing-md",
-    "--spacing-lg",
-    "--spacing-xl",
-    "--spacing-2xl",
-    "--spacing-gutter",
-  ],
-  motion: [
-    "--duration-step",
-    "--duration-base",
-    "--duration-focus",
-    "--duration-flip",
-    "--ease-step",
-    "--ease-focus",
-    "--ease-fall",
-    "--ease-flip",
-  ],
-};
-
-const readToken = (name) =>
-  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
-function useCopy() {
-  const [copied, setCopied] = useState(null);
-  useEffect(() => {
-    if (!copied) return;
-    const t = setTimeout(() => setCopied(null), 1200);
-    return () => clearTimeout(t);
-  }, [copied]);
-  const copy = (name) => {
-    navigator.clipboard?.writeText(`var(${name})`).then(() => setCopied(name), () => {});
-  };
-  return [copied, copy];
-}
-
-const rowStyle = {
-  display: "grid",
-  gridTemplateColumns: "72px 1fr 1fr",
-  alignItems: "center",
-  gap: "var(--spacing-md)",
-  width: "100%",
-  padding: "var(--spacing-sm) 0",
-  border: 0,
-  borderBottom: "1px solid var(--color-border-hairline)",
-  background: "none",
-  font: "inherit",
-  color: "var(--color-text-primary)",
-  textAlign: "left",
-  cursor: "copy",
-};
-
-const mono = { fontFamily: "var(--font-mono)", fontSize: 13 };
-
-function TokenTable({ names, preview }) {
-  const [copied, copy] = useCopy();
-  return (
-    <div style={{ maxWidth: 720 }}>
-      {names.map((name) => {
-        const value = readToken(name);
-        return (
-          <button key={name} type="button" style={rowStyle} onClick={() => copy(name)} title="點擊複製 var(…)">
-            {preview(name, value)}
-            <span style={mono}>{copied === name ? "已複製 ✓" : name}</span>
-            <span style={{ ...mono, color: "var(--color-text-secondary)" }}>{value || "（未定義）"}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-const swatch = (name) => (
-  <span
-    style={{
-      width: 56,
-      height: 40,
-      background: `var(${name})`,
-      border: "1px solid var(--color-border-hairline)",
-    }}
-  />
-);
-
-const bar = (name) => (
-  <span style={{ height: 12, width: `var(${name})`, background: "var(--color-accent)" }} />
-);
 
 function MotionDot({ name }) {
   // Pair each duration with --ease-focus, and each easing with --duration-focus.
@@ -143,14 +35,20 @@ function MotionDot({ name }) {
   );
 }
 
+const Group = ({ prefixes, exclude, preview, previewWidth }) => {
+  const defs = useTokenDefs();
+  return <TokenTable names={pick(defs, prefixes, exclude)} preview={preview} previewWidth={previewWidth} />;
+};
+
 const meta = {
   title: "Foundations/Tokens",
   tags: ["autodocs"],
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
-          "`public/tokens.css` 的設計 Token，數值即時從頁面讀取，改 tokens.css 這裡會自動更新。點任一列可複製 `var(--token)`。",
+          "`public/tokens.css` 的設計 Token，分三層（A1）：**Primitive** 原始值（元件不准直接用）→ **Semantic** 用途（元件用這層）→ **Component** 元件專用。每列顯示「指向誰 → 實際值」。改 tokens.css 這裡自動更新；點任一列複製 `var(--token)`。",
       },
     },
   },
@@ -158,22 +56,63 @@ const meta = {
 export default meta;
 
 export const Colors = {
-  render: () => <TokenTable names={GROUPS.color} preview={swatch} />,
-};
-
-export const WarmInk = {
-  name: "Warm ink (case study)",
+  name: "色彩",
   render: () => (
-    <div style={{ background: "var(--color-bg-warm)", padding: "var(--spacing-lg)" }}>
-      <TokenTable names={GROUPS.warmInk} preview={swatch} />
-    </div>
+    <>
+      <Section title="Semantic · 背景（三層，全站冷灰 C4）">
+        <Group prefixes={["--color-bg-"]} preview={swatch} />
+      </Section>
+      <Section title="Semantic · 文字（C2）" note="secondary 在三層背景上的對比都 ≥ 4.7:1；tertiary 只給裝飾或停用狀態，不放必讀資訊。">
+        <Group prefixes={["--color-text-"]} preview={swatch} />
+      </Section>
+      <Section title="Semantic · 主色（C3）" note="只給「現在在哪／可以互動」：導覽列目前頁、游標提示、badge 預設、焦點框、連結 hover。一個畫面最多兩三塊，不用漸層。">
+        <Group prefixes={["--color-accent"]} preview={swatch} />
+      </Section>
+      <Section title="Semantic · 線與遮罩（S2：用細線分層，不用陰影）">
+        <Group prefixes={["--color-border-", "--color-rule-", "--color-backdrop"]} preview={swatch} />
+      </Section>
+      <Section title="Primitive · 原始色" note="只能被語意層引用，元件 CSS 不直接用。">
+        <Group prefixes={["--color-primitive-"]} preview={swatch} />
+      </Section>
+    </>
   ),
 };
 
 export const Spacing = {
-  render: () => <TokenTable names={GROUPS.spacing} preview={bar} />,
+  name: "間距",
+  render: () => (
+    <Section title="8px 方格" note="--grid-unit 是倍數：calc(var(--grid-unit) * 3px) = 24px。">
+      <Group prefixes={["--spacing-"]} preview={bar} />
+    </Section>
+  ),
+};
+
+export const Layout = {
+  name: "版面（S3）",
+  render: () => (
+    <Section title="頁框與閱讀欄" note="作品牆、Blog 共用頁框；案例頁、Blog 文章、Resume 共用 680px 閱讀欄（T6）。">
+      <Group prefixes={["--layout-"]} />
+    </Section>
+  ),
+};
+
+export const Radius = {
+  name: "圓角（S1）",
+  render: () => (
+    <Section title="直角是唯一值" note="例外要新增 token，不在元件裡寫數字。目前唯一的例外是自訂游標（圓形）。">
+      <Group
+        prefixes={["--radius-"]}
+        preview={(name) => <span style={{ width: 40, height: 40, background: "var(--color-accent)", borderRadius: `var(${name})` }} />}
+      />
+    </Section>
+  ),
 };
 
 export const Motion = {
-  render: () => <TokenTable names={GROUPS.motion} preview={(name) => <MotionDot name={name} />} />,
+  name: "動態",
+  render: () => (
+    <Section title="時長與曲線" note="--stagger：列表進場每項錯開 60ms，最多 8 步（M1）。">
+      <Group prefixes={["--duration-", "--ease-", "--stagger"]} preview={(name) => (name === "--stagger" ? null : <MotionDot name={name} />)} />
+    </Section>
+  ),
 };

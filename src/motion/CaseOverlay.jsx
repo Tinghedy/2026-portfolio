@@ -118,11 +118,11 @@ export default function CaseOverlay({ id, closing, onClosed }) {
       const tl = gsap.timeline({ onComplete: landed });
       tl.fromTo(backdropRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: m.duration.base, ease: m.ease.focus }, 0);
       tl.fromTo(sheet, { clipPath: from }, { clipPath: FULL, duration: D, ease: m.ease.flip, clearProps: "clipPath" }, 0);
-      // scale (transform) instead of absolute: the hero keeps its slot in the
-      // layout, so the title/content below don't jump up into its place
-      // while it flies (they fade in mid-flight).
+      // Animate width/height (not scale) so the image never stretches if
+      // the card and banner ratios differ. The hero is absolute inside its
+      // .banner wrapper, which holds the layout, so nothing below moves.
       tl.add(Flip.from(pending.state, {
-        targets: hero, duration: D, ease: m.ease.flip, scale: true,
+        targets: hero, duration: D, ease: m.ease.flip, absolute: true,
       }), 0);
       tl.to(content, { autoAlpha: 1, y: 0, duration: m.duration.base, ease: m.ease.focus, stagger: 0.04 }, D * 0.55);
       tl.call(() => setHeroActive(true), null, D * 0.8);
@@ -164,7 +164,7 @@ export default function CaseOverlay({ id, closing, onClosed }) {
       tween.fromTo(sheet, { clipPath: FULL }, {
         clipPath: clipTo(card.getBoundingClientRect(), rootRef.current), duration: D, ease: m.ease.flip,
       }, 0);
-      tween.add(Flip.fit(hero, card, { duration: D, ease: m.ease.flip, scale: true }), 0);
+      tween.add(Flip.fit(hero, card, { duration: D, ease: m.ease.flip, absolute: true }), 0);
       tween.to(backdropRef.current, { autoAlpha: 0, duration: D * 0.65, ease: m.ease.focus }, 0);
     }
     return () => tween.kill();

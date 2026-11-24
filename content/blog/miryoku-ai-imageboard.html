@@ -1,0 +1,94 @@
+<blockquote>
+<p>這篇改寫自我在 IDCII 2026 發表的論文，很幸運拿到優秀論文獎。</p>
+<p>簡單說，我先去訪談 Vespa 車主，用魅力工學找出他們說的「尊榮感」「放鬆感」，背後到底是哪些具體的東西；再把這些特徵寫進 prompt，請 Gemini 生成意象看板，最後找 15 位設計師拿著看板畫草圖。大家的回饋是：抽象的形容詞終於有畫面可以對照，也不用再花時間猜關鍵字找圖。但 AI 畫出來的結構常常不太合理，細節也抓不準，這部分還是得靠設計師自己判斷。</p>
+</blockquote>
+<p><strong>「我一直在想一個問題：使用者心裡那種說不清楚的感覺，AI 能不能準確理解？」</strong></p>
+<h2>每個設計師都遇過的場景</h2>
+<p>設計專案初期，需求常常只是一個形容詞：「我們想要更有尊榮感。」「希望用起來很放鬆。」</p>
+<p>接下來的流程大家都很熟：打開 Pinterest、Behance，輸入關鍵字，一張一張收藏，拼成意象看板（Imageboard）。到了 2026 年，很多人改成直接丟一句 prompt 給 Midjourney、Adobe Firefly 這類 AI 生圖工具。</p>
+<p>但結果常常差不多。搜「尊榮感」，得到的是金色、皮革、黑底打光；AI 生成的圖很漂亮，卻說不出為什麼長這樣，也不一定是目標使用者心裡的那種尊榮。</p>
+<p>工具變快了，但<strong>「形容詞要怎麼變成畫面」這一步，仍然靠設計師各自猜。</strong></p>
+<h2>問題不在工具，在中間少了一層</h2>
+<p>「尊榮感」是一種感覺，設計師要畫的卻是線條、材質、比例。兩者之間其實還有一層：<strong>使用者為什麼會有這種感覺？是哪些具體的東西讓他這樣覺得？</strong></p>
+<p>這一層沒有定義清楚，人只能憑經驗猜，AI 也只能從訓練資料裡挑最常見的答案，也就是刻板印象。</p>
+<p>所以我需要一個方法，先把這一層挖出來，再交給 AI。這個方法就是魅力工學。</p>
+<h2>魅力工學是什麼？</h2>
+<p><strong>魅力工學（Miryoku Engineering）是一套源自日本的感性研究方法，用來把「這個產品很有魅力」這種模糊感受，拆解成設計師可以直接處理的具體特徵。</strong></p>
+<p>它最核心的工具叫評價構造法（Evaluation Grid Method，EGM）。如果你做過 UX 訪談，應該很熟悉 laddering：使用者說「我喜歡這個」，你就一直追問「為什麼？」。EGM 可以看成一套有結構的 laddering，而且往上、往下兩個方向都要問：</p>
+<ul>
+<li><p><strong>往上問</strong>「這個特點帶給你什麼感覺？」，找到<strong>上位概念</strong>：抽象的感受</p></li>
+<li><p><strong>往下問</strong>「具體是哪裡讓你這樣覺得？」，找到<strong>下位概念</strong>：具體的特徵</p></li>
+<li><p>夾在中間的是<strong>中位概念</strong>：連接感受和特徵的理由</p></li>
+</ul>
+<p>用這次研究的 Vespa 為例，一條完整的鏈長這樣：</p>
+<img src="https://jesegsebjdtassdltyym.supabase.co/storage/v1/object/public/project-images/blog/miryoku-ai-imageboard/egm.png" alt="Vespa 魅力的 EGM 評價構造圖：左欄上位概念、中欄中位概念、右欄下位概念">
+<p><em>圖 1｜EGM 評價構造圖：左欄是感受（上位概念），中欄是理由（中位概念），右欄是具體特徵（下位概念）（資料來源：本研究繪製）</em></p>
+<p>換句話說，「尊榮感」不再只是一個形容詞，而是一條可以追溯的因果鏈：車主覺得 Vespa 有尊榮感，是因為它是一種<strong>身分象徵</strong>；而最能撐起這個身分象徵的，是<strong>高價配件</strong>。</p>
+<h3>從「有哪些」到「哪個最重要」</h3>
+<p>訪談能找出有哪些特徵，卻說不出哪個最重要。所以魅力工學會再多一步：把訪談結果做成問卷，用統計方法（數量化一類分析）算出每個特徵對那種感受的影響力。</p>
+<p>分數最高的特徵，就是最值得放進設計的那一個。後來我寫 prompt，也是根據這個分數。</p>
+<h2>我怎麼把魅力工學接到 AI 上</h2>
+<p>這次研究以 Vespa 為例，流程分成三個階段：</p>
+<img src="https://jesegsebjdtassdltyym.supabase.co/storage/v1/object/public/project-images/blog/miryoku-ai-imageboard/flow.png" alt="研究流程三階段：魅力架構建構、AI 意象看板生成、設計驗證">
+<p><em>圖 2｜研究流程（資料來源：本研究繪製）</em></p>
+<ol>
+<li><p><strong>挖出魅力結構</strong>：我到台南三間 Vespa 改裝與維修店，訪談 5 位騎乘年資 3 年以上的資深車主和技師，用 EGM 整理出 Vespa 的六種魅力感受：懷舊感、尊榮感、精緻感、放鬆感、歸屬感、信賴感。</p></li>
+<li><p><strong>算出權重</strong>：回收 65 份有效問卷，找出每種感受背後影響力最高的特徵。例如「放鬆感」最關鍵的是「龍頭握感舒適」，「精緻感」是「綾織碳纖維」坐墊，「尊榮感」則是「高價配件」。</p></li>
+<li><p><strong>寫成結構化 prompt</strong>：把分數最高的特徵填進固定的 prompt 模板，請 Gemini 生成意象看板。選 Gemini 是因為它比較能照著長而有結構的指令走，不會只追求畫面風格。</p></li>
+</ol>
+<h3>差別在 prompt 裡</h3>
+<p>一般的 prompt 大概會這樣寫：</p>
+<blockquote>
+<p>請生成有尊榮感的機車配件圖片。</p>
+</blockquote>
+<p>我的 prompt 則由四個區塊組成，每一塊都對應 EGM 的一層，並且明確告訴 AI 哪個特徵分數最高：</p>
+<blockquote>
+<p>目前研究 Vespa 魅力的結果發現，<strong>「優越的身分象徵」是營造 Vespa「尊榮感」魅力的重要元素</strong>，<strong>其最具代表性的具體呈現是「高價配件」、「小眾用戶」、「車輛定價高」。</strong>其中<strong>最高分的項目是「高價配件」</strong>。<strong>如果將此概念移植到 Vespa 的其他機車配件，請產出 20 個機車的部件或配件的構想圖片，能具體呈現營造「尊榮感」。</strong></p>
+</blockquote>
+<p>這樣一來，AI 收到的不只是一個形容詞，而是「什麼感覺、為什麼、靠哪些特徵、哪個最重要」。生成結果都能追溯回研究數據，不再只是隨機抽樣。</p>
+<img src="https://jesegsebjdtassdltyym.supabase.co/storage/v1/object/public/project-images/blog/miryoku-ai-imageboard/board-prestige.png" alt="以結構化 prompt 生成的尊榮感 Vespa 配件意象看板">
+<p><em>圖 3｜實驗用的 AI 意象看板：尊榮感（資料來源：本研究以 Gemini 生成）</em></p>
+<img src="https://jesegsebjdtassdltyym.supabase.co/storage/v1/object/public/project-images/blog/miryoku-ai-imageboard/board-relax.jpg" alt="以結構化 prompt 生成的放鬆感 Vespa 意象看板">
+<p><em>圖 4｜實驗用的 AI 意象看板：放鬆感（資料來源：本研究以 Gemini 生成）</em></p>
+<h2>15 位設計師的實測</h2>
+<p>圖好不好看不是重點，重點是它能不能幫設計師畫出更貼近目標的設計。所以我請 15 位設計師進行四回合快速草圖，每回合 5–10 分鐘：</p>
+<ul>
+<li><p>第 1、3 回合：只給文字題目</p></li>
+<li><p>第 2、4 回合：文字題目＋AI 意象看板</p></li>
+</ul>
+<p>題目選了兩種性質不同的感受：「尊榮感」偏造型與風格，很依賴視覺符號；「放鬆感」偏功能與身體感受，比較難用一張圖表達。畫完後，我逐一訪談設計師，再用 KJ 法（親和圖法）整理回饋。</p>
+<img src="https://jesegsebjdtassdltyym.supabase.co/storage/v1/object/public/project-images/blog/miryoku-ai-imageboard/sketches.png" alt="受測設計師在四回合快速草圖中畫的握把與坐墊草圖">
+<p><em>圖 5｜受測設計師的四回合草圖節錄（資料來源：本研究受測者繪製）</em></p>
+<h3>有用的地方</h3>
+<ul>
+<li><p><strong>抽象詞變得看得見</strong>：像「綾織碳纖維」這種詞，設計師過去只能憑經驗想像；AI 看板直接呈現縫線位置和皮革質感，變成可以參考的畫面。</p></li>
+<li><p><strong>省掉「形容詞轉關鍵字」的試錯</strong>：不用再想要在 Pinterest 輸入什麼字。設計師回饋，從看懂題目到開始下筆的時間變短了。</p></li>
+<li><p><strong>快速建立品牌風格框架</strong>：不熟悉 Vespa 的設計師，也能很快抓到品牌調性，不會因為各自經驗不同而跑偏。</p></li>
+<li><p><strong>補上搜圖找不到的情境</strong>：處理「放鬆感」時，AI 能生成人與車互動的整體氛圍，這是搜單品圖很難得到的。</p></li>
+</ul>
+<h3>還做不到的地方</h3>
+<p>我覺得這部分和優點一樣重要：</p>
+<ul>
+<li><p><strong>結構不合理</strong>：AI 生成的坐墊材質很高級，但結構更像休閒椅，缺少機車坐墊需要的人因考量。</p></li>
+<li><p><strong>會誤解形容詞指的對象</strong>：「放鬆感」被畫成人和環境的氛圍，而不是產品本身線條或比例的放鬆。</p></li>
+<li><p><strong>局部細節不精準</strong>：要聚焦在「握把」時，AI 很難畫清楚具體形狀和結構；生成的「高價配件」也和一般配件差不多，看不出 Vespa 的品牌辨識度。</p></li>
+<li><p><strong>定錨效應</strong>：視覺刺激太強時，反而可能壓縮設計師自己的想像空間。</p></li>
+</ul>
+<h2>我的收穫：AI 的產出，取決於你給它多少結構</h2>
+<p>這次研究讓我更確定一件事：AI 是工具，真正定義問題、做決定的還是設計師。</p>
+<p>AI 很擅長把清楚的輸入快速變成大量畫面，但「清楚的輸入」本身就是設計工作。魅力工學在這裡的角色，是把使用者研究的結果轉成 AI 讀得懂的結構；少了這一步，AI 給的就只是平均值。</p>
+<p>放到產品團隊的日常工作裡，我覺得這套思路也用得上：</p>
+<ul>
+<li><p><strong>研究不只停在報告</strong>：使用者訪談的結果可以直接轉成視覺參考，讓團隊在發想初期就對齊「我們說的尊榮感到底長什麼樣子」。</p></li>
+<li><p><strong>AI 產出要能追溯</strong>：每張圖都能回答「為什麼長這樣」，提案時比「AI 生的，我覺得不錯」更站得住腳。</p></li>
+<li><p><strong>清楚 AI 的邊界在哪裡</strong>：結構、人因、品牌細節仍需要設計師把關，這也決定了 AI 該放在流程的哪一段。</p></li>
+</ul>
+<hr>
+<h2>論文資訊</h2>
+<p>本文改寫自我在《2026 跨域創新設計整合國際研討會》（IDCII 2026）發表的論文，獲優秀論文獎。</p>
+<p><strong>從語意到視覺：基於魅力工學與生成式 AI 之意象看板共創研究——以 Vespa 為例</strong></p>
+<p>作者：梁雅婷（第一作者）、張婉鈴、馬敏元、陳禹任、蘇泳晴、劉震緯｜國立成功大學工業設計研究所</p>
+<ul>
+<li><p><a href="https://drive.google.com/drive/mobile/folders/1xUo4qf6xx31A9xfa2viFTdEDYN7jSfYI?usp=sharing" target="_blank" rel="noopener">《2026 跨域創新設計整合國際研討會》全文集</a></p></li>
+<li><p><a href="https://2026yuntechcd.wixsite.com/yuntechcd" target="_blank" rel="noopener">2026 跨域創新設計整合國際研討會官方網站</a></p></li>
+</ul>

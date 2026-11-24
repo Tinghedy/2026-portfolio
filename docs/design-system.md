@@ -23,37 +23,90 @@
 
 ## Token
 
-### 顏色（語意層）
+### 三層架構（A1）
 
-Figma 裡這層別名到 Primitives 集合（`grey/50…700`、`ink`、`white`、`blue/500`、`blue/700`）。程式碼只用語意層，不直接用 primitive。
+`tokens.css` 分三層，元件 CSS **只能用第 2、3 層**：
+
+1. **Primitive**：原始值，依色相＋階層命名（`--color-primitive-neutral-500`、`--text-lg`）。只能被語意層引用。
+2. **Semantic**：用途命名（`--color-text-secondary`、`--type-title`）。元件用這層。
+3. **Component**：某個元件專用，指向語意層（`--tooltip-font`、`--article-h2-font`）。改某個元件的字，只改這裡一行。
+
+Storybook 的 Foundations 頁直接解析 `tokens.css`，每列顯示「指向誰 → 實際值」，新增 token 會自動出現。完整準則與決策見 [`design-guidelines-draft.md`](design-guidelines-draft.md)。
+
+### 顏色
+
+**全站冷灰**（C4，2026-11-24 決定）：原本作品內頁的暖米白與暖墨色階已移除，案例頁和其他頁同一套。
+
+| Token | 指向 | 值 | 用途 |
+|---|---|---|---|
+| `--color-bg-page` | neutral-50 | `#F6F6F6` | 全站頁面底色 |
+| `--color-bg-surface` | neutral-100 | `#ECEDEF` | 次一層：卡片圖片底色、沒有封面的方塊、inline code |
+| `--color-bg-surface-strong` | neutral-200 | `#DCDEE2` | 更明顯的面 |
+| `--color-bg-raised` | neutral-0 | `#FFFFFF` | 浮起的面：彈窗、輸入框 |
+| `--color-text-primary` | neutral-900 | `#0A0A0C` | 主要文字、標題 |
+| `--color-text-secondary` | neutral-500 | `#5A6069` | 次要文字：年份、說明、標籤。三層背景上對比都 ≥ 4.7:1 |
+| `--color-text-tertiary` | neutral-400 | `#8D939C` | 只給裝飾或停用狀態，不放必讀資訊 |
+| `--color-text-on-accent` | neutral-0 | `#FFFFFF` | 主色上的文字（7.1:1） |
+| `--color-accent` | blue-500 | `#1043E5` | 主色（見下） |
+| `--color-accent-strong` | blue-700 | `#0B2FA6` | 淺底上的文字連結 |
+| `--color-border-hairline` | neutral-300 | `#C6CAD0` | 看得見的細線、標籤外框 |
+| `--color-border-subtle` | neutral-200 | `#DCDEE2` | 安靜的細線：圖片外框、hr、引言左線 |
+| `--color-bg-inverse` | neutral-900 | `#0A0A0C` | 深色強調面：案例頁的強調色塊 |
+| `--color-text-inverse` | neutral-0 | `#FFFFFF` | 深色面上的主要文字 |
+| `--color-text-inverse-secondary` | neutral-300 | `#C6CAD0` | 深色面上的補充說明 |
+| `--color-rule-on-photo` | neutral-0 | `#FFFFFF` | 疊在照片上的線與小字 |
+| `--color-backdrop` | alpha-black-30 | | 案例頁、Notes 彈窗後的遮罩 |
+| `--color-backdrop-heavy` | alpha-black-90 | | 圖片燈箱 |
+
+**主色用途**（C3）：導覽列目前頁、游標提示、封面 badge 預設、焦點框、連結 hover、按鈕 hover、篩選標籤的選取狀態。不用漸層。
+
+### 字體與字級
+
+- **主字體** `--font-sans`：標題與內文共用（T1），層級靠字重和字級分，不再用第二套標題字。定案是 LINE Seed，webfont 還沒自架，目前顯示的是後備的 Noto Sans TC。
+- **Mono** `--font-mono`（Space Mono 400／700）：小標籤與數據的識別（T2），包括 badge、標籤、年份、日期、meta、Back、游標提示、**導覽列連結與 Admin 按鈕**，以及首頁開場動畫底部那排資訊（大標與小字都是）。
+- **字級階層**（T3，rem）：`--text-2xs` 11 · `xs` 12 · `sm` 14 · `md` 15 · `base` 16 · `lg` 18 · `xl` 20 · `2xl` 22 · `3xl` 26 · `4xl` 28 · `5xl` 34 · `6xl` 40。上面幾階照 meganyap.me 的案例頁：段落標題 22 → 26 → 28、案例標題 28 → 34 → 40。最大到 40px。
+- **字重** 400／500／700；**行高** 1.2／1.3／1.5／1.65；**字距** -0.02em／0／0.06em／0.12em（T4）。
+- `html` 字級是 `100%`，尊重使用者的瀏覽器設定（T7）。
+
+**文字角色**（T5）：全站文字只能從這張表選。每個角色是一個 `font` 簡寫 token，加上選用的字距 token：
+
+```css
+font: var(--type-title);
+letter-spacing: var(--type-title-tracking);
+```
+
+| 角色 | 規格 | 用在 |
+|---|---|---|
+| `--type-display` | 40 / 700 / 1.2 | 桌機案例標題（≥ 768px）、Resume 名字 |
+| `--type-title` | 34 / 700 / 1.2 | 頁標題、平板案例標題（≥ 640px） |
+| `--type-title-sm` | 28 / 700 / 1.2 | 手機案例標題 |
+| `--type-section` | 28 / 700 / 1.2 | 案例頁 h2（≥ 768px；≥ 640px 用 `section-md` 26、手機 `section-sm` 22）、文章 h2 |
+| `--type-subsection` | 20 / 700 / 1.3 | 案例頁、文章 h3 |
+| `--type-body-lg` | 18 / 400 / 1.65 | Resume 自介 |
+| `--type-body` | 16 / 400 / 1.65 | 預設內文、側欄目錄 |
+| `--type-body-sm` | 14 / 400 / 1.65 | 案例頁、文章內文 |
+| `--type-ui` | 15 / 500 / 1.5 | 作品卡片標題、導覽列、按鈕 |
+| `--type-ui-strong` | 16 / 700 / 1.3 | Blog 卡片標題、h4、Logo |
+| `--type-caption` | 14 / 400 / 1.5 | 圖說、摘要、次要說明 |
+| `--type-label` | mono 11 / 700 / 大寫 / 0.06em | 標籤（`Label` 元件） |
+| `--type-label-lg` | mono 14 / 400 / 大寫 / 0.06em | 大標籤：案例頁標題上方的 tags |
+| `--type-data` | mono 14 / 400 | 年份、日期、meta、Back |
+| `--type-tooltip` | mono 15 / 400 / 1.3 | 游標提示 |
+
+### 版面（S3）
 
 | Token | 值 | 用途 |
 |---|---|---|
-| `--color-bg-page` | `#F6F6F6` | 全站頁面底色（Works 頁也是，不再用黑底） |
-| `--color-bg-surface` | `#ECEDEF` | 次一層的面：卡片圖片底色、沒有封面時的方塊 |
-| `--color-bg-surface-strong` | `#DCDEE2` | 需要更明顯區隔的面（選取列、按下狀態） |
-| `--color-text-primary` | `#0A0A0C` | 主要文字、標題 |
-| `--color-text-secondary` | `#5A6069` | 次要文字：年份、說明、標籤 |
-| `--color-text-on-accent` | `#FFFFFF` | 放在主色上的文字（對比 7.10:1，過 AAA） |
-| `--color-accent` | `#1043E5` | 主色：目前位置、可互動元素、焦點框（放淺灰底 6.11:1） |
-| `--color-accent-strong` | `#0B2FA6` | 淺底上的文字連結、主色元素的 hover/按下 |
-| `--color-border-hairline` | `#C6CAD0` | 細分隔線、沒有封面時卡片上的方框 |
-| `--color-rule-on-photo` | `#FFFFFF` | 疊在照片上的線與小字（卡片方框、十字、標籤） |
-
-### 暖墨色階（作品內頁 case study 專用）
-
-只有一個 RGB 底值，其他層級都是它的 alpha。深色模式只需換 `--ink-rgb` 與 `--color-bg-warm`。目前只用在 `/works/:id`，其他頁仍是 Style C 的冷灰。
-
-| Token | 值 | 用途 |
-|---|---|---|
-| `--ink-rgb` | `54, 54, 48` | 底值，只拿來組 `rgba(var(--ink-rgb), α)` |
-| `--color-bg-warm` | `#FBFAF4` | 作品內頁底色（暖米白） |
-| `--color-ink-secondary` | α 0.6 | 日期、meta、圖說、引言、連結底線 |
-| `--color-ink-code` | α 0.08 | inline code 底色 |
-| `--color-ink-fill` | α 0.05 | 圖片載入前底色、透明 PNG 襯底 |
-| `--color-ink-line` | α 0.1 | 細線：圖片外框、hr、引言左線 |
-
-主要文字沿用 `--color-text-primary`。
+| `--layout-max` | `1600px` | 作品牆、Blog 的頁框最寬 |
+| `--layout-gutter` | `56px` | 頁框左右留白（桌機）；手機 `--layout-gutter-mobile` 16px |
+| `--layout-gap-x` / `-y` | `24px` / `40px` | 作品牆、Blog 的欄距／列距 |
+| `--layout-reading` | `42.5rem`（680px） | 閱讀欄：Blog 文章、Resume（T6） |
+| `--layout-case-main` | `68.75rem`（1100px） | 案例頁主文區最寬 |
+| `--layout-case-text` | `58rem`（928px） | 案例頁標題與內文一行最長 |
+| `--layout-case-media` | `47.5rem`（760px） | 案例頁圖片、互動插圖最寬 |
+| `--layout-case-banner` | `35rem`（560px） | 案例頁封面橫幅最寬（3:2） |
+| `--layout-case-sidebar` | `303px` | 案例頁側欄寬 |
+| `--layout-nav-clearance` | `112px` | 頁面上方留給固定導覽列的空間 |
 
 ### 方格與間距
 
@@ -66,6 +119,7 @@ Figma 裡這層別名到 Primitives 集合（`grey/50…700`、`ink`、`white`�
 | `--spacing-lg` | `24px` | 欄與欄之間（作品牆的欄距） |
 | `--spacing-xl` | `40px` | 區塊之間、作品牆的列距 |
 | `--spacing-2xl` | `64px` | 大段落之間 |
+| `--spacing-3xl` | `96px` | 頁面上下留白 |
 | `--spacing-gutter` | `56px` | 頁面左右外緣留白（桌機） |
 
 `--grid-unit` 刻意不帶單位，才能乘出任何 8 的倍數；spacing 系列帶 `px`，可以直接當長度用。
@@ -75,6 +129,7 @@ Figma 裡這層別名到 Primitives 集合（`grey/50…700`、`ink`、`white`�
 | Token | 值 | 用途 |
 |---|---|---|
 | `--radius-none` | `0` | 所有元件。系統裡沒有圓角。 |
+| `--radius-round` | `50%` | 唯一的例外：自訂游標（圓形）。新的例外要先加 token。 |
 
 ### 動態
 
@@ -84,6 +139,7 @@ Figma 裡這層別名到 Primitives 集合（`grey/50…700`、`ink`、`white`�
 | `--duration-base` | `240ms` | 一般過場：hover 顏色、導覽列、換頁淡出 |
 | `--duration-focus` | `550ms` | 對焦：卡片對焦、捲動淡入、換頁淡入、平滑捲動的追趕時間 |
 | `--duration-flip` | `700ms` | **只給**作品卡片 → 案例頁的展開 / 收合 |
+| `--stagger` | `60ms` | 列表進場每項錯開，最多 8 步（M1）：作品牆、Blog（`<Reveal index>`） |
 | `--ease-step` | `steps(4, end)` | **方塊類**：一格一格跳，不平滑 |
 | `--ease-focus` | `cubic-bezier(.2,.6,.2,1)` | **對焦類**與其他所有平滑動態 |
 | `--ease-fall` | `cubic-bezier(.55,.02,.78,.36)` | 下墜：越掉越快（首頁方塊落下） |
@@ -149,7 +205,7 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 
 - 圖片 3:2（Figma 360×240），底色 `--color-bg-surface`。
 - 封面清楚顯示，沒有模糊、方框、十字或小字。
-- **Badge**：封面左上角（內縮 `--spacing-md`，手機 `--spacing-sm`），文字 = `work.tag`，底色 = `work.tag_color`（後台設定），沒設定時用 `#1043E5`（`--color-accent`）。字色依底色自動選黑或白。mono 11px、大寫、直角。沒有 `tag` 就不顯示。元件：[`src/pages/Works/CoverTag.jsx`](../src/pages/Works/CoverTag.jsx)。
+- **Badge**：封面左上角（內縮 `--spacing-md`，手機 `--spacing-sm`），文字 = `work.tag`，底色 = `work.tag_color`（後台設定），沒設定時用 `#1043E5`（`--color-accent`）。字色依底色自動選黑或白。外觀是 `<Label variant="solid">`。沒有 `tag` 就不顯示。元件：[`src/pages/Works/CoverTag.jsx`](../src/pages/Works/CoverTag.jsx)。
 - **Active**：目前沒有變化（劇本已停用，見下方 HoverPlayCard）。影片封面會播放。
 - 標題與年份在圖**外**，永遠清楚（規則 4）。標題最多兩行。
 
@@ -181,13 +237,36 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 - 減少動態：不播動畫，作用中時直接顯示完成狀態。
 - 劇本內容取自各案例內文裡實際出現的詞。
 
+## 縮放檢視框（ZoomViewer）
+
+[`src/components/ZoomViewer/`](../src/components/ZoomViewer/)。參考 mchiu.co.uk 案例頁的工作坊白板。給比畫面大很多的互動圖用（目前是 MetroSense 的資訊架構圖，畫布 1626×1960）。
+
+- **框的大小固定**：寬度跟著欄位（案例頁最寬 760px），高 `--zoom-viewer-height` = `min(480px, 70vh)`。頁面不會被大圖撐高。
+- **一開始整張圖縮進框裡**（四邊留 24px），淺灰底加 24px 方格，像白板。
+- **移動**：捲動、觸控板，或滑鼠拖曳。按下後移動不到 4px 仍算點擊，所以圖裡的按鈕照常可以點。
+- **縮放**：右下角 ＋／−（直角、36px），從「整張」到「5 倍」分 4 段，每段等比放大，`--duration-base` + `--ease-focus` 緩動。觸控板雙指縮放可以連續縮放。縮放時，游標（按鈕則是框的中心）下面那一點維持不動。
+- 減少動態：按鈕縮放沒有動畫，直接跳到該段。
+
+## 標籤（Label）
+
+[`src/components/Label/`](../src/components/Label/)。全站唯一的小標籤（P2），字一律是 `--label-font`（mono 11px、粗體、大寫、字距 0.06em），直角。`size="lg"` 改用 `--label-font-lg`（mono 14px）。
+
+| 變體 | 樣子 | 用在 |
+|---|---|---|
+| `plain` | 無框、secondary 色 | 日期、年份 |
+| `outline` | 1px `--color-border-hairline` 框 | 內容標籤（Blog、Notes） |
+| `fill` | `--color-bg-surface-strong` 底、secondary 字 | 案例頁標題上方的 tags（搭配 `size="lg"`） |
+| `solid` | 色塊底（預設主色，可自訂） | 封面 badge（CoverTag） |
+
+新的小標籤一律用這個元件，不要在頁面 CSS 裡另寫一套。
+
 ## 游標提示（Cursor Tooltip）
 
 [`src/components/CursorTooltip/`](../src/components/CursorTooltip/)，掛在 `App.jsx`，全站只有一個。參考 mchiu.co.uk。
 
 - 任何元素加上 `data-tooltip="…"`，滑鼠移上去就在游標**右下 24px** 顯示這段字；右邊快超出畫面時往左推，離邊緣 8px。
 - 跟隨游標有一點延遲（`--duration-base` + `--ease-focus`，GSAP `quickTo`），文字每 18ms 打一個字；移出元素立刻消失，點擊也會消失。
-- 外觀：直角、`--color-accent` 底、`--color-text-on-accent` 字、15px/500、內距 8×16、最寬 360px，`\n` 換行。出現時 `--duration-step` 淡入並上移 4px。
+- 外觀：直角、`--color-accent` 底、`--color-text-on-accent` 字、`--tooltip-font`（mono 15px，跟 badge 同字體家族，T2）、內距 8×16、最寬 360px，`\n` 換行。出現時 `--duration-step` 淡入並上移 4px。
 - 作品卡片的文字來自後台「滑鼠提示 Hover Text」欄位（`projects.hover_text`），留空就不顯示。
 - 觸控／沒有 hover 的裝置、螢幕 ≤ 768px、減少動態：不顯示。
 
@@ -208,17 +287,64 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 
 ## 作品內頁（Case study page）
 
-`src/pages/Works/WorkDetail.jsx` + `WorkDetail.module.css`。排版對齊 haoqi.design/adrive，只動樣式層，資料與文字不變。
+`src/pages/Works/WorkDetail.jsx`、`CaseSidebar.jsx` 和兩個對應的 `.module.css`。**版面照 meganyap.me 的案例頁**，再套 Style C（直角、冷灰、無陰影）。
 
-- **容器**：單欄置中，`max-width: 880px`，左右 24px，上下 72px（≥1024px 為 96px）。沒有雙欄、卡片或 grid 區塊。
-- **頁首**：← Back → 64px → 封面主視覺（3:2，最寬 640px 置中，FLIP 終點）→ h1 → meta 一行（4px，mono、tabular-nums、14px、secondary）→ 正文（第一段即 intro）。沒有封面大圖。
-- **字級**：h1 48/60/700/−1.2px（<768px 為 30px）；h2 28/35/600，上 56 下 16；h3 24/30/600，上 48 下 16；h4 20/27.5/600，上 40 下 16；正文 16/26（<768px 為 14px）。標題都有 `scroll-margin-top: 96px`。
-- **垂直節奏**：只有一條規則：`.prose > * + * { margin-top: 16px }`。標題、圖片、hr 用自己的 margin 覆蓋（margin 會合併取大值）。每個區塊的第一個子元素 `margin-top: 0`。
-- **圖片**：滿寬、直角、`--color-ink-line` 細框、`--color-ink-fill` 底色，上下 24px；無陰影、無裝置框。點擊或 Enter 開 lightbox（`src/components/Lightbox/`，原生 `<dialog>`，Esc 關閉）。
-- **圖說**：圖片後、整段只有 `<em>` 的段落自動視為圖說：14px、secondary、正體、靠左，與圖距 8px。
-- **並排**：連續兩張以上的圖自動包成 `[data-image-row]`：兩欄 grid、gap 16px、同高（`object-fit: cover`）；<768px 疊成一欄。
-- **hr**：1px `--color-ink-line`，上下 32px。只用在功能區塊切換（目前只有文末「Back」之前一條）。
-- 以上的 `data-*` 標記由 `prepareHtml()` 在 render 前加上，不改寫資料庫內容。
+**整體**：左側欄＋右邊主文區。
+
+- **側欄**（≥ 1024px 才顯示）：寬 303px、內距 40px、間距 24px，`--color-bg-surface` 底，捲動時固定在畫面上。由上到下：
+  - `← WORKS`：回作品牆，overlay 裡等於關閉。
+  - **Contents 目錄**：從內文的 h2 自動產生，點了跳到該段。目前段落用深一階的方塊標示，判斷方式是「最後一個捲過畫面 30% 位置的標題」。
+  - `↑ BACK TO TOP`：固定在側欄底部。
+  - 從卡片開的 overlay 是原生捲動，側欄用 CSS sticky；直接開的頁面有 ScrollSmoother，改用 ScrollTrigger pin。
+- **主文區**：最寬 1100px、置中。內距 16 / 24 / 40px（手機／≥ 640／≥ 768），區塊間距 32 / 40 / 56px（手機／≥ 640／≥ 1024）。手機沒有側欄，返回連結放在主文區最上面。
+
+**主文區由上到下**：
+
+1. **橫幅**：封面維持原本的 3:2（跟作品卡片一樣，不裁切），最寬 560px（`--layout-case-banner`）。外層 `.banner` 撐住版面，裡面的 `.hero` 是 FLIP 目標（絕對定位），飛進來時下面的內容不會跳動。
+   - **程式繪製的封面**（[`codeCovers.js`](../src/pages/Works/codeCovers.js)，以作品 id 對應）：有些作品的橫幅不用上傳的圖，而是用 Figma 圖層組成的元件，可以做響應式。目前只有 MetroSense（[`MetroCover`](../src/components/MetroCover/)，Figma `133:58`）。桌機照 Figma 的 824:467、最寬 760px，每個圖層用百分比定位、等比縮放；M 版（< 640px）改成 4:3，logo 置中放大到 80% 寬，列車縮小貼右下。作品牆的卡片仍用上傳的封面圖。
+2. **Tags**：後台「Tags」欄位，`<Label variant="fill" size="lg">`，間距 8px。
+3. **標題**：28 → 34 → 40px（手機／≥ 640／≥ 768），最長 928px。`text-wrap: balance` 讓需要換行的長標題平均分行；`text-spacing-trim: trim-start` 去掉開頭「【」的半形空白。
+4. **連結按鈕**：有填 Link 才出現，滿寬外框按鈕，高 44px（參考「Try it out →」）。
+5. **資訊區塊**：Year / Role / Team，手機 2 欄、≥ 768px 4 欄，`--color-bg-surface` 底、內距 16px。標籤是 mono 14px 大寫，值是內文 16px。沒填的項目不顯示。
+6. **內文**：
+   - 一行最長 928px（`--layout-case-text`），內文 14px（`body-sm`）。
+   - h2 22 → 26 → 28px，和上一段距 32 / 40 / 56px；同段內的段落間距 8px。h3 16px 粗體，h4 15px。
+   - **圖片置中，最寬 760px、最高 70% 螢幕高**，直式截圖會維持手機大小，不會撐滿整欄（參考 320px／760px）。連續兩張以上自動並排，兩欄同高；手機疊成一欄。
+   - 圖說：圖片後、整段只有 `<em>` 的段落，12px、secondary、置中，與圖距 8px。
+   - **強調色塊（callout）**：引言（blockquote）的第一行整行粗體時，變成強調色塊，用來突顯一句話，例如問題陳述（參考 meganyap.me 的 Problem statement）。粗體的第一行是主句（20px 粗體），之後的行是補充說明（14px、`--color-text-inverse-secondary`），不放小標。深色底 `--color-bg-inverse`、白字、置中、直角，內距 24px（≥ 640px 為 40 × 56px）。不用主色：主色只給目前位置與可互動元素（C3）。一般引言（第一行不是整行粗體）維持左邊細線的樣式。後台做法：按 Quote，再把第一行設成粗體。
+   - **互動插圖**（`proseEmbeds.jsx` 把特定圖片換成元件，例如 MetroSense 的雙模式圖、資訊架構圖）：跟圖片一樣最寬 760px、置中。資訊架構圖放在 `ZoomViewer` 裡（見下）。
+   - 這些 `data-*` 標記和 h2 的 id 由 `prepareHtml()` 在 render 前加上，不改寫資料庫內容。
+
+## Blog
+
+**Blog 一律沒有封面**：列表卡片和文章頁都不放封面圖或影片，後台也拿掉了封面上傳欄。資料庫的 `cover_image` 欄位保留但不使用。
+
+### 列表卡片（BlogCard）
+
+元件：[`src/components/BlogCard/`](../src/components/BlogCard/)。只有文字，由上到下：日期（`<Label>`）、標題（`--type-ui-strong`）、摘要（`--type-caption`、secondary、最多 3 行）、tags（`<Label variant="outline">`）。
+
+- `--color-bg-surface` 底、內距 `--spacing-md`、元素間距 `--spacing-sm`，直角無陰影。
+- Hover：1px `--color-text-primary` 框（`--duration-base`）。鍵盤 focus：2px 主色外框。
+- 列表頁：頁框同作品牆（`--layout-max`），瀑布流 3 / 2 / 1 欄（> 960 / > 520 / 以下），間距 `--layout-gap-x`，`<Reveal index>` 錯開進場。
+
+### 文章頁
+
+[`src/pages/Blog/BlogPost.jsx`](../src/pages/Blog/BlogPost.jsx)。閱讀欄 680px（`--layout-reading`），由上到下：Back、日期與 tags、標題（`--article-title-*`，28 → 34 → 40px）、內文、底部 Back。沒有封面橫幅。
+
+內文是 Tiptap 的 HTML，樣式用標籤選擇器套在 `.prose` 上：
+
+| 元素 | 樣式 |
+|---|---|
+| `h2` | `--article-h2-font-lg`，上距 `--spacing-2xl` |
+| `h3` | `--article-h3-font`，上距 `--spacing-xl` |
+| `p` | `--article-body-font`（14px），段距 1em |
+| `blockquote` | 引言框：`--color-bg-surface` 底、左邊 4px `--color-border-hairline`、內距 `--spacing-md` / `--spacing-lg` |
+| `img` | 原尺寸、最寬到欄寬、置中，1px `--color-border-subtle` 外框 |
+| 圖說 | 圖片後、整段只有 `<em>` 的段落：`--article-caption-font`（12px）、secondary、置中，與圖距 `--spacing-sm` |
+| `hr` | 1px `--color-border-subtle`，上下 `--spacing-2xl`；正文和文末資訊的分隔 |
+| `a` | `--color-accent-strong`、底線，hover `--color-accent` |
+
+---
 
 ## 首頁開場動畫（HELLO → HEDY）
 
@@ -232,11 +358,13 @@ gsap.to(el, { autoAlpha: 1, duration: m.duration.focus, ease: m.ease.focus });
 ## 字體
 
 - **定案**：LINE Seed（中文 LINE Seed TW、英數 LINE Seed EN），SIL OFL 1.1，自架 webfont。
-- **現況**：尚未切換，暫時仍是 Google Fonts 的 Raleway（標題）／Noto Sans TC（內文）。小字標籤用 Space Mono（`--font-mono`），是否保留未決定。
-- 字體堆疊定義在 `src/index.css` 的 `--font-*`。
+- **現況**：webfont 還沒自架。`--font-sans` 堆疊已把 LINE Seed 排第一，裝好字型檔就會生效；目前顯示的是後備的 Noto Sans TC。Raleway 已移除（T1）。Mono 保留 Space Mono（T2）。
+- 字體堆疊定義在 `public/tokens.css` 的 `--font-primitive-*`。
 
 ## 待補
 
 - Figma 尚未設計：導覽列、按鈕與連結、標籤、段落標題、頁尾、Works 作品牆版面、Home Hero、作品內頁標題區。在那之前這些元件只換了動態 token，視覺沒有照 Style C 重做。
-- Blog 列表與文章頁已先依四條規則換成 token（淺底、直角、連結用 `--color-accent-strong`、小字標籤用 `--font-mono`）。作品內頁改走上面的 case study 規格。
-- Blog、Notes 版面未決定；Notes 卡片目前仍有 `box-shadow`，與規則 3 不符。
+- 公開頁面（Works、案例頁、Blog、Notes、Resume、導覽列）已全部改用 v2 token，CSS 裡沒有寫死的字級、色碼、字體。Notes 的陰影與圓角已移除。
+- 例外：MetroSense 案例的互動插圖（`MetroHomeModes`、`MetroIAMap`）是作品內容，保留該專案自己的品牌色與字體，就像圖片一樣。
+- 後台頁面還沒收斂（A2 待決定）。
+- Notes 版面本身仍未決定。（Blog 已定，見上方 Blog 一節。）

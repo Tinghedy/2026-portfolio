@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import Label from "../../components/Label/Label";
 import styles from "./BlogPost.module.css";
-
-const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -46,30 +45,15 @@ export default function BlogPost() {
         <button onClick={() => navigate("/blog")} className={styles.back}>← Back</button>
       </div>
 
-      {/* Hero cover */}
-      {post.cover_image && (
-        <div className={styles.hero}>
-          {isVideo(post.cover_image) ? (
-            <video
-              src={post.cover_image}
-              className={styles.heroMedia}
-              autoPlay muted loop playsInline
-            />
-          ) : (
-            <img src={post.cover_image} alt={post.title} className={styles.heroMedia} />
-          )}
-        </div>
-      )}
-
       <div className={styles.inner}>
 
         {/* Date + tags */}
         <div className={styles.meta}>
-          {post.date && <time className={styles.date}>{post.date}</time>}
+          {post.date && <Label as="time">{post.date}</Label>}
           {post.tags?.length > 0 && (
             <ul className={styles.tags}>
               {post.tags.map((t) => (
-                <li key={t} className={styles.tag}>{t}</li>
+                <Label as="li" variant="outline" key={t}>{t}</Label>
               ))}
             </ul>
           )}

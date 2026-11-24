@@ -10,7 +10,7 @@
 
   container-type: inline-size;
   background: var(--metro-bg);
-  border: 1px solid var(--color-ink-line);
+  border: 1px solid var(--color-border-subtle);
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
 }
 

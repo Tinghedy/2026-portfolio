@@ -9,16 +9,13 @@
   visibility: hidden;
   opacity: 0;
 
-  max-width: 360px;
-  padding: var(--spacing-sm) var(--spacing-md);
+  max-width: var(--tooltip-max);
+  padding: var(--tooltip-pad);
   background: var(--color-accent);
   color: var(--color-text-on-accent);
   border-radius: var(--radius-none);
 
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.4;
+  font: var(--tooltip-font);   /* mono, same family as the cover badge (T2) */
   white-space: pre-line;
 }
 

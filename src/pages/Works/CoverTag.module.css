@@ -1,33 +1,16 @@
-/* Cover badge — top-left, inside the cover (see CoverTag.jsx) */
+/* Cover badge — position only; the look is <Label variant="solid"> */
 .tag {
   position: absolute;
   top: var(--spacing-md);
   left: var(--spacing-md);
   z-index: 2;
   max-width: calc(100% - 2 * var(--spacing-md));
-
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-none);
   pointer-events: none;
-}
-
-/* label > 28 chars: no truncation — wrap */
-.wrap {
-  white-space: normal;
 }
 
 @media (max-width: 767px) {
   .tag {
     top: var(--spacing-sm);
     left: var(--spacing-sm);
-    font-size: 10px;
   }
 }

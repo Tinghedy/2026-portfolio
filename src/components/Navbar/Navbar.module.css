@@ -10,7 +10,7 @@
 }
 
 .navbar.scrolled {
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--color-bg-nav-scrolled);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -25,11 +25,10 @@
 }
 
 .logo {
-  font-weight: 700;
-  font-size: 1.1rem;
+  font: var(--nav-logo-font);
+  letter-spacing: var(--tracking-wide);
   text-decoration: none;
   color: inherit;
-  letter-spacing: 0.05em;
 }
 
 /* Desktop links */
@@ -44,10 +43,15 @@
 .link {
   text-decoration: none;
   color: inherit;
-  font-size: 0.9rem;
-  letter-spacing: 0.03em;
+  font: var(--nav-link-font);
   position: relative;
   padding-bottom: 2px;
+  transition: color var(--duration-base) var(--ease-focus);
+}
+
+/* Current page = accent (C3: "where you are") */
+.link.active {
+  color: var(--color-accent);
 }
 
 .link::after {
@@ -70,21 +74,17 @@
 
 .loginBtn {
   text-decoration: none;
-  color: #fff;
-  background: #333;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  color: var(--color-text-on-accent);
+  background: var(--color-text-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-none);
+  font: var(--nav-link-font);
   transition: background var(--duration-base) var(--ease-focus);
 }
 
-.loginBtn:hover {
-  background: #000;
-}
-
+.loginBtn:hover,
 .loginBtn.active {
-  background: #000;
+  background: var(--color-accent);
 }
 
 /* Hamburger */
@@ -128,6 +128,7 @@
   justify-content: center;
   opacity: 0;
   pointer-events: none;
+  background: var(--color-bg-page);
   transition: opacity var(--duration-base) var(--ease-focus);
   z-index: 99;
 }
@@ -150,13 +151,12 @@
 .overlayLink {
   text-decoration: none;
   color: inherit;
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font: var(--type-title);
+  letter-spacing: var(--type-title-tracking);
 }
 
 .overlayLink.active {
-  opacity: 0.5;
+  color: var(--color-accent);
 }
 
 @media (max-width: 768px) {

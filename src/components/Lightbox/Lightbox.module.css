@@ -18,7 +18,7 @@
 }
 
 .dialog::backdrop {
-  background: rgba(var(--ink-rgb), 0.92);
+  background: var(--color-backdrop-heavy);
 }
 
 .image {
@@ -34,9 +34,7 @@
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-lg);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 20px;
+  font: var(--type-data);
   color: var(--color-rule-on-photo);
   background: none;
   border: 0;

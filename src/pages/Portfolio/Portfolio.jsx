@@ -82,17 +82,10 @@ export default function Portfolio() {
         <Reveal as="section" className={styles.section}>
           <h1 className={styles.name}>Yating Liang</h1>
           <p className={styles.bio}>
-            I'm a UI/UX designer finishing a master's in Industrial Design at National Cheng
-            Kung University, where my thesis studies how participatory design can make digital
-            learning work for older adults. I like the parts of design where research turns into
-            something people can actually use — workshops into requirements, requirements into
-            interfaces, interfaces into working code.
-          </p>
-          <p className={styles.bio}>
-            That last step is why I build as well as design: React, GSAP, and design systems are
-            part of how I think, not a separate skill set. My work spans a Taiwanese-language
-            teaching platform, a meditation app, a financial Mini Program, and an award-winning
-            transit concept for the Taipei Metro.
+            Hey! I'm a UI/UX designer and a sticky-note hoarder — even when I'm coding a
+            feature, I still work it out by hand first. I'm finishing a master's in Industrial Design at National Cheng Kung
+            University, focusing on research, interaction, and code. My work aims to bridge what
+            people need and what actually ships.
           </p>
         </Reveal>
 

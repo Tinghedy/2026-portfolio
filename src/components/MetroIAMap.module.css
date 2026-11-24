@@ -33,22 +33,10 @@
   font-weight: 600;
 }
 
-.scroller {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.sizer {
-  position: relative;
-  margin: 0 auto;
-}
-
+/* The board itself; ZoomViewer scales and positions it. */
 .canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   background: #fff;
-  transform-origin: top left;
 }
 
 /* ── 圖例 ── */
@@ -215,8 +203,18 @@ button.node:hover {
   transform: translateY(-1px);
 }
 
+/* 點選的分支：被點的節點和它底下的子功能一起亮起來 */
+.node[data-lit]::before {
+  box-shadow: 0 0 0 2px var(--metro-arrow-hi);
+}
+
+.node[data-lit] .nodeLabel {
+  font-weight: 700;
+  opacity: 1;
+}
+
 .node[data-focused]::before {
-  box-shadow: 0 0 0 3px rgba(1, 122, 177, 0.35);
+  box-shadow: 0 0 0 3px var(--metro-root);
 }
 
 /* ── 註解 & 說明 ── */

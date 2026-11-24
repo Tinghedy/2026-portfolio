@@ -1,0 +1,50 @@
+/* Label — one family for every small tag (P2). Mono, bold, uppercase,
+   wide tracking (T2, T5 `label` role). Square. */
+.label {
+  display: inline-block;
+  font: var(--label-font);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: var(--radius-none);
+}
+
+/* Colour block — cover badge. Colours come from props (inline). */
+.solid {
+  padding: var(--label-pad);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+
+/* Hairline box — content tags (Blog) */
+.outline {
+  padding: 2px var(--spacing-sm);
+  border: 1px solid var(--color-border-hairline);
+  color: var(--color-text-secondary);
+}
+
+/* Filled neutral block — tags above a case title (ref: meganyap.me) */
+.fill {
+  padding: var(--label-pad);
+  background: var(--color-bg-surface-strong);
+  color: var(--color-text-secondary);
+}
+
+/* No box — dates, years, category text */
+.plain {
+  color: var(--color-text-secondary);
+}
+
+.wrap {
+  white-space: normal;
+}
+
+/* Larger size: mono 14px regular, for tags that lead a page header */
+.lg {
+  font: var(--label-font-lg);
+}
+.lg.solid,
+.lg.fill,
+.lg.outline {
+  padding: var(--label-pad-lg);
+}

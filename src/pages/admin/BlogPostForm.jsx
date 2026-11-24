@@ -6,7 +6,7 @@ import Link from "@tiptap/extension-link";
 import { ResizableImage as Image } from "../../lib/ResizableImage";
 import Placeholder from "@tiptap/extension-placeholder";
 import { supabase } from "../../lib/supabase";
-import { uploadImage, uploadMedia, deleteImageByUrl } from "../../lib/uploadImage";
+import { uploadImage, deleteImageByUrl } from "../../lib/uploadImage";
 import FigmaImportModal from "../../components/admin/FigmaImportModal";
 import AIAssistantBar from "../../components/admin/AIAssistantBar";
 import styles from "./BlogPostForm.module.css";
@@ -59,13 +59,10 @@ export default function BlogPostForm() {
   const navigate = useNavigate();
   const slugTouched = useRef(false);
   const fileInputRef = useRef(null);
-  const coverInputRef = useRef(null);
   const savedIdRef = useRef(id ?? null);
   const today = new Date().toISOString().slice(0, 10);
 
   const [form, setForm] = useState({ title: "", slug: "", date: today, summary: "", content: "", tags: [] });
-  const [coverFile, setCoverFile] = useState(null);
-  const [coverPreview, setCoverPreview] = useState("");
   const formRef = useRef(form);
   useEffect(() => { formRef.current = form; }, [form]);
 
@@ -106,7 +103,6 @@ export default function BlogPostForm() {
         };
         setForm(loaded);
         formRef.current = loaded;
-        setCoverPreview(data.cover_image ?? "");
         setInitialContent(data.content ?? "");
         setEditorReady(true);
       });
@@ -144,9 +140,6 @@ export default function BlogPostForm() {
     setSaveStatus("saving");
     setError("");
 
-    let coverUrl = coverPreview;
-    if (coverFile) coverUrl = await uploadMedia(coverFile, "blog-covers/");
-
     const payload = {
       title: f.title,
       slug: f.slug || toSlug(f.title),
@@ -154,7 +147,6 @@ export default function BlogPostForm() {
       summary: f.summary,
       content: f.content,
       tags: f.tags,
-      cover_image: coverUrl,
     };
 
     try {
@@ -174,7 +166,7 @@ export default function BlogPostForm() {
     } finally {
       setSaving(false);
     }
-  }, [coverFile, coverPreview, navigate]);
+  }, [navigate]);
 
   // Auto-save every 30 minutes
   useEffect(() => {
@@ -411,48 +403,6 @@ export default function BlogPostForm() {
           />
 
           {error && <p className={styles.error}>{error}</p>}
-
-          {/* Cover image / video zone */}
-          <div
-            className={styles.coverZone}
-            onClick={() => coverInputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && coverInputRef.current?.click()}
-            aria-label="Upload cover image or video"
-          >
-            {coverPreview ? (
-              <>
-                {coverFile?.type?.startsWith("video/") || /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(coverPreview) ? (
-                  <video src={coverPreview} className={styles.coverZoneImg} muted loop playsInline autoPlay />
-                ) : (
-                  <img src={coverPreview} alt="Cover" className={styles.coverZoneImg} />
-                )}
-                <div className={styles.coverZoneOverlay}>
-                  <span>點擊更換封面</span>
-                  <button
-                    type="button"
-                    className={styles.coverZoneRemove}
-                    onClick={(e) => { e.stopPropagation(); setCoverFile(null); setCoverPreview(""); }}
-                  >
-                    移除
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className={styles.coverZonePlaceholder}>
-                <span className={styles.coverZoneIcon}>＋</span>
-                <span>新增封面圖片 / 影片</span>
-              </div>
-            )}
-          </div>
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/*,video/*"
-            style={{ display: "none" }}
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) { setCoverFile(f); setCoverPreview(URL.createObjectURL(f)); } e.target.value = ""; }}
-          />
 
           <input
             type="text"

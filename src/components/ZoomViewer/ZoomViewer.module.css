@@ -1,0 +1,80 @@
+/* Zoom viewer — fixed box, pannable / zoomable canvas inside
+   (ref: mchiu.co.uk board viewer). Style C: square, hairline, no shadow;
+   a quiet grid behind the canvas like a whiteboard. */
+.viewer {
+  position: relative;
+  width: 100%;
+  height: var(--zoom-viewer-height);
+  overflow: hidden;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-none);
+  background-color: var(--color-bg-surface);
+  background-image:
+    linear-gradient(to right, var(--color-border-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border-subtle) 1px, transparent 1px);
+  background-size: var(--spacing-lg) var(--spacing-lg);
+}
+
+.scroll {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  cursor: grab;
+}
+.scroll::-webkit-scrollbar { display: none; }
+.scroll[data-dragging] { cursor: grabbing; user-select: none; }
+
+.wrap {
+  position: relative;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  transition: opacity var(--duration-base) var(--ease-focus);
+}
+
+/* +/− bottom-right, square */
+.controls {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-none);
+  background: var(--color-bg-raised);
+  font: var(--type-ui-strong);
+  font-size: var(--text-lg);
+  line-height: 1;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-step) var(--ease-focus),
+    color var(--duration-step) var(--ease-focus);
+}
+.btn:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

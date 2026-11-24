@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import Label from "../../components/Label/Label";
 import styles from "./Notes.module.css";
 
 const CARD_COLORS = [
@@ -24,7 +25,7 @@ function NoteCard({ note, color, onClick }) {
       {note.tags?.length > 0 && (
         <div className={styles.cardTags}>
           {note.tags.map((tag) => (
-            <span key={tag} className={styles.cardTag}>#{tag}</span>
+            <Label key={tag} variant="outline">#{tag}</Label>
           ))}
         </div>
       )}
@@ -167,7 +168,7 @@ export default function Notes() {
             {selectedNote.tags?.length > 0 && (
               <div className={styles.modalTags}>
                 {selectedNote.tags.map((tag) => (
-                  <span key={tag} className={styles.cardTag}>#{tag}</span>
+                  <Label key={tag} variant="outline">#{tag}</Label>
                 ))}
               </div>
             )}

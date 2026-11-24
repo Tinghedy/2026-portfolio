@@ -7,8 +7,13 @@ import { gsap, getMotion } from "./tokens";
  * With prefers-reduced-motion it renders in place with no animation.
  *
  *   <Reveal as="section" className={styles.section}>…</Reveal>
+ *
+ * In a list, pass `index`: items that come in together are staggered by
+ * --stagger each, at most 8 steps (M1), so a long list never waits long.
  */
-export default function Reveal({ as = "div", children, ...rest }) {
+const MAX_STAGGER_STEPS = 8;
+
+export default function Reveal({ as = "div", index, children, ...rest }) {
   const Tag = as;
   const ref = useRef(null);
 
@@ -25,12 +30,13 @@ export default function Reveal({ as = "div", children, ...rest }) {
           y: 0,
           duration: m.duration.focus,
           ease: m.ease.focus,
+          delay: index == null ? 0 : (index % MAX_STAGGER_STEPS) * m.duration.stagger,
           scrollTrigger: { trigger: el, start: "top 90%", once: true },
         }
       );
     });
     return () => mm.revert();
-  }, []);
+  }, [index]);
 
   return (
     <Tag ref={ref} {...rest}>

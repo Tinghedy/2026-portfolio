@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import ZoomViewer from "./ZoomViewer/ZoomViewer";
 import styles from "./MetroIAMap.module.css";
 
 /* ──────────────────────────────────────────────────────────────
@@ -186,8 +187,6 @@ function buildEdges() {
 /* ── component ── */
 
 export default function MetroIAMap() {
-  const wrapRef = useRef(null);
-  const [scale, setScale] = useState(1);
   const [activeCat, setActiveCat] = useState(null); // 圖例篩選
   const [focusId, setFocusId] = useState(null); // 點節點：聚焦分支
   const [hoverId, setHoverId] = useState(null); // hover：高亮路徑
@@ -198,18 +197,6 @@ export default function MetroIAMap() {
     const c = {};
     NODES.forEach((n) => n.cat && (c[n.cat] = (c[n.cat] || 0) + 1));
     return c;
-  }, []);
-
-  // 依容器寬度等比縮放
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      const w = entry.contentRect.width;
-      setScale(Math.max(0.5, Math.min(1, w / CANVAS_W)));
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
   }, []);
 
   // Esc 清除所有狀態
@@ -236,6 +223,9 @@ export default function MetroIAMap() {
     return s;
   }, [focusId]);
 
+  // 點選的節點與它底下所有子功能：這一組「亮起來」
+  const litSet = useMemo(() => (focusId ? descendantsOf(focusId) : null), [focusId]);
+
   const pathSet = useMemo(() => (hoverId ? ancestorsOf(hoverId) : null), [hoverId]);
 
   const nodeOpacity = (n) => {
@@ -252,10 +242,11 @@ export default function MetroIAMap() {
     const dimByFocus = focusSet && !(focusSet.has(e.from) && focusSet.has(e.to));
     const dimByCat = activeCat && byId[e.to].cat !== activeCat;
     const onPath = pathSet && pathSet.has(e.from) && pathSet.has(e.to);
+    const inLitBranch = litSet && litSet.has(e.from) && litSet.has(e.to);
     const catHit = activeCat && byId[e.to].cat === activeCat;
     return {
       opacity: dimByFocus || dimByCat ? 0.12 : 1,
-      highlight: onPath || catHit,
+      highlight: onPath || catHit || inLitBranch,
     };
   };
 
@@ -269,17 +260,15 @@ export default function MetroIAMap() {
     <figure className={styles.figure}>
       <figcaption className={styles.hint}>
         <span className={styles.badge}>Interactive</span>
-        點圖例篩選分類・點選單節點聚焦分支・Esc 重置
+        拖曳或捲動移動・＋／− 或雙指縮放・點圖例篩選・點節點聚焦
       </figcaption>
 
-      <div ref={wrapRef} className={styles.scroller}>
-        <div
-          className={styles.sizer}
-          style={{ width: CANVAS_W * scale, height: CANVAS_H * scale }}
-        >
+      {/* Fixed box (ZoomViewer): the 1626×1960 canvas starts fitted inside,
+          then pans and zooms in place instead of making the page tall. */}
+      <ZoomViewer canvasWidth={CANVAS_W} canvasHeight={CANVAS_H} label="北捷 App 資訊架構圖">
           <div
             className={styles.canvas}
-            style={{ width: CANVAS_W, height: CANVAS_H, transform: `scale(${scale})` }}
+            style={{ width: CANVAS_W, height: CANVAS_H }}
             onClick={(e) => {
               if (e.target === e.currentTarget) setFocusId(null);
             }}
@@ -295,7 +284,10 @@ export default function MetroIAMap() {
                     className={styles.legendItem}
                     aria-pressed={on}
                     data-dim={activeCat && !on ? "" : undefined}
-                    onClick={() => setActiveCat(on ? null : key)}
+                    onClick={() => {
+                      setFocusId(null);
+                      setActiveCat(on ? null : key);
+                    }}
                   >
                     <span className={styles.swatch} style={{ background: c.color }}>
                       <span className={styles.count}>{counts[key] || 0}</span>
@@ -374,6 +366,7 @@ export default function MetroIAMap() {
                   className={styles.node}
                   data-kind={kind}
                   data-focused={focusId === n.id ? "" : undefined}
+                  data-lit={litSet?.has(n.id) ? "" : undefined}
                   aria-pressed={clickable ? focusId === n.id : undefined}
                   style={{
                     left: n.x,
@@ -386,7 +379,15 @@ export default function MetroIAMap() {
                   onMouseLeave={() => setHoverId(null)}
                   onFocus={() => setHoverId(n.id)}
                   onBlur={() => setHoverId(null)}
-                  onClick={clickable ? () => setFocusId(focusId === n.id ? null : n.id) : undefined}
+                  onClick={
+                    clickable
+                      ? () => {
+                          // 聚焦分支時清掉圖例篩選，兩種變淡不會疊在一起
+                          setActiveCat(null);
+                          setFocusId(focusId === n.id ? null : n.id);
+                        }
+                      : undefined
+                  }
                 >
                   <span className={styles.nodeLabel}>{n.label}</span>
                 </Tag>
@@ -412,8 +413,7 @@ export default function MetroIAMap() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+      </ZoomViewer>
     </figure>
   );
 }

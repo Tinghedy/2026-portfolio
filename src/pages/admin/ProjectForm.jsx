@@ -320,7 +320,7 @@ export default function ProjectForm() {
               />
             </label>
             <div className={styles.settingsLabel}>
-              Tags
+              Tags（顯示在案例頁標題上方）
               <TagsInput
                 tags={form.tags}
                 onChange={(tags) => { const next = { ...formRef.current, tags }; setForm(next); formRef.current = next; }}

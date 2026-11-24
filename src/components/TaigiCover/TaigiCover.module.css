@@ -1,0 +1,117 @@
+/* 台語文教學共融平台 cover — Figma 2026_Portfolio node 137:121.
+   Same approach as MetroCover: layers positioned in % of the cover box so
+   the art scales with it; text sized in container units (cqw).
+   Desktop 824:467: text left, whale right (as on the platform's own hero).
+   M (< 640px) 4:3: text on top, whale larger at the bottom right.
+   Colours live inside the Figma PNGs (project brand art, like a photo);
+   the white text matches the platform hero. */
+.cover {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  background: #4aa3ba; /* platform hero fallback while the PNG loads */
+  font-family: "Huninn", "Noto Sans TC", sans-serif; /* the platform's font */
+  color: #fff;
+}
+
+.bg,
+.whale {
+  position: absolute;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Abstract gradient waves: cover the box at any ratio */
+.bg {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* whale.png is 1200×1200 with the whale (and island) in 116–1085 × 280–872 */
+.whale {
+  width: 58%;
+  height: auto;
+  left: 44%;
+  top: 6%;
+}
+
+.text {
+  position: absolute;
+  left: 6.8%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.4cqw;
+  text-shadow: 0 0.2cqw 1.2cqw rgb(0 40 60 / 0.18);
+}
+
+.title {
+  font-size: 4.2cqw;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.eyebrow,
+.sub {
+  font-size: 1.7cqw;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  opacity: 0.92;
+}
+
+/* ── Proposal A: Tsui水 logo as a white signature chip ── */
+.chip {
+  display: block;
+  padding: 0.9cqw 1.6cqw;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  box-shadow: 0 0.3cqw 1.4cqw rgb(0 40 60 / 0.12);
+  margin-bottom: 0.6cqw;
+}
+
+/* Crop the PNG's transparent padding: art sits in 160–746 × 207–535 of 872×660 */
+.logoBox {
+  position: relative;
+  display: block;
+  width: 9.5cqw;
+  aspect-ratio: 586 / 328;
+  overflow: hidden;
+}
+
+.logo {
+  position: absolute;
+  display: block;
+  max-width: none;
+  width: 148.8%;
+  height: auto;
+  left: -27.3%;
+  top: -63.1%;
+}
+
+/* ── M: 4:3 box, text on top, whale larger at the bottom right ── */
+@media (max-width: 639px) {
+  /* Whale bleeds off the bottom edge a little, as in the design */
+  .whale { width: 80%; left: 22%; top: 27%; }
+
+  .text {
+    left: 7%;
+    top: 12%;
+    transform: none;
+    gap: 2.2cqw;
+  }
+
+  .title { font-size: 7.6cqw; }
+  .eyebrow, .sub { font-size: 3cqw; }
+
+  .chip { padding: 1.6cqw 3cqw; margin-bottom: 0.8cqw; }
+  .logoBox { width: 17cqw; }
+}

@@ -1,160 +1,190 @@
+import { TokenTable, Section, useTokenDefs, pick, monoStyle } from "./tokenUtils";
+
 /**
- * 字體「現況盤點」── 不是規範。
- *
- * 列出目前網站上實際在用的字體和文字樣式（數值抄自各 .module.css，
- * 2026-11-22 盤點）。還沒有字級 token，所以這頁是手動整理的快照：
- * 改了 CSS 這裡不會自動跟著變。等字級系統定案後，這頁會改成讀 token。
+ * Typography tokens (T1–T7), read live from public/tokens.css.
+ * Replaces the 2026-11-22 hand-copied inventory: edit tokens.css and
+ * every sample here follows.
  */
 
-const FAMILIES = [
-  { token: "--font-heading", use: "所有 h1–h6（index.css 全域）：頁標題、案例頁標題、內文小標" },
-  { token: "--font-body", use: "內文、卡片標題、導覽列、游標提示" },
-  { token: "--font-mono", use: "封面 badge、年份、meta、Back、Blog 標籤" },
+const sample = "作品集 Portfolio 2026";
+
+// Text roles (T5): name → sample text + where it is used.
+const ROLES = [
+  { role: "display", text: "Yating Liang", use: "案例標題（≥ 768px，40）、Resume 名字" },
+  { role: "title", text: "Works", use: "頁標題（Works／Blog／Notes）、案例標題（≥ 640px，34）" },
+  { role: "title-sm", text: "【2025 捷運盃黑客松】", use: "案例標題（手機，28）" },
+  { role: "section", text: "專案簡介", use: "案例頁 h2（≥ 768px，28）、文章 h2" },
+  { role: "section-md", text: "專案簡介", use: "案例頁 h2（≥ 640px，26）" },
+  { role: "section-sm", text: "專案簡介", use: "案例頁 h2（手機，22）" },
+  { role: "subsection", text: "設計挑戰", use: "案例頁、文章 h3、Notes 彈窗標題" },
+  { role: "body-lg", text: "MetroSense 捷境是一款重新設計台北捷運服務的 App 概念。", use: "案例頁、文章內文（≥ 768px）、Resume 自介" },
+  { role: "body", text: "MetroSense 捷境是一款重新設計台北捷運服務的 App 概念。", use: "預設內文、側欄目錄、資訊區塊的值" },
+  { role: "body-sm", text: "MetroSense 捷境是一款重新設計台北捷運服務的 App 概念。", use: "案例頁、文章內文（14px，參考 meganyap.me）" },
+  { role: "ui", text: "【Young Ones】反 AI 生圖軟體_Flux", use: "作品卡片標題、按鈕" },
+  { role: "ui-strong", text: "訪談摘錄", use: "Blog 卡片標題、案例頁 h4、Logo、Resume 公司名" },
+  { role: "caption", text: "捷境 MetroSense 主視覺", use: "摘要、次要說明" },
+  { role: "caption-sm", text: "捷境 MetroSense 主視覺", use: "案例頁圖說" },
+  { role: "label", text: "Young Ones Awards — UX", use: "badge、標籤、年份（Label 元件）", upper: true, mono: true },
+  { role: "label-lg", text: "UI/UX · Contents · Year", use: "案例頁 tags、側欄標題、資訊區塊標籤", upper: true, mono: true },
+  { role: "data", text: "2026 · Role UX Designer · ← Back", use: "年份、日期、meta、Back 連結、導覽列連結與 Admin 按鈕", mono: true },
+  { role: "tooltip", text: "UX Project\nPrivacy Protection", use: "游標提示", mono: true, accent: true },
 ];
 
-// 沒有走 token、直接寫死的字體
-const HARDCODED = [
-  { family: '"Helvetica Neue", sans-serif', where: "Notes 頁（9 處）" },
-  { family: '"Georgia", serif', where: "Notes 頁（3 處）" },
-  { family: "'JetBrains Mono', ui-monospace", where: "後台：封面標籤預覽（ProjectForm.jsx）" },
-  { family: "Inter, \"PingFang TC\", …", where: "1 處" },
-];
-
-// 公開頁面實際在用的文字樣式。f = 字體 token，s = 字級，w = 字重，
-// lh = 行高，ls = 字距，up = 大寫。
-const STYLES = [
-  { group: "標題", items: [
-    { name: "案例頁 h1", where: "WorkDetail .title（≥768px）", f: "--font-heading", s: "48px", w: 700, lh: "60px", ls: "-1.2px", text: "【2025 捷運盃黑客松】第一名" },
-    { name: "案例頁 h1（手機）", where: "WorkDetail .title", f: "--font-heading", s: "30px", w: 700, lh: 1.25, ls: "-0.025em", text: "【2025 捷運盃黑客松】第一名" },
-    { name: "頁標題", where: "Works／Blog .pageTitle", f: "--font-heading", s: "clamp(1.4rem, 2.4vw, 1.9rem)", w: 700, ls: "-0.03em", text: "Works" },
-    { name: "內文 h2", where: "WorkDetail .prose h2", f: "--font-heading", s: "28px", w: 600, lh: "35px", ls: "-0.7px", text: "專案簡介" },
-    { name: "內文 h3", where: "WorkDetail .prose h3", f: "--font-heading", s: "24px", w: 600, lh: "30px", ls: "-0.6px", text: "設計挑戰" },
-    { name: "內文 h4", where: "WorkDetail .prose h4", f: "--font-heading", s: "20px", w: 600, lh: "27.5px", ls: "-0.5px", text: "訪談摘錄" },
-  ]},
-  { group: "內文與卡片", items: [
-    { name: "內文", where: "WorkDetail .prose（≥768px）", f: "--font-body", s: "16px", w: 400, lh: "26px", text: "MetroSense 捷境是一款重新設計台北捷運服務的 App 概念。" },
-    { name: "內文（手機）", where: "WorkDetail .prose", f: "--font-body", s: "14px", w: 400, lh: 1.625, text: "MetroSense 捷境是一款重新設計台北捷運服務的 App 概念。" },
-    { name: "作品卡片標題", where: "WorkCard .title", f: "--font-body", s: "15px", w: 500, lh: "22px", text: "【Young Ones】反 AI 生圖軟體_Flux" },
-    { name: "Blog 卡片標題", where: "Blog .title", f: "--font-body", s: "1rem", w: 700, lh: 1.4, ls: "-0.01em", text: "文章標題" },
-    { name: "Blog 摘要", where: "Blog .tagline", f: "--font-body", s: "0.8125rem", w: 400, lh: 1.6, text: "一句話摘要。" },
-    { name: "游標提示", where: "CursorTooltip", f: "--font-body", s: "15px", w: 500, lh: 1.4, text: "UX Project\nPrivacy Protection", tooltip: true },
-  ]},
-  { group: "小字／標籤（mono）", items: [
-    { name: "封面 badge", where: "CoverTag", f: "--font-mono", s: "11px", w: 500, lh: 1.4, ls: "0.06em", up: true, text: "Young Ones Awards — UX", badge: true },
-    { name: "作品卡片年份", where: "WorkCard .year", f: "--font-mono", s: "11px", w: 400, lh: 1.4, text: "2026" },
-    { name: "Blog 年份", where: "Blog .year", f: "--font-mono", s: "11px", w: 400, ls: "0.08em", up: true, text: "2026" },
-    { name: "Blog 標籤", where: "Blog .tag", f: "--font-mono", s: "11px", w: 400, ls: "0.06em", up: true, text: "Research" },
-    { name: "案例頁 meta／Back", where: "WorkDetail .meta / .back", f: "--font-mono", s: "14px", w: 400, lh: "20px", text: "← Back    Role UX Designer" },
-  ]},
-  { group: "導覽列", items: [
-    { name: "Logo", where: "Navbar .logo", f: "--font-body", s: "1.1rem", w: 700, ls: "0.05em", text: "YT" },
-    { name: "導覽連結", where: "Navbar .link", f: "--font-body", s: "0.9rem", w: 400, ls: "0.03em", text: "作品集" },
-    { name: "Admin 按鈕", where: "Navbar .loginBtn", f: "--font-body", s: "0.85rem", w: 500, text: "Admin" },
-  ]},
-];
-
-const mono = { fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--color-text-secondary)" };
-const cell = { padding: "12px 16px 12px 0", borderBottom: "1px solid var(--color-border-hairline)", verticalAlign: "top" };
-
-function spec(it) {
-  return [
-    it.f.replace("--font-", ""),
-    it.s,
-    it.w,
-    it.lh != null && `lh ${it.lh}`,
-    it.ls && `ls ${it.ls}`,
-    it.up && "大寫",
-  ].filter(Boolean).join(" · ");
+function Families() {
+  return (
+    <TokenTable
+      names={["--font-sans", "--font-mono"]}
+      previewWidth={280}
+      preview={(name) => <span style={{ fontFamily: `var(${name})`, fontSize: 22 }}>{sample}</span>}
+    />
+  );
 }
 
-function Sample({ it }) {
-  const style = {
-    fontFamily: `var(${it.f})`,
-    fontSize: it.s,
-    fontWeight: it.w,
-    lineHeight: it.lh,
-    letterSpacing: it.ls,
-    textTransform: it.up ? "uppercase" : undefined,
-    whiteSpace: "pre-line",
-    margin: 0,
-    color: "var(--color-text-primary)",
-  };
-  if (it.badge) Object.assign(style, { display: "inline-block", padding: "4px 8px", background: "var(--color-accent)", color: "var(--color-text-on-accent)" });
-  if (it.tooltip) Object.assign(style, { display: "inline-block", padding: "8px 16px", background: "var(--color-accent)", color: "var(--color-text-on-accent)" });
-  return <p style={style}>{it.text}</p>;
+function Scale() {
+  const defs = useTokenDefs();
+  return (
+    <TokenTable
+      names={pick(defs, ["--text-"])}
+      previewWidth={280}
+      preview={(name) => <span style={{ fontSize: `var(${name})`, lineHeight: 1.2, whiteSpace: "nowrap" }}>字級 Aa</span>}
+    />
+  );
+}
+
+function Scales() {
+  const defs = useTokenDefs();
+  return (
+    <>
+      <Section title="字重">
+        <TokenTable names={pick(defs, ["--weight-"])} previewWidth={160} preview={(n) => <span style={{ fontWeight: `var(${n})`, fontSize: 18 }}>{sample.slice(0, 3)} Aa</span>} />
+      </Section>
+      <Section title="行高">
+        <TokenTable
+          names={pick(defs, ["--leading-"])}
+          previewWidth={160}
+          preview={(n) => <span style={{ lineHeight: `var(${n})`, fontSize: 13, display: "block", background: "var(--color-bg-surface)" }}>兩行文字<br />Line two</span>}
+        />
+      </Section>
+      <Section title="字距" note="全大寫的字一律至少 wide。">
+        <TokenTable names={pick(defs, ["--tracking-"])} previewWidth={160} preview={(n) => <span style={{ letterSpacing: `var(${n})`, fontSize: 14, textTransform: "uppercase" }}>Label</span>} />
+      </Section>
+    </>
+  );
+}
+
+function Roles() {
+  const defs = useTokenDefs();
+  if (!defs) return null;
+  return (
+    <div style={{ maxWidth: 1040 }}>
+      {ROLES.map(({ role, text, use, upper, accent }) => {
+        const font = `--type-${role}`;
+        const tracking = defs.has(`${font}-tracking`) ? `var(${font}-tracking)` : undefined;
+        return (
+          <div
+            key={role}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "180px 1fr 280px",
+              gap: "var(--spacing-md)",
+              alignItems: "start",
+              padding: "var(--spacing-md) 0",
+              borderBottom: "1px solid var(--color-border-subtle)",
+            }}
+          >
+            <div>
+              <div style={{ font: "var(--type-ui-strong)" }}>{role}</div>
+              <div style={{ ...monoStyle, color: "var(--color-text-secondary)" }}>{font}</div>
+            </div>
+            <div>
+              <span
+                style={{
+                  font: `var(${font})`,
+                  letterSpacing: tracking,
+                  textTransform: upper ? "uppercase" : undefined,
+                  whiteSpace: "pre-line",
+                  display: "inline-block",
+                  ...(accent && { background: "var(--color-accent)", color: "var(--color-text-on-accent)", padding: "var(--tooltip-pad)" }),
+                }}
+              >
+                {text}
+              </span>
+            </div>
+            <div style={{ font: "var(--type-caption)", color: "var(--color-text-secondary)" }}>
+              {use}
+              <div style={{ ...monoStyle, color: "var(--color-text-tertiary)", marginTop: 4, overflowWrap: "anywhere" }}>
+                {(defs.get(font) ?? "").replace(/var\((--[\w-]+)\)/g, "$1")}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Components() {
+  const defs = useTokenDefs();
+  return (
+    <TokenTable
+      names={pick(defs, ["--nav-", "--page-title", "--card-", "--label-", "--tooltip-", "--article-"])}
+      previewWidth={1}
+    />
+  );
 }
 
 const meta = {
-  title: "Foundations/Typography（現況盤點）",
+  title: "Foundations/Typography",
   tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {
       description: {
         component:
-          "目前網站實際在用的字體與文字樣式，**是盤點不是規範**。還沒有字級 token，各頁各自寫數值（全站 CSS 約 45 種 font-size，混用 px / rem / clamp）。數值為 2026-11-22 從 CSS 抄錄的快照。",
+          "字體系統（T1–T7），即時讀取 `public/tokens.css`。**一個主字體**負責標題與內文，用字重分層級；**mono** 是小標籤與數據的識別（badge、年份、meta、游標提示）。全站文字只能從「文字角色」選，元件再透過元件 token 指向角色。",
       },
     },
   },
 };
 export default meta;
 
-export const Families = {
-  name: "字體家族",
+export const FontFamilies = {
+  name: "字體家族（T1、T2）",
   render: () => (
-    <div style={{ maxWidth: 880 }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <tbody>
-          {FAMILIES.map(({ token, use }) => (
-            <tr key={token}>
-              <td style={{ ...cell, width: 160 }}><span style={mono}>{token}</span></td>
-              <td style={cell}>
-                <p style={{ fontFamily: `var(${token})`, fontSize: 28, margin: "0 0 4px" }}>作品集 Portfolio 2026</p>
-                <span style={mono}>{getComputedStyle(document.documentElement).getPropertyValue(token)}</span>
-                <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--color-text-secondary)" }}>{use}</p>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <h3 style={{ margin: "32px 0 8px", fontSize: 15 }}>沒走 token、寫死的字體</h3>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <tbody>
-          {HARDCODED.map(({ family, where }) => (
-            <tr key={family}>
-              <td style={{ ...cell, width: 320 }}><span style={mono}>{family}</span></td>
-              <td style={{ ...cell, fontSize: 13 }}>{where}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Section title="兩個字體" note="主字體已定案 LINE Seed，但 webfont 尚未自架，目前實際顯示的是後備的 Noto Sans TC。">
+      <Families />
+    </Section>
   ),
 };
 
-export const TextStyles = {
-  name: "文字樣式（公開頁面）",
+export const TypeScale = {
+  name: "字級階層（T3）",
   render: () => (
-    <div style={{ maxWidth: 1040 }}>
-      {STYLES.map(({ group, items }) => (
-        <section key={group} style={{ marginBottom: 40 }}>
-          <h3 style={{ margin: "0 0 8px", fontSize: 15 }}>{group}</h3>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              {items.map((it) => (
-                <tr key={it.name}>
-                  <td style={{ ...cell, width: 200 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{it.name}</div>
-                    <div style={mono}>{it.where}</div>
-                  </td>
-                  <td style={cell}><Sample it={it} /></td>
-                  <td style={{ ...cell, width: 260 }}><span style={mono}>{spec(it)}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
-    </div>
+    <Section title="12 階，全部用 rem（T7）" note="原始值，元件不直接用；元件用下面的文字角色。">
+      <Scale />
+    </Section>
+  ),
+};
+
+export const WeightLeadingTracking = {
+  name: "字重／行高／字距（T4）",
+  render: () => <Scales />,
+};
+
+export const TextRoles = {
+  name: "文字角色（T5）",
+  render: () => (
+    <Section title="全站文字只從這張表選" note="每個角色 = 一個 font 簡寫 token（字重 字級/行高 字體）＋ 選用的字距 token。用法：font: var(--type-title); letter-spacing: var(--type-title-tracking);">
+      <Roles />
+    </Section>
+  ),
+};
+
+export const ComponentTokens = {
+  name: "元件 token（A3）",
+  render: () => (
+    <Section title="元件 → 角色" note="改某個元件的字，只要改 tokens.css 這裡一行。">
+      <Components />
+    </Section>
   ),
 };

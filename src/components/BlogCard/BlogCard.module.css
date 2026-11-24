@@ -1,0 +1,50 @@
+/* Blog card — text only, no cover. Square, no shadow; hover draws a 1px
+   frame (rectangle = attention). Date and tags are <Label> (P2). */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  text-decoration: none;
+  color: inherit;
+  background: var(--color-bg-surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-none);
+  transition: border-color var(--duration-base) var(--ease-focus);
+}
+
+.card:hover {
+  border-color: var(--color-text-primary);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: var(--spacing-xs);
+}
+
+.title {
+  font: var(--type-ui-strong);
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.summary {
+  font: var(--type-caption);
+  color: var(--color-text-secondary);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}

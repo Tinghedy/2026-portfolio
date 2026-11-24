@@ -1,12 +1,14 @@
+/* Resume page (/portfolio). Text tones use the semantic text colours
+   (C2) instead of opacity; rules are hairlines (S2). */
 .page {
-  padding-top: 8rem;
+  padding-top: var(--layout-nav-clearance);
   padding-bottom: 8rem;
 }
 
 .inner {
-  max-width: 800px;
+  max-width: calc(var(--layout-reading) + 2 * var(--spacing-lg));
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--spacing-lg);
   display: flex;
   flex-direction: column;
   gap: 5rem;
@@ -14,34 +16,35 @@
 
 /* Bio */
 .name {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 0 0 1.5rem;
+  font: var(--page-title-font);
+  letter-spacing: var(--page-title-tracking);
+  margin: 0 0 var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .name { font: var(--type-display); letter-spacing: var(--type-display-tracking); }
 }
 
 .bio {
-  font-size: 1rem;
-  line-height: 1.8;
-  opacity: 0.8;
-  margin: 0 0 1rem;
-  max-width: 60ch;
+  font: var(--type-body-lg);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-md);
 }
 
 /* Section */
 .section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-lg);
 }
 
+/* Small section heading = label role (mono, uppercase) */
 .sectionTitle {
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+  font: var(--label-font);
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
-  opacity: 0.5;
+  color: var(--color-text-secondary);
   margin: 0;
-  font-weight: 500;
 }
 
 /* Timeline */
@@ -54,44 +57,41 @@
 .timelineItem {
   display: grid;
   grid-template-columns: 140px 1fr;
-  gap: 1.5rem;
-  padding: 1.25rem 0;
-  border-top: 1px solid currentColor;
+  gap: var(--spacing-lg);
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border-hairline);
 }
 
 .timelineItem:last-child {
-  border-bottom: 1px solid currentColor;
+  border-bottom: 1px solid var(--color-border-hairline);
 }
 
 .period {
-  font-size: 0.8rem;
-  letter-spacing: 0.03em;
-  opacity: 0.5;
-  padding-top: 0.15rem;
+  font: var(--type-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
   flex-shrink: 0;
 }
 
 .timelineBody {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: var(--spacing-xs);
   margin: 0;
 }
 
 .org {
-  font-size: 1rem;
-  font-weight: 600;
+  font: var(--type-ui-strong);
 }
 
 .role {
-  font-size: 0.9rem;
-  opacity: 0.7;
+  font: var(--type-caption);
+  color: var(--color-text-secondary);
 }
 
 .note {
-  font-size: 0.85rem;
-  opacity: 0.55;
-  margin-top: 0.15rem;
+  font: var(--type-caption);
+  color: var(--color-text-secondary);
 }
 
 /* Awards */
@@ -105,32 +105,32 @@
   display: grid;
   grid-template-columns: 60px 1fr auto;
   align-items: baseline;
-  gap: 1.5rem;
-  padding: 1.1rem 0;
-  border-top: 1px solid currentColor;
+  gap: var(--spacing-lg);
+  padding: 18px 0;
+  border-top: 1px solid var(--color-border-hairline);
 }
 
 .awardItem:last-child {
-  border-bottom: 1px solid currentColor;
+  border-bottom: 1px solid var(--color-border-hairline);
 }
 
 .awardYear {
-  font-size: 0.8rem;
-  opacity: 0.5;
+  font: var(--type-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
 }
 
 .awardTitle {
-  font-size: 0.95rem;
-  font-weight: 500;
+  font: var(--type-ui);
 }
 
 .awardIssuer {
-  font-size: 0.8rem;
-  opacity: 0.55;
+  font: var(--type-caption);
+  color: var(--color-text-secondary);
   text-align: right;
 }
 
-/* PDF download */
+/* PDF download — outlined button, fills with accent on hover */
 .downloadSection {
   align-items: flex-start;
 }
@@ -138,23 +138,34 @@
 .downloadBtn {
   display: inline-block;
   text-decoration: none;
-  color: inherit;
-  border: 1px solid currentColor;
-  padding: 0.75rem 2rem;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
+  border-radius: var(--radius-none);
+  padding: 12px 32px;
+  font: var(--label-font);
+  letter-spacing: var(--label-tracking);
   text-transform: uppercase;
-  transition: opacity var(--duration-base) var(--ease-focus);
+  transition:
+    background var(--duration-base) var(--ease-focus),
+    color var(--duration-base) var(--ease-focus),
+    border-color var(--duration-base) var(--ease-focus);
 }
 
 .downloadBtn:hover {
-  opacity: 0.6;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+
+.downloadBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: var(--spacing-xs);
 }
 
 @media (max-width: 600px) {
   .timelineItem {
     grid-template-columns: 1fr;
-    gap: 0.4rem;
+    gap: var(--spacing-xs);
   }
 
   .awardItem {

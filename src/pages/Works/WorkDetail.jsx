@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import Lightbox from "../../components/Lightbox/Lightbox";
 import HoverPlayCard from "../../components/HoverPlayCard/HoverPlayCard";
 import { workCache } from "./workCache";
 import { useProseEmbeds } from "./proseEmbeds";
+import Label from "../../components/Label/Label";
+import CaseSidebar from "./CaseSidebar";
+import { CODE_COVERS } from "./codeCovers";
+import { ScrollSmoother, ScrollTrigger } from "../../motion/tokens";
 import styles from "./WorkDetail.module.css";
 
 /**
@@ -13,9 +17,13 @@ import styles from "./WorkDetail.module.css";
  *   - every <img>: loading="lazy", decoding="async", zoomable (lightbox)
  *   - a <p> right after an image whose only content is <em> → data-caption
  *   - two or more top-level images in a row → wrapped in [data-image-row]
+ *   - every top-level <h2>: id="section-N" → the sidebar's contents
+ *   - top-level <blockquote> whose first line is all bold → data-callout
+ *
+ * @returns {{ html: string, headings: { id: string, text: string }[] }}
  */
 function prepareHtml(html) {
-  if (!html || typeof DOMParser === "undefined") return html ?? "";
+  if (!html || typeof DOMParser === "undefined") return { html: html ?? "", headings: [] };
   const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
   const root = doc.body.firstElementChild;
 
@@ -37,6 +45,18 @@ function prepareHtml(html) {
     }
   });
 
+  // Callout: a top-level blockquote whose first line is all bold.
+  // That line is the statement; any lines after it are supporting detail.
+  // (Editable in /admin: Quote, then bold the first line.)
+  root.querySelectorAll(":scope > blockquote").forEach((bq) => {
+    const first = bq.firstElementChild;
+    const strong = first?.tagName === "P" ? first.querySelector(":scope > strong") : null;
+    if (strong && first.children.length === 1 && first.textContent.trim() === strong.textContent.trim()) {
+      bq.setAttribute("data-callout", "");
+      first.setAttribute("data-callout-lead", "");
+    }
+  });
+
   let node = root.firstElementChild;
   while (node) {
     if (node.tagName === "IMG" && node.nextElementSibling?.tagName === "IMG") {
@@ -50,7 +70,15 @@ function prepareHtml(html) {
     }
   }
 
-  return root.innerHTML;
+  // Ids live in the markup: React re-renders dangerouslySetInnerHTML, so
+  // ids set on the DOM afterwards would be lost.
+  const headings = [...root.querySelectorAll(":scope > h2")].map((h, i) => {
+    const id = `section-${i + 1}`;
+    h.id = id;
+    return { id, text: h.textContent.trim() || `Section ${i + 1}` };
+  });
+
+  return { html: root.innerHTML, headings };
 }
 
 const isVideo = (url) => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(url ?? "");
@@ -99,8 +127,21 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
       });
   }, [id]);
 
-  const html = useMemo(() => prepareHtml(project?.description), [project?.description]);
+  const { html, headings } = useMemo(() => prepareHtml(project?.description), [project?.description]);
   const articleRef = useRef(null);
+  const layoutRef = useRef(null);
+
+  // Page mode under ScrollSmoother: content is moved with transforms, so
+  // CSS sticky can't hold the sidebar — pin it with ScrollTrigger instead.
+  // (The overlay sheet scrolls natively; CSS sticky works there.)
+  useLayoutEffect(() => {
+    if (mode !== "page" || !ScrollSmoother.get()) return;
+    const layout = layoutRef.current;
+    const aside = layout?.querySelector("aside");
+    if (!layout || !aside || getComputedStyle(aside).display === "none") return;
+    const st = ScrollTrigger.create({ trigger: layout, start: "top top", end: "bottom bottom", pin: aside, pinSpacing: false });
+    return () => st.kill();
+  }, [mode, html]);
   useProseEmbeds(articleRef); // e.g. MetroSense IA image → interactive map
 
   // One handler for every zoomable image on the page (prose + gallery).
@@ -113,114 +154,133 @@ export function CaseView({ id, mode = "page", onClose, heroActive }) {
   };
 
   const goBack = onClose ?? (() => navigate("/works"));
-  const back = (extra = "") => (
-    <button onClick={goBack} className={`${styles.back} ${extra}`} data-enter="">← Back</button>
+  const back = () => (
+    <button onClick={goBack} className={styles.back} data-enter="">← Works</button>
   );
 
   if (loading && !project) return (
     <main className={styles.page}>
-      <article className={styles.article}>
+      <div className={styles.main}>
         <p className={styles.stateText}>Loading…</p>
-      </article>
+      </div>
     </main>
   );
 
   if (!project) return (
     <main className={styles.page}>
-      <article className={styles.article}>
+      <div className={styles.main}>
         {back()}
         <p className={styles.stateText}>Project not found.</p>
-      </article>
+      </div>
     </main>
   );
 
-  const metaItems = [
+  // Info grid under the title (ref: meganyap.me's Team / Role / Timeline / Skills)
+  const info = [
     { label: "Year", value: project.year },
-    { label: "My role", value: project.role },
+    { label: "Role", value: project.role },
     { label: "Team", value: project.team },
-    project.link ? { label: "Link", value: project.link, isLink: true } : null,
-  ].filter((m) => m && m.value);
+  ].filter((m) => m.value);
+  const link = typeof project.link === "string" ? project.link.trim() : "";
 
   const cover = typeof project.cover_image === "string" ? project.cover_image.trim() : "";
+  // Some projects draw their banner in code (responsive art from Figma)
+  const codeCover = CODE_COVERS[id];
+  // Admin "Tags" field, shown above the title
+  const tags = (project.tags ?? []).map((t) => String(t).trim()).filter(Boolean);
   const titleId = `case-title-${id}`;
 
-  // In the overlay the sheet carries the background (it fades in after
-  // the card lands), so the page itself must stay transparent.
-  const pageClass = mode === "overlay" ? `${styles.page} ${styles.inOverlay}` : styles.page;
+  // In the overlay the sheet carries the background, so the page itself
+  // stays transparent. `isPage` leaves room for the fixed navbar.
+  const pageClass = [styles.page, mode === "overlay" ? styles.inOverlay : styles.isPage].join(" ");
 
   return (
     <main className={pageClass}>
-      <article ref={articleRef} className={styles.article} onClick={zoomFrom} onKeyDown={zoomFrom}>
-        {back()}
+      <div ref={layoutRef} className={styles.layout}>
+        <CaseSidebar headings={headings} onBack={goBack} rootRef={articleRef} />
 
-        {/* Hero: FLIP target */}
-        {cover && (
-          <HoverPlayCard
-            className={styles.hero}
-            mode="once"
-            active={mode === "overlay" ? Boolean(heroActive) : true}
-            waitForFocus={mode === "page"}
-            data-flip-id={id}
-          >
-            {cover && (isVideo(cover) ? (
-              <video src={cover} className={styles.heroMedia} muted autoPlay loop playsInline />
-            ) : (
-              <img src={cover} alt="" className={styles.heroMedia} />
-            ))}
-          </HoverPlayCard>
-        )}
+        <article ref={articleRef} className={styles.main} onClick={zoomFrom} onKeyDown={zoomFrom}>
+          {/* Small screens: no sidebar, so the back link sits on top */}
+          <div className={styles.mobileBack}>{back()}</div>
 
-        <header className={styles.header} data-enter="">
-          <h1 id={titleId} className={styles.title} tabIndex={-1}>{project.title}</h1>
-          {metaItems.length > 0 && (
-            <p className={styles.meta}>
-              {metaItems.map(({ label, value, isLink }) => (
-                <span key={label} className={styles.metaItem}>
-                  {label !== "Year" && <span className={styles.metaLabel}>{label} </span>}
-                  {isLink ? (
-                    <a href={value} target="_blank" rel="noopener noreferrer">
-                      {String(value).replace(/^https?:\/\//, "")}
-                    </a>
-                  ) : (
-                    value
-                  )}
-                </span>
-              ))}
-            </p>
+          {/* Banner: FLIP target. The wrapper holds the size; the hero
+              inside is what grows out of the card. */}
+          {(cover || codeCover) && (
+            <div className={codeCover?.wide ? `${styles.banner} ${styles.bannerWide}` : styles.banner}>
+              <HoverPlayCard
+                className={styles.hero}
+                mode="once"
+                active={mode === "overlay" ? Boolean(heroActive) : true}
+                waitForFocus={mode === "page"}
+                data-flip-id={id}
+              >
+                {codeCover ? (
+                  <codeCover.Component />
+                ) : isVideo(cover) ? (
+                  <video src={cover} className={styles.heroMedia} muted autoPlay loop playsInline />
+                ) : (
+                  <img src={cover} alt="" className={styles.heroMedia} />
+                )}
+              </HoverPlayCard>
+            </div>
           )}
-        </header>
 
-        {/* Description (Tiptap HTML): intro paragraph → h2 sections */}
-        {html && (
-          <div className={styles.prose} data-enter="" dangerouslySetInnerHTML={{ __html: html }} />
-        )}
+          <header className={styles.header} data-enter="">
+            {tags.length > 0 && (
+              <ul className={styles.tags} aria-label="Tags">
+                {tags.map((t) => (
+                  <Label as="li" key={t} variant="fill" size="lg">{t}</Label>
+                ))}
+              </ul>
+            )}
+            <h1 id={titleId} className={styles.title} tabIndex={-1}>{project.title}</h1>
+            {link && (
+              <a className={styles.cta} href={link} target="_blank" rel="noopener noreferrer">
+                {link.replace(/^https?:\/\//, "").replace(/\/$/, "")} <span aria-hidden="true">→</span>
+              </a>
+            )}
+          </header>
 
-        {/* Gallery images with captions */}
-        {project.images?.length > 0 && (
-          <div className={styles.prose} data-enter="">
-            {project.images.map((url, i) => {
-              const caption = project.image_captions?.[i];
-              return (
-                <figure key={url} className={styles.figure}>
-                  <img
-                    src={url}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    data-zoomable=""
-                    tabIndex={0}
-                    role="button"
-                  />
-                  {caption && <figcaption>{caption}</figcaption>}
-                </figure>
-              );
-            })}
-          </div>
-        )}
+          {info.length > 0 && (
+            <dl className={styles.info} data-enter="">
+              {info.map(({ label, value }) => (
+                <div key={label} className={styles.infoItem}>
+                  <dt className={styles.infoLabel}>{label}</dt>
+                  <dd className={styles.infoValue}>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
 
-        <hr className={styles.rule} data-enter="" />
-        {back()}
-      </article>
+          {/* Description (Tiptap HTML): intro paragraph → h2 sections */}
+          {html && (
+            <div className={styles.prose} data-enter="" dangerouslySetInnerHTML={{ __html: html }} />
+          )}
+
+          {/* Gallery images with captions */}
+          {project.images?.length > 0 && (
+            <div className={styles.prose} data-enter="">
+              {project.images.map((url, i) => {
+                const caption = project.image_captions?.[i];
+                return (
+                  <figure key={url} className={styles.figure}>
+                    <img
+                      src={url}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      data-zoomable=""
+                      tabIndex={0}
+                      role="button"
+                    />
+                    {caption && <figcaption>{caption}</figcaption>}
+                  </figure>
+                );
+              })}
+            </div>
+          )}
+        </article>
+      </div>
 
       <Lightbox image={zoomed} onClose={() => setZoomed(null)} />
     </main>

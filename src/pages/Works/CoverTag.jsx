@@ -1,3 +1,4 @@
+import Label from "../../components/Label/Label";
 import styles from "./CoverTag.module.css";
 
 /** Default badge colour = --color-accent (Style C blue), white text. */
@@ -12,13 +13,14 @@ export const DEFAULT_TAG_COLOR = "#1043E5";
  */
 export function readableTextColor(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec((hex ?? "").trim());
-  if (!m) return "#0A0A0A";
+  if (!m) return "#0A0A0C";
   const n = parseInt(m[1], 16);
   const r = (n >> 16) & 255;
   const g = (n >> 8) & 255;
   const b = n & 255;
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.6 ? "#0A0A0A" : "#FFFFFF";
+  // Mirrors --color-primitive-neutral-900 / -0 (inline style needs a value).
+  return luminance > 0.6 ? "#0A0A0C" : "#FFFFFF";
 }
 
 /**
@@ -34,11 +36,13 @@ export default function CoverTag({ label, color }) {
   const wrap = label.length > 28;
 
   return (
-    <span
-      className={wrap ? `${styles.tag} ${styles.wrap}` : styles.tag}
+    <Label
+      variant="solid"
+      wrap={wrap}
+      className={styles.tag}
       style={{ background: bg, color: readableTextColor(bg) }}
     >
       {label}
-    </span>
+    </Label>
   );
 }

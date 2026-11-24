@@ -6,34 +6,28 @@
 }
 
 /* ─── Base ───────────────────────────────────────────
-   Design tokens (color / spacing / motion) live in public/tokens.css,
-   loaded from index.html. Only font stacks are defined here, because
-   the webfont switch (LINE Seed) is still pending.
+   All design tokens (color, type, spacing, motion, fonts) live in
+   public/tokens.css, loaded from index.html.
 ───────────────────────────────────────────────────── */
-:root {
-  --font-heading: 'Raleway', system-ui, sans-serif;
-  --font-body: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
-  /* Small labels (card tags, years). Whether Space Mono stays is undecided. */
-  --font-mono: 'Space Mono', ui-monospace, Menlo, monospace;
-}
 
 /* No `scroll-behavior: smooth` here: smooth scrolling is handled by
    GSAP ScrollSmoother (src/motion/PublicLayout.jsx), and the CSS
    property fights it. */
 html {
-  font-size: 16px;
+  font-size: 100%;  /* respect the browser's font size; all type is rem (T7) */
 }
 
 body {
-  font-family: var(--font-body);
+  font: var(--type-body);
   background-color: var(--color-bg-page);
   color: var(--color-text-primary);
-  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
+/* One main font for headings and body (T1); hierarchy comes from the
+   text roles in tokens.css, not from a second typeface. */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
 }
 
 img {
@@ -69,7 +63,7 @@ button {
     width: 16px;
     height: 16px;
     border: 1px solid currentColor;
-    border-radius: 50%;
+    border-radius: var(--radius-round);
     pointer-events: none;
     transform: translate(-50%, -50%);
     z-index: 9999;
@@ -85,8 +79,8 @@ button {
     width: 50px;
     height: 50px;
     mix-blend-mode: difference;
-    background-color: #ffffff;
-    border-color: #ffffff;
+    background-color: var(--color-primitive-neutral-0);  /* difference blend needs pure white */
+    border-color: var(--color-primitive-neutral-0);
   }
 }
 

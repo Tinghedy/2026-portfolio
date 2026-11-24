@@ -1,39 +1,83 @@
 /* ─────────────────────────────────────────────────────────────
-   Design tokens — Style C「Light Grey × Blue」
-   Source of truth: Figma x2xfHe6kMY0IHgoM4WfbYq, page "01 Design system",
-   frame 59:2. Variable names = Figma WEB code syntax.
+   Design tokens — Style C「Light Grey × Blue」 v2
+   Source of truth: Figma x2xfHe6kMY0IHgoM4WfbYq, page "01 Design system".
+   Guidelines: docs/design-guidelines-draft.md · Reference: docs/design-system.md
+
+   Three layers (A1):
+     1. Primitive — raw values, named by hue + step. Never used directly
+        in component CSS.
+     2. Semantic  — aliases named by intent. What components use.
+     3. Component — scoped to one UI pattern; points at semantic tokens,
+        so changing one component's type is a one-line edit here (A3).
 
    This file lives in /public so BOTH the React app (index.html) and the
    standalone hero iframe (public/hero.html) load the same values.
-   JS reads the motion tokens at runtime (src/motion/tokens.js), so
-   change a value here and CSS + GSAP follow.
-
-   See docs/design-system.md for what each token is for.
+   JS reads the motion tokens at runtime (src/motion/tokens.js).
    ───────────────────────────────────────────────────────────── */
 :root {
-  /* ── Color (semantic) ── */
-  --color-bg-page:           #F6F6F6;
-  --color-bg-surface:        #ECEDEF;
-  --color-bg-surface-strong: #DCDEE2;
-  --color-text-primary:      #0A0A0C;
-  --color-text-secondary:    #5A6069;
-  --color-text-on-accent:    #FFFFFF;
-  --color-accent:            #1043E5;
-  --color-accent-strong:     #0B2FA6;
-  --color-border-hairline:   #C6CAD0;
-  --color-rule-on-photo:     #FFFFFF;
 
-  /* ── Warm ink scale (case study / article pages) ──
-     One RGB base; every level is an alpha of it. For a dark mode,
-     swap --ink-rgb (and --color-bg-warm) only. */
-  --ink-rgb:              54, 54, 48;
-  --color-bg-warm:        #FBFAF4;
-  --color-ink-secondary:  rgba(var(--ink-rgb), 0.6);   /* meta, dates, captions, quotes */
-  --color-ink-code:       rgba(var(--ink-rgb), 0.08);  /* inline code background */
-  --color-ink-fill:       rgba(var(--ink-rgb), 0.05);  /* image placeholder / backing */
-  --color-ink-line:       rgba(var(--ink-rgb), 0.1);   /* hairlines, image borders, hr */
+  /* ═══════════════════════════════════════════
+     LAYER 1 · PRIMITIVES
+     ═══════════════════════════════════════════ */
 
-  /* ── Grid & spacing ──
+  /* ── Neutral (cool grey) ── */
+  --color-primitive-neutral-0:    #FFFFFF;
+  --color-primitive-neutral-50:   #F6F6F6;
+  --color-primitive-neutral-100:  #ECEDEF;
+  --color-primitive-neutral-200:  #DCDEE2;
+  --color-primitive-neutral-300:  #C6CAD0;
+  --color-primitive-neutral-400:  #8D939C;
+  --color-primitive-neutral-500:  #5A6069;
+  --color-primitive-neutral-900:  #0A0A0C;
+
+  /* ── Blue (accent) ── */
+  --color-primitive-blue-500:     #1043E5;
+  --color-primitive-blue-700:     #0B2FA6;
+
+  /* ── Alpha (overlays) — RGB of neutral-900 ── */
+  --color-primitive-alpha-black-30: rgba(10, 10, 12, 0.3);
+  --color-primitive-alpha-black-90: rgba(10, 10, 12, 0.9);
+  --color-primitive-alpha-white-75: rgba(255, 255, 255, 0.75);
+
+  /* ── Font families (T1, T2) ──
+     One main font for headings and body. LINE Seed is the decided face
+     but its webfont is not self-hosted yet, so the stack falls through
+     to Noto Sans TC (loaded from Google Fonts in index.html). */
+  --font-primitive-sans: 'LINE Seed TW', 'LINE Seed Sans TW', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+  --font-primitive-mono: 'Space Mono', ui-monospace, Menlo, monospace;
+
+  /* ── Type scale (T3, rem so browser zoom scales it — T7) ── */
+  --text-2xs:  0.6875rem;  /* 11px */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-md:   0.9375rem;  /* 15px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.25rem;    /* 20px */
+  --text-2xl:  1.375rem;   /* 22px */
+  --text-3xl:  1.625rem;   /* 26px */
+  --text-4xl:  1.75rem;    /* 28px */
+  --text-5xl:  2.125rem;   /* 34px */
+  --text-6xl:  2.5rem;     /* 40px — top of the scale */
+  /* Upper steps follow meganyap.me's case page:
+     section heading 22 → 26 → 28, page title 28 → 34 → 40. */
+
+  /* ── Weight / leading / tracking (T4) ── */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-bold:    700;
+
+  --leading-tight:   1.2;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.06em;
+  --tracking-ultra:  0.12em;
+
+  /* ── Spacing (8px grid) ──
      --grid-unit is a unitless multiplier: calc(var(--grid-unit) * 3px) = 24px */
   --grid-unit:      8;
   --spacing-xs:     4px;
@@ -42,19 +86,165 @@
   --spacing-lg:     24px;
   --spacing-xl:     40px;
   --spacing-2xl:    64px;
+  --spacing-3xl:    96px;
   --spacing-gutter: 56px;
 
-  /* ── Radius ── */
-  --radius-none: 0;
+  /* ── Radius (S1: square is the only value) ── */
+  --radius-none:  0;
+  --radius-round: 50%;  /* exception: the custom cursor only */
 
   /* ── Motion ── */
   --duration-step:  120ms;
   --duration-base:  240ms;
   --duration-focus: 550ms;
   --duration-flip:  700ms;  /* card → case page only */
+  --stagger:        60ms;   /* list entrance, per item, max 8 items (M1) */
   --ease-step:  steps(4, end);
   --ease-focus: cubic-bezier(.2, .6, .2, 1);
   --ease-fall:  cubic-bezier(.55, .02, .78, .36);
   /* Card → case page FLIP only: slight overshoot (y2 > 1) then settle */
   --ease-flip:  cubic-bezier(.34, 1.1, .64, 1);
+
+
+  /* ═══════════════════════════════════════════
+     LAYER 2 · SEMANTIC
+     ═══════════════════════════════════════════ */
+
+  /* ── Surfaces: three layers, cool grey everywhere (C4) ── */
+  --color-bg-page:           var(--color-primitive-neutral-50);
+  --color-bg-surface:        var(--color-primitive-neutral-100);
+  --color-bg-surface-strong: var(--color-primitive-neutral-200);
+  --color-bg-raised:         var(--color-primitive-neutral-0);   /* modal, input */
+
+  /* ── Text (C2) ── */
+  --color-text-primary:   var(--color-primitive-neutral-900);
+  --color-text-secondary: var(--color-primitive-neutral-500);  /* ≥ 4.7:1 on all three surfaces */
+  --color-text-tertiary:  var(--color-primitive-neutral-400);  /* decoration / disabled only — not for text that must be read */
+  --color-text-on-accent: var(--color-primitive-neutral-0);    /* 7.1:1 on accent */
+
+  /* ── Inverse: a dark block for emphasis without using accent (case callout) ── */
+  --color-bg-inverse:             var(--color-primitive-neutral-900);
+  --color-text-inverse:           var(--color-primitive-neutral-0);    /* 19.6:1 on bg-inverse */
+  --color-text-inverse-secondary: var(--color-primitive-neutral-300);  /* 12:1 on bg-inverse */
+
+  /* ── Accent (C3): where you are / can interact. Max 2–3 areas a screen.
+     Used for: current nav item, cursor tooltip, cover badge default,
+     focus ring, link hover. No gradients. ── */
+  --color-accent:        var(--color-primitive-blue-500);
+  --color-accent-strong: var(--color-primitive-blue-700);  /* links at rest */
+
+  /* ── Lines (S2: hairlines instead of shadows) ── */
+  --color-border-hairline: var(--color-primitive-neutral-300);  /* visible rule, tag outline */
+  --color-border-subtle:   var(--color-primitive-neutral-200);  /* image frame, hr, quiet divider */
+  --color-rule-on-photo:   var(--color-primitive-neutral-0);
+
+  /* ── Overlays ── */
+  --color-backdrop:       var(--color-primitive-alpha-black-30);  /* behind the case overlay */
+  --color-backdrop-heavy: var(--color-primitive-alpha-black-90);  /* lightbox */
+  --color-bg-nav-scrolled: var(--color-primitive-alpha-white-75);
+
+  /* ── Fonts ── */
+  --font-sans: var(--font-primitive-sans);
+  --font-mono: var(--font-primitive-mono);
+
+  /* ── Text roles (T5) ──
+     Each role = one `font` shorthand + one letter-spacing. Use as:
+       font: var(--type-title);
+       letter-spacing: var(--type-title-tracking);
+     The whole site picks its text from this list only. */
+  --type-display:            var(--weight-bold) var(--text-6xl)/var(--leading-tight) var(--font-sans);
+  --type-display-tracking:   var(--tracking-tight);
+  --type-title:              var(--weight-bold) var(--text-5xl)/var(--leading-tight) var(--font-sans);
+  --type-title-tracking:     var(--tracking-tight);
+  --type-title-sm:           var(--weight-bold) var(--text-4xl)/var(--leading-tight) var(--font-sans);
+  --type-section:            var(--weight-bold) var(--text-4xl)/var(--leading-tight) var(--font-sans);   /* 28 */
+  --type-section-md:         var(--weight-bold) var(--text-3xl)/var(--leading-tight) var(--font-sans);   /* 26 */
+  --type-section-sm:         var(--weight-bold) var(--text-2xl)/var(--leading-tight) var(--font-sans);   /* 22 */
+  --type-section-tracking:   var(--tracking-tight);
+  --type-subsection:         var(--weight-bold) var(--text-xl)/var(--leading-snug) var(--font-sans);
+  --type-subsection-tracking: var(--tracking-normal);
+  --type-body-lg:            var(--weight-regular) var(--text-lg)/var(--leading-relaxed) var(--font-sans);
+  --type-body:               var(--weight-regular) var(--text-base)/var(--leading-relaxed) var(--font-sans);
+  --type-body-sm:            var(--weight-regular) var(--text-sm)/var(--leading-relaxed) var(--font-sans);  /* case body (ref: meganyap.me 14px) */
+  --type-ui:                 var(--weight-medium) var(--text-md)/var(--leading-normal) var(--font-sans);
+  --type-ui-strong:          var(--weight-bold) var(--text-base)/var(--leading-snug) var(--font-sans);
+  --type-caption:            var(--weight-regular) var(--text-sm)/var(--leading-normal) var(--font-sans);
+  --type-caption-sm:         var(--weight-regular) var(--text-xs)/var(--leading-normal) var(--font-sans);
+  /* mono roles (T2: mono is the identity for small labels and data) */
+  --type-label:              var(--weight-bold) var(--text-2xs)/var(--leading-normal) var(--font-mono);
+  --type-label-tracking:     var(--tracking-wide);        /* always uppercase */
+  --type-label-lg:           var(--weight-regular) var(--text-sm)/1 var(--font-mono);  /* larger tags, e.g. above a case title */
+  --type-data:               var(--weight-regular) var(--text-sm)/var(--leading-normal) var(--font-mono);
+  --type-tooltip:            var(--weight-regular) var(--text-md)/var(--leading-snug) var(--font-mono);
+
+  /* ── Layout (S3, T6) ── */
+  --layout-max:     1600px;   /* page frame (Works, Blog) */
+  --layout-gutter:  var(--spacing-gutter);
+  --layout-gutter-mobile: var(--spacing-md);
+  --layout-gap-x:   var(--spacing-lg);
+  --layout-gap-y:   var(--spacing-xl);
+  --layout-reading: 42.5rem;  /* 680px reading column (~65 ch) */
+  --layout-case-main:    68.75rem;  /* 1100px case-page main column (ref: meganyap.me) */
+  --layout-case-text:    58rem;     /* 928px max line length for case headings and body */
+  --layout-case-media:   47.5rem;   /* 760px max width for case images and embeds */
+  --layout-case-banner:  35rem;     /* 560px max width for the 3:2 cover banner */
+  --layout-case-sidebar: 303px;     /* left sidebar: home link, contents, back to top */
+  --layout-nav-clearance: 112px;  /* top padding that clears the fixed navbar */
+
+
+  /* ═══════════════════════════════════════════
+     LAYER 3 · COMPONENT
+     Each points at a semantic role. Change a component's text here.
+     ═══════════════════════════════════════════ */
+
+  /* Navbar */
+  --nav-link-font:     var(--type-data);   /* mono 14px: nav links + Admin button (T2) */
+  --nav-logo-font:     var(--type-ui-strong);
+
+  /* Page header (Works, Blog, Notes, Resume) */
+  --page-title-font:     var(--type-title);
+  --page-title-tracking: var(--type-title-tracking);
+
+  /* Work card */
+  --card-title-font:   var(--type-ui);
+  --card-meta-font:    var(--type-data);
+
+  /* Label: cover badge, tags, years, small headings (P2) */
+  --label-font:        var(--type-label);
+  --label-tracking:    var(--type-label-tracking);
+  --label-pad:         var(--spacing-xs) var(--spacing-sm);
+  --label-font-lg:     var(--type-label-lg);
+  --label-pad-lg:      var(--spacing-xs) var(--spacing-sm);
+
+  /* Zoom viewer: fixed box for large interactive diagrams (ref: mchiu.co.uk 448px) */
+  --zoom-viewer-height: min(480px, 70vh);
+
+  /* Cursor tooltip */
+  --tooltip-font:      var(--type-tooltip);
+  --tooltip-pad:       var(--spacing-sm) var(--spacing-md);
+  --tooltip-max:       360px;
+
+  /* Case study / article — sizes follow meganyap.me's case page */
+  --article-title-font:          var(--type-title-sm); /* < 640px: 28px */
+  --article-title-font-md:       var(--type-title);    /* ≥ 640px: 34px */
+  --article-title-font-lg:       var(--type-display);  /* ≥ 768px: 40px */
+  --article-title-tracking:      var(--type-display-tracking);
+  --article-h2-font:             var(--type-section-sm); /* < 640px: 22px */
+  --article-h2-font-md:          var(--type-section-md); /* ≥ 640px: 26px */
+  --article-h2-font-lg:          var(--type-section);    /* ≥ 768px: 28px */
+  --article-h2-tracking:         var(--type-section-tracking);
+  --article-h3-font:             var(--type-ui-strong);
+  --article-h4-font:             var(--type-ui);
+  --article-body-font:           var(--type-body-sm);    /* 14px, all widths */
+  --article-caption-font:        var(--type-caption-sm);
+  --article-meta-font:           var(--type-data);
+  --article-kicker-font:         var(--label-font-lg);   /* sidebar headings, info-grid labels */
+
+  /* Case callout (blockquote whose first line is bold) — e.g. problem statement */
+  --callout-bg:             var(--color-bg-inverse);
+  --callout-text-color:     var(--color-text-inverse);
+  --callout-meta-color:     var(--color-text-inverse-secondary);
+  --callout-text-font:      var(--type-subsection);    /* 20px bold */
+  --callout-text-tracking:  var(--type-subsection-tracking);
+  --callout-detail-font:    var(--type-body-sm);
 }

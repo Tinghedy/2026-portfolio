@@ -1,42 +1,40 @@
-/* Blog list — Style C tokens (see docs/design-system.md).
-   Same page frame as Works. Cards: square, no shadow; hover draws a
-   1px ink frame (rectangle = attention). */
+/* Blog list — same page frame as Works (S3). Cards are <BlogCard>:
+   text only, no cover. */
 
 .page {
   min-height: 100vh;
-  padding-top: calc(var(--grid-unit) * 14px);     /* 112px */
-  padding-bottom: calc(var(--grid-unit) * 12px);  /* 96px */
+  padding-top: var(--layout-nav-clearance);
+  padding-bottom: var(--spacing-3xl);
   background: var(--color-bg-page);
   color: var(--color-text-primary);
 }
 
 .inner {
-  max-width: 1600px;
+  max-width: var(--layout-max);
   margin: 0 auto;
-  padding: 0 var(--spacing-gutter);
+  padding: 0 var(--layout-gutter);
 }
 
 @media (max-width: 768px) {
-  .inner { padding: 0 var(--spacing-md); }
+  .inner { padding: 0 var(--layout-gutter-mobile); }
 }
 
 .pageTitle {
-  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font: var(--page-title-font);
+  letter-spacing: var(--page-title-tracking);
   margin: 0 0 var(--spacing-xl);
   color: var(--color-text-primary);
 }
 
 .empty {
+  font: var(--type-caption);
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
 }
 
 /* ── Masonry grid ── */
 .grid {
   columns: 3;
-  column-gap: var(--spacing-lg);
+  column-gap: var(--layout-gap-x);
 }
 
 @media (max-width: 960px) {
@@ -50,101 +48,5 @@
 /* ── Card wrapper ── */
 .cardWrapper {
   break-inside: avoid;
-  margin-bottom: var(--spacing-lg);
-}
-
-/* ── Card ── */
-.card {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  color: inherit;
-  background: var(--color-bg-surface);
-  border: 1px solid transparent;
-  border-radius: var(--radius-none);
-  overflow: hidden;
-  transition: border-color var(--duration-base) var(--ease-focus);
-}
-
-.card:hover {
-  border-color: var(--color-text-primary);
-}
-
-.card:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: var(--spacing-xs);
-}
-
-/* ── Card text section ── */
-.cardTop {
-  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.year {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.title {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: -0.01em;
-  margin: 0;
-  color: var(--color-text-primary);
-}
-
-.tagline {
-  font-size: 0.8125rem;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.tags {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-}
-
-.tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border: 1px solid var(--color-border-hairline);
-  border-radius: var(--radius-none);
-  padding: 2px var(--spacing-sm);
-  color: var(--color-text-secondary);
-}
-
-/* ── Media ── */
-.mediaWrap {
-  width: 100%;
-  overflow: hidden;
-  background: var(--color-bg-surface-strong);
-}
-
-.media {
-  width: 100%;
-  height: auto;
-  display: block;
-  transition: transform var(--duration-focus) var(--ease-focus);
-}
-
-.card:hover .media {
-  transform: scale(1.04);
+  margin-bottom: var(--layout-gap-x);
 }
